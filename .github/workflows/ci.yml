@@ -27,8 +27,42 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml pytest pytest-cov
 
+      - name: Environment info
+        run: |
+          {
+            echo "## Environment for Python ${{ matrix.python-version }}"
+            echo ""
+            echo "- python: $(python -V 2>&1)"
+            echo "- pytest: $(pytest --version 2>&1)"
+            echo "- pyyaml: $(python -c 'import yaml; print(yaml.__version__)')"
+            echo "- pwd: $(pwd)"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run unit tests
-        run: pytest tests/unit -v
+        run: |
+          set -o pipefail
+          pytest tests/unit -v --tb=long 2>&1 | tee /tmp/pytest-unit.log
+          EXIT=$?
+          {
+            echo "## Unit tests (Python ${{ matrix.python-version }}) exit=$EXIT"
+            echo ""
+            echo '```'
+            tail -200 /tmp/pytest-unit.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit $EXIT
 
       - name: Run integration tests
-        run: pytest tests/integration -v
+        run: |
+          set -o pipefail
+          pytest tests/integration -v --tb=long 2>&1 | tee /tmp/pytest-int.log
+          EXIT=$?
+          {
+            echo "## Integration tests (Python ${{ matrix.python-version }}) exit=$EXIT"
+            echo ""
+            echo '```'
+            tail -200 /tmp/pytest-int.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit $EXIT
