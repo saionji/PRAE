@@ -164,18 +164,12 @@ def bootstrap(target_str: str, client: str, prae_root_str: str) -> None:
     elif client == "codex":
         deploy_codex(prae_root, target, checks)
 
-    # 检查 PDAE（companion methodology project）
-    # PDAE 的位置由用户通过 PDAE_HOME 环境变量提供
+    # PDAE 是可选 companion（基础设施工程化和契约检查需要它）
+    # 检测状态写入 data，不参与 all_passed —— PRAE 本身可独立运行
     pdae_home = os.environ.get("PDAE_HOME")
     pdae_available = bool(
         pdae_home and (Path(pdae_home) / "tools/check_contracts.py").exists()
     )
-    checks.append(check_item(
-        "PDAE 已安装",
-        pdae_available,
-        "未发现 PDAE 安装。基础设施工程化和契约检查依赖 PDAE — "
-        "请设置 PDAE_HOME 指向 PDAE 仓库根目录" if not pdae_available else ""
-    ))
 
     all_passed = all(c["passed"] for c in checks)
     failed = [c for c in checks if not c["passed"]]
