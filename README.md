@@ -2,164 +2,188 @@
 
 > I run real projects across quantitative trading, marine systems, flight log automation, and DEX research — all managed with this toolchain. PRAE is the methodology + tools I extracted. Open-sourced because the discipline of public docs makes it better.
 
-**Status**: `v0.1.0-alpha` · single maintainer · in production use by the author · English documentation is in progress — the methodology source-of-truth is currently Chinese (see [`methodology/`](methodology/)).
+**Status**: `v0.1.0-alpha` · single maintainer · in production use by the author · English documentation is in progress — methodology deep docs are still Chinese in `methodology/`, English translation is the first post-launch backlog item.
 
-**Quickstart**: see [Quick Start](#快速开始) (works in Claude Code or Codex CLI). **Concepts**: see [Core Model](#核心概念). **What is PDAE**: see [与 PDAE 的关系](#与-pdae-的关系).
-
----
-
-AI 辅助科研方法论框架。管"哪条研究路线值得走"的决策过程，与 **PDAE**（管"怎么把代码做好"）配套使用。
-
-如果你是大模型，第一次进入本仓库时，先读 `LLM_ENTRYPOINT.md`。
-## 入口定义
-
-- `LLM_ENTRYPOINT.md`：模型上下文入口
-- `prae bootstrap` / `/prae-bootstrap`：项目安装入口
-- `prae init` / `/prae-init`：项目状态初始化入口
+**Quickstart**: see [Quick Start](#quick-start). **Concepts**: see [Core Model](#core-model). **What is PDAE**: see [Relationship to PDAE](#relationship-to-pdae).
 
 ---
 
-## 什么是 PRAE
+## What is PRAE
 
-研究型项目（量化策略、目标检测、机器人控制）的核心挑战不是写代码——是决定**跑哪个实验、相信哪个结果、何时放弃一条路线**。
+The hard problem in research projects (quant strategies, object detection, robot control) is *not* writing code. It's deciding **which experiment to run next, which result to believe, when to abandon a line of work**.
 
-PRAE 通过两类轨道、四个阶段、四层门控，让 AI 辅助这一决策过程，同时保证：
-- 实验可复现（参数记录 + 随机种子）
-- 决策有据可查（TRACK_LOG + PHASE_GATE）
-- 基础设施稳定后才开始算法探索（Phase 0 门控）
-- 毕业到生产前经过完整工程化（PDAE M1-M3）
+PRAE structures that decision process — using two track types, four phases, and four layers of gates — so that AI can assist research-level decisions while keeping reproducibility, traceability, and human approval in the loop:
+
+- Experiments are reproducible (recorded parameters + random seeds).
+- Decisions are documented (every move recorded in `TRACK_LOG.md` and `PHASE_GATE.md`).
+- Infrastructure is locked down *before* algorithmic exploration begins (Phase 0 gate).
+- Code graduates to production only after a full engineering review (PDAE M1-M3).
+
+If you're an LLM entering this repository for the first time, read `LLM_ENTRYPOINT.md` first.
+
+## Entry points
+
+- `LLM_ENTRYPOINT.md` — model context entry
+- `prae bootstrap` / `/prae-bootstrap` — installs PRAE into your research project
+- `prae init` / `/prae-init` — initializes a project's state machine
 
 ---
 
-## 快速开始
+## Quick Start
 
-### 在现有研究项目里安装 PRAE
+### Install PRAE into an existing research project
 
-这里说的是**项目操作入口**，也就是一个新研究项目第一次接入 PRAE 时的第一条命令。
+This is the **project-level entry point** — the first command a new research project runs to onboard PRAE.
 
-**Claude Code 用户：**
+**Claude Code users:**
+
 ```
 /prae-bootstrap
 ```
-（Claude 会自动检测项目类型并部署 PRAE 文件）
 
-**Codex 用户：**
+(Claude detects your project type and deploys the PRAE files.)
+
+**Codex CLI users:**
+
 ```
 codex exec --task /path/to/PRAE/runtime/codex/tasks/prae-bootstrap.md
 ```
 
-或手动：
+**Manual install (works for either runtime):**
+
 ```bash
 python3 /path/to/PRAE/tools/prae_bootstrap.py \
   --target /path/to/your/project \
-  --client claude-code   # 或 codex
+  --client claude-code   # or "codex"
 ```
 
-### 初始化研究项目
+See `runtime/claude-code/SKILLS_README.md` if you want only the role-discipline skills without the rest of PRAE.
 
-1. 打开 `prae/PRAE_INIT.md`，填写研究问题和轨道分类
-2. 运行 `/prae-init`（Claude Code）或 `prae init`（Codex CLI）
-   该步骤会生成 `prae/track_registry.yaml`、`prae/phases/phase_00_infra/PHASE_BRIEF.md` 和基础设施 `TRACK_LOG.md`
-3. 先完成 Phase 0：为基础设施轨道记录选型实验，PDAE M3 通过后用 `/prae-lock-infra` 或 `prae lock-infra` 正式锁定
-4. 所有基础设施轨道都 `LOCKED` 后，先运行 `/prae-advance-phase` 或 `prae advance-phase` 生成 gate；人工批准后再次运行同一命令进入 Phase 1
-5. 进入 Phase 1 后，已在 `track_registry.yaml` 中登记的研究轨道运行 `/prae-new-track`、`/prae-new-exp`；若是全新假设，先 `/prae-add-track`，再 `/prae-new-track`
-6. 实验跑完后，用 `/prae-record-result` 记录结果；若用户批准状态变更，再用 `/prae-update-track-state` 或 `prae update-track-state`
+### Initialize the research project
+
+1. Edit `prae/PRAE_INIT.md` — write down your research question and your track plan.
+2. Run `/prae-init` (Claude Code) or `prae init` (Codex CLI).
+   This generates `prae/track_registry.yaml`, `prae/phases/phase_00_infra/PHASE_BRIEF.md`, and the initial `TRACK_LOG.md` for each infrastructure track.
+3. **Finish Phase 0 first.** For each infrastructure track, record selection experiments and — after the implementation passes PDAE M3 — formally lock it with `/prae-lock-infra` (or `prae lock-infra`).
+4. Once every infrastructure track is `LOCKED`, run `/prae-advance-phase` to generate a gate document for human approval. Approve it (write `APPROVED: yes` in `PHASE_GATE.md`), then run the same command again to actually enter Phase 1.
+5. In Phase 1, run `/prae-new-track` and `/prae-new-exp` for tracks already registered in `track_registry.yaml`. If you have a brand-new hypothesis, run `/prae-add-track` first, then `/prae-new-track`.
+6. Record experiment outcomes with `/prae-record-result`. If you approve a state change, use `/prae-update-track-state` (or `prae update-track-state`).
 
 ---
 
-## 核心概念
+## Core Model
 
-### 两类轨道
+### Two track types
 
-| 类型 | 生命周期 | 说明 |
-|------|----------|------|
-| 基础设施轨道 | `EXPLORING → LOCKED` | 数据管道、特征工程等支撑组件；LOCKED 后只读，变更开 v2 |
-| 研究轨道 | `EXPLORING → ACTIVE → KILLED/MERGED/GRADUATED` | 算法假设；每次实验记录在 EXP_NNN.md |
+| Type | Lifecycle | Description |
+|------|-----------|-------------|
+| Infrastructure track | `EXPLORING → LOCKED` | Data pipelines, feature engineering, and similar supporting components. Once `LOCKED`, the track is read-only; any change opens `_v2`. |
+| Research track | `EXPLORING → ACTIVE → KILLED / MERGED / GRADUATED` | Algorithmic hypotheses. Each experiment is recorded as an `EXP_NNN.md` file. |
 
-### 四个阶段
+### Four phases
 
 ```
-Phase 0  基础设施就绪期   所有基础设施轨道 LOCKED 后进入 Phase 1
-Phase 1  算法探索期       并行实验，AI 分析，人批准
-Phase 2  算法验证期       聚焦验证，严格参数记录
-Phase 3  结论期           归档 or 毕业进 PDAE
+Phase 0  Infrastructure readiness   All infrastructure tracks must be LOCKED before Phase 1 starts.
+Phase 1  Algorithmic exploration    Parallel experiments; AI analysis; human approval on state changes.
+Phase 2  Algorithmic validation     Focused validation; strict parameter discipline.
+Phase 3  Conclusion                 Archive or graduate into PDAE.
 ```
 
-### AI 角色
+### AI roles
 
-- **分析者**（Analyst）：轨道 EXPLORING/ACTIVE 时激活。设计实验、检索文献、解读结果。
-- **执行者**（Executor）：轨道 LOCKED/实现期激活。写代码、跑 PDAE 单元门控。
+- **Analyst** — Activated when a research track is in `EXPLORING` or `ACTIVE`. Designs experiments, runs literature search, interprets results.
+- **Executor** — Activated when a track is approaching `LOCKED` or stable implementation needs extracting. Writes code, runs PDAE unit-level gates.
 
 ---
 
-## 仓库结构
+## Repository layout
 
 ```
 PRAE/
-├── methodology/           ← 方法论 SSOT（LLM 读，人也可读）
-│   ├── PRAE_QUICKSTART.md ← 从这里开始
-│   ├── PRAE_CORE_MODEL.md ← 轨道/阶段/状态机权威定义
-│   ├── PRAE_ROLES.md      ← 分析者/执行者 SOP
+├── methodology/          ← Source-of-truth (LLMs read these; humans can too)
+│   ├── PRAE_QUICKSTART.md
+│   ├── PRAE_CORE_MODEL.md       ← Authoritative track / phase / state-machine definitions
+│   ├── PRAE_ROLES.md            ← Analyst / Executor SOPs
 │   ├── PRAE_PHASE_GATES.md
 │   ├── PRAE_RESEARCH_GATE.md
 │   └── PRAE_ARTIFACTS.md
 │
 ├── runtime/
-│   ├── abstract/          ← 平台无关模板（TRACK_LOG、EXP_NNN 等）
-│   ├── claude-code/       ← Claude Code：skills + agents + commands
-│   └── codex/             ← Codex：prompts + tasks + bin/prae CLI
+│   ├── abstract/         ← Platform-agnostic templates (TRACK_LOG, EXP_NNN, etc.)
+│   ├── claude-code/      ← Claude Code: skills + agents + commands
+│   └── codex/            ← Codex CLI: prompts + tasks + bin/prae wrapper
 │
-├── project-pack/          ← 部署包（bootstrap 自动复制到研究项目）
-├── tools/                 ← 门控脚本（check_phase_gate.py 等）
-└── tests/                 ← 单元 + 集成测试
+├── project-pack/         ← Deployment skeleton (copied into your project by bootstrap)
+├── tools/                ← Gating scripts (check_phase_gate.py, lock_infra_track.py, …)
+└── tests/                ← Unit + integration tests
 ```
 
 ---
 
-## 门控工具
+## Gating tools
 
-所有工具输出 JSON，exit code 0=通过 / 1=不通过 / 2=文件缺失。
+All tools emit JSON. Exit code: `0` = pass, `1` = fail, `2` = missing file or invalid input.
 
 ```bash
-# 检查阶段门控（Phase 0→1）
+# Phase gate (e.g. 0→1)
 python3 tools/check_phase_gate.py --project-dir . --phase 0
 
-# 检查研究轨道门控
+# Research-track gate
 python3 tools/check_research_gate.py --project-dir . --track-id research_strategy_momentum
 
-# 检查轨道状态一致性
+# Track-registry consistency
 python3 tools/check_track_status.py --project-dir .
 
-# 契约检查（复用 PDAE）
+# Contracts check (PDAE-vendored)
 python3 tools/check_contracts.py --contracts src/infra_data_v1/contracts.yaml --src src/
 ```
 
 ---
 
-## 与 PDAE 的关系
+## Relationship to PDAE
 
-| 场景 | PRAE | PDAE |
-|------|------|------|
-| 决定跑哪个实验 | ✓ | — |
-| 基础设施代码工程化 | 触发 → | ✓ |
-| 单元门控 / 契约检查 | 复用工具 | ✓ |
-| 毕业到生产 | 触发 → | ✓ |
+PDAE (Project-Driven Application Engineering) is PRAE's sibling project. PRAE manages **which research direction to invest in**; PDAE manages **how to engineer a particular component well**.
 
-PDAE 仓库：`${PDAE_HOME}/`
+| Scenario | PRAE | PDAE |
+|---|---|---|
+| Deciding which experiment to run | ✓ | — |
+| Engineering an infrastructure component | triggers → | ✓ |
+| Unit gates / contract checks | reuses tooling | ✓ |
+| Graduating to production | triggers → | ✓ |
+
+PDAE is a separate project. If you have it installed, set the `PDAE_HOME` environment variable so PRAE can discover it.
 
 ---
 
-## 开发与测试
+## Development & testing
 
 ```bash
-# 运行所有测试
+# Run all tests
 pytest tests/ -v
 
-# 运行集成测试（完整生命周期）
+# Run integration tests (full lifecycle)
 pytest tests/integration/test_end_to_end.py -v
 
-# 手工冒烟测试
+# Manual smoke
 mkdir /tmp/prae-smoke && touch /tmp/prae-smoke/.claude
 python3 tools/prae_bootstrap.py --target /tmp/prae-smoke --client claude-code
 python3 tools/init_project.py --name smoke --output-dir /tmp/prae-smoke
 ```
+
+CI on every push to `main` runs the same test suite across Python 3.10 / 3.11 / 3.12.
+
+---
+
+## Status & roadmap
+
+`v0.1.0-alpha` is the first public release. Known short-term work:
+
+- Translate `methodology/*.md` to English (currently the Chinese versions are authoritative).
+- Polish `--help` output across all 27 tools.
+- Manual Codex CLI end-to-end smoke (post-launch — see `SMOKE_TEST_REPORT.md` if you cloned that copy).
+
+Contributions welcome — see `CONTRIBUTING.md`.
+
+## License
+
+[Apache-2.0](LICENSE)
