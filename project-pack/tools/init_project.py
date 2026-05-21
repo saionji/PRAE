@@ -67,7 +67,7 @@ def parse_prae_init(prae_init_path: str) -> dict:
                 infra_tracks.append({
                     "id": m.group(1).strip(),
                     "description": m.group(2).strip(),
-                    "lock_criteria": phase0_criteria.get(m.group(1).strip(), "待补充"),
+                    "lock_criteria": phase0_criteria.get(m.group(1).strip(), "(no description yet)"),
                 })
 
     # 解析研究轨道表格
@@ -78,7 +78,9 @@ def parse_prae_init(prae_init_path: str) -> dict:
             m = re.match(r"\|\s*`?(research_\S+?)`?\s*\|(.+?)\|(.+?)\|", line)
             if m:
                 depends_raw = m.group(3).strip().strip("`").replace(" ", "")
-                depends_list = [d.strip() for d in depends_raw.split(",") if d.strip() and d.strip() != "—"]
+                # F-008 fix: split on Western OR Chinese comma OR 顿号 so authors writing
+                # `infra_X`、`infra_Y` (idiomatic Chinese) get parsed the same as `infra_X, infra_Y`.
+                depends_list = [d.strip() for d in re.split(r"[,，、]", depends_raw) if d.strip() and d.strip() != "—"]
                 research_tracks.append({
                     "id": m.group(1).strip(),
                     "hypothesis": m.group(2).strip(),
@@ -134,8 +136,8 @@ def render_infra_track_log(track: dict, registry: dict) -> str:
         "phase_00_infra",
         cycle_label=cycle_label,
         created_reason="项目启动",
-        description=track.get("description") or "待补充",
-        lock_criteria=track.get("lock_criteria") or "待补充",
+        description=track.get("description") or "(no description yet)",
+        lock_criteria=track.get("lock_criteria") or "(no description yet)",
     )
 
 
@@ -231,9 +233,9 @@ def init_project(project_name: str, output_dir: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="初始化 PRAE 研究项目结构")
-    parser.add_argument("--name", required=True, help="项目名称")
-    parser.add_argument("--output-dir", required=True, help="目标目录（通常是研究项目根目录）")
+    parser = argparse.ArgumentParser(description="Initialize a PRAE research project structure")
+    parser.add_argument("--name", required=True, help="Project name")
+    parser.add_argument("--output-dir", required=True, help="Target directory (typically the research project root)")
     args = parser.parse_args()
     init_project(args.name, args.output_dir)
 

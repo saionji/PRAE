@@ -129,10 +129,10 @@ def run(project_dir: Path, track_id: str, title: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="为已物化轨道创建新的 EXP_NNN.md / EXP_NNN.py")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--track-id", required=True, help="轨道 ID")
-    parser.add_argument("--title", default="实验", help="实验标题")
+    parser = argparse.ArgumentParser(description="Create a new EXP_NNN.md / EXP_NNN.py for a materialized track")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--track-id", required=True, help="Track ID")
+    parser.add_argument("--title", default="Experiment", help="Experiment title")
     args = parser.parse_args()
 
     run_action(

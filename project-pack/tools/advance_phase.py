@@ -186,8 +186,8 @@ def advance_phase(project_dir: Path) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="在批准后推进 PRAE 项目到下一阶段")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Advance the PRAE project to the next phase (after human approval)")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     args = parser.parse_args()
 
     emit_payload(advance_phase(Path(args.project_dir)))

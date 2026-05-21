@@ -179,12 +179,12 @@ def bootstrap(target_str: str, client: str, prae_root_str: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="将 PRAE 框架部署到研究项目")
-    parser.add_argument("--target", required=True, help="目标研究项目根目录")
+    parser = argparse.ArgumentParser(description="Deploy the PRAE framework into a research project")
+    parser.add_argument("--target", required=True, help="Target research project root directory")
     parser.add_argument("--client", default="auto",
                         choices=["claude-code", "codex", "auto"],
-                        help="AI 客户端类型（默认自动检测）")
-    parser.add_argument("--prae-path", default="", help="PRAE 仓库路径（默认自动推断）")
+                        help="AI client type (default: auto-detect)")
+    parser.add_argument("--prae-path", default="", help="PRAE repository path (default: auto-inferred)")
     args = parser.parse_args()
     bootstrap(args.target, args.client, args.prae_path)
 

@@ -139,9 +139,9 @@ def run(project_dir: Path, track_id: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="为已登记轨道创建当前阶段目录和 TRACK_LOG.md")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--track-id", required=True, help="轨道 ID")
+    parser = argparse.ArgumentParser(description="Create the current-phase directory and TRACK_LOG.md for a registered track")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--track-id", required=True, help="Track ID")
     args = parser.parse_args()
 
     run_action(lambda: run(Path(args.project_dir), args.track_id), NewTrackError)
