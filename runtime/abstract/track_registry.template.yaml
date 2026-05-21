@@ -1,0 +1,52 @@
+# track_registry.yaml — 轨道状态总表（唯一真相来源）
+# 模板来源: PRAE/runtime/abstract/track_registry.template.yaml
+# 规格参考: methodology/PRAE_ARTIFACTS.md §2.3
+
+project: "{{project_name}}"          # 项目名称，与目录名一致
+current_cycle: 1                      # 当前研究轮次（每次 CONTINUE 重开后递增）
+current_phase: phase_00_infra         # 当前阶段（由阶段门控批准后更新）
+updated: "{{YYYY-MM-DD}}"            # 最后更新日期
+# 以下项目级字段按需填写（Phase 3 终态或 CONTINUE 时由工具写入）
+# project_decision: ARCHIVED | GRADUATED_TO_PDAE | CONTINUE
+# project_approver: "{{user_id}}"
+# project_decided_at: "{{YYYY-MM-DD}}"
+# project_reopened_at: "{{YYYY-MM-DD}}"   # 仅 CONTINUE 重开后填写
+# project_finalized_at: "{{YYYY-MM-DD}}"  # 仅终态决定填写
+# archived_at: "{{YYYY-MM-DD}}"           # 仅 ARCHIVED 填写
+
+# ===========================================================================
+# tracks 列表：每条轨道一个条目
+# state 合法值（见 methodology/PRAE_CORE_MODEL.md §2）：
+#   基础设施: EXPLORING → LOCKED
+#   研究:     EXPLORING → ACTIVE → KILLED / MERGED / GRADUATED
+# ===========================================================================
+
+tracks:
+
+  # -------------------------------------------------------------------------
+  # 基础设施轨道示例
+  # -------------------------------------------------------------------------
+  - id: infra_{{name}}_v1             # 命名规则: infra_{name}_v{N}
+    type: infrastructure
+    state: EXPLORING                   # 初始状态
+    src: src/infra_{{name}}_v1/
+    # 以下字段在 LOCKED 后填写（由执行者在 PDAE M3 通过后写入）:
+    module_spec: ~                     # src/infra_{{name}}_v1/MODULE_SPEC.md
+    contracts: ~                       # src/infra_{{name}}_v1/contracts.yaml
+    locked_at: ~                       # YYYY-MM-DD
+
+  # -------------------------------------------------------------------------
+  # 研究轨道示例
+  # -------------------------------------------------------------------------
+  - id: research_{{topic}}_{{variant}} # 命名规则: research_{topic}_{variant}
+    type: research
+    state: EXPLORING                   # 初始状态
+    src: src/tracks/research_{{topic}}_{{variant}}/
+    hypothesis: "{{一句话假设，可证伪}}"
+    depends_on:
+      - infra_{{name}}_v1             # 依赖的基础设施轨道 ID 列表
+    experiments: 0                    # 已跑实验数（AI 在每次 EXP 后自动递增）
+    evidence_summary: ~               # 每次实验后追加一句话摘要（AI 维护）
+    # 以下字段在轨道结束时填写:
+    concluded_at: ~                   # YYYY-MM-DD
+    merged_into: ~                    # 仅当 state=MERGED 时填写目标轨道 ID

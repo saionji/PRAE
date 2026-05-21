@@ -1,0 +1,24 @@
+project: fake-research
+current_phase: phase_00_infra
+updated: "2026-04-19"
+
+tracks:
+  - id: infra_data_v1
+    type: infrastructure
+    state: EXPLORING
+    src: src/infra_data_v1/
+    module_spec: null
+    contracts: null
+    locked_at: null
+
+  - id: research_strategy_momentum
+    type: research
+    state: EXPLORING
+    src: src/tracks/research_strategy_momentum/
+    hypothesis: "动量因子在A股日频数据上有显著正向收益"
+    depends_on:
+      - infra_data_v1
+    experiments: 0
+    evidence_summary: null
+    concluded_at: null
+    merged_into: null

@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# prae — PRAE 统一 CLI 入口（Codex 版本）
+#
+# 安装说明见 bin/README.md
+# 用法: prae <subcommand> [args...]
+#
+# Subcommands:
+#   bootstrap                     部署 PRAE 到当前项目
+#   init                          初始化研究项目（生成 registry 和 Phase 0 工件）
+#   add-track <track_id>          正式注册新轨道到 registry
+#   new-track <track_id>          为已登记轨道创建当前阶段目录
+#   new-exp <track_id>            新建实验
+#   record-result <track_id> <exp_id>  记录实验结果
+#   lock-infra <track_id>         正式锁定基础设施轨道
+#   update-track-state <track_id> <state>  正式更新研究轨道状态
+#   advance-phase                 首次生成阶段门控报告；已批准时正式推进阶段
+#   graduate <track_id>           研究轨道毕业到 PDAE
+#   finalize                      记录项目终态决定
+#   reopen                        根据 CONTINUE 决定重开到 Phase 1
+
+set -euo pipefail
+
+PRAE_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PRAE_ROOT="$(cd "${PRAE_BIN_DIR}/../.." && pwd)"
+TASKS_DIR="${PRAE_ROOT}/runtime/codex/tasks"
+
+SUBCOMMAND="${1:-help}"
+shift || true
+
+case "${SUBCOMMAND}" in
+  bootstrap)
+    exec codex exec --task "${TASKS_DIR}/prae-bootstrap.md" -- "$@"
+    ;;
+  init)
+    exec codex exec --task "${TASKS_DIR}/prae-init.md" -- "$@"
+    ;;
+  add-track)
+    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae add-track <track_id> --type <research|infrastructure> [...]"; exit 1; }
+    exec codex exec --task "${TASKS_DIR}/prae-add-track.md" -- "$@"
+    ;;
+  new-track)
+    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae new-track <track_id>"; exit 1; }
+    exec codex exec --task "${TASKS_DIR}/prae-new-track.md" -- "$@"
+    ;;
+  new-exp)
+    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae new-exp <track_id>"; exit 1; }
+    exec codex exec --task "${TASKS_DIR}/prae-new-exp.md" -- "$@"
+    ;;
+  record-result)
+    [ -n "${1:-}" ] && [ -n "${2:-}" ] || {
+      echo "错误: 请提供 track_id 和 exp_id"
+      echo "用法: prae record-result <track_id> <exp_id>"
+      exit 1
+    }
+    exec codex exec --task "${TASKS_DIR}/prae-record-result.md" -- "$@"
+    ;;
+  lock-infra)
+    [ -n "${1:-}" ] || {
+      echo "错误: 请提供基础设施 track_id"
+      echo "用法: prae lock-infra <track_id> --approver <name> --reason <reason> [--contracts <path>] [--module-spec <path>]"
+      exit 1
+    }
+    exec codex exec --task "${TASKS_DIR}/prae-lock-infra.md" -- "$@"
+    ;;
+  update-track-state)
+    [ -n "${1:-}" ] && [ -n "${2:-}" ] || {
+      echo "错误: 请提供 track_id 和 to_state"
+      echo "用法: prae update-track-state <track_id> <ACTIVE|KILLED|MERGED|GRADUATED> --approver <name> --reason <reason>"
+      exit 1
+    }
+    exec codex exec --task "${TASKS_DIR}/prae-update-track-state.md" -- "$@"
+    ;;
+  advance-phase)
+    exec codex exec --task "${TASKS_DIR}/prae-advance-phase.md" -- "$@"
+    ;;
+  graduate)
+    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae graduate <track_id>"; exit 1; }
+    exec codex exec --task "${TASKS_DIR}/prae-graduate.md" -- "$@"
+    ;;
+  finalize)
+    exec codex exec --task "${TASKS_DIR}/prae-finalize.md" -- "$@"
+    ;;
+  reopen)
+    exec codex exec --task "${TASKS_DIR}/prae-reopen.md" -- "$@"
+    ;;
+  help|--help|-h)
+    cat << 'HELP'
+prae — PRAE 研究方法论 CLI（Codex 版本）
+
+用法:
+  prae bootstrap                      部署 PRAE 到当前项目（首次使用）
+  prae init                           初始化研究项目（填写 PRAE_INIT.md 后运行，生成 registry 和 Phase 0 工件）
+  prae add-track <track_id>           正式注册新轨道到 track_registry.yaml
+  prae new-track <track_id>           为已登记轨道创建当前阶段目录和初始日志
+  prae new-exp <track_id>             新建实验记录和代码骨架
+  prae record-result <id> <exp_id>    记录实验结果到 TRACK_LOG.md
+  prae lock-infra <id>                在人工批准后正式将基础设施轨道更新为 LOCKED
+  prae update-track-state <id> <state>  在人工批准后正式更新研究轨道状态
+  prae advance-phase                  首次生成阶段门控分析；已批准时校验 gate 并正式推进
+  prae graduate <track_id>            研究轨道毕业到 PDAE 工程项目
+  prae finalize                       记录项目终态决定
+  prae reopen                         根据 CONTINUE 决定重开到 Phase 1
+
+示例:
+  prae bootstrap
+  # 填写 prae/PRAE_INIT.md 后
+  prae init
+  # 如需新增尚未登记的轨道，先注册
+  prae add-track research_strategy_reversal --type research --hypothesis "反转因子在A股ETF上有效" --depends-on infra_data_v1
+  # Phase 0: 基础设施选型 / PDAE M1-M3 / 锁定
+  prae new-track infra_data_v1
+  prae new-exp infra_data_v1 --title "DuckDB 选型实验"
+  prae record-result infra_data_v1 EXP_001
+  prae lock-infra infra_data_v1 --approver saionji --reason "PDAE M3 通过"
+  prae advance-phase
+  # 人工在 PHASE_GATE.md 填写 APPROVED: yes 后
+  prae advance-phase
+  # Phase 1: 研究轨道探索
+  prae new-track research_strategy_momentum
+  prae new-exp research_strategy_momentum
+  prae record-result research_strategy_momentum EXP_003
+  prae update-track-state research_strategy_momentum ACTIVE --approver saionji --reason "EXP_003 正向信号"
+  prae advance-phase
+  # 人工在 PHASE_GATE.md 填写 APPROVED: yes 后
+  prae advance-phase
+  prae graduate research_strategy_momentum
+  prae finalize
+  prae reopen
+
+文档: PRAE_ROOT/methodology/PRAE_QUICKSTART.md
+HELP
+    exit 0
+    ;;
+  *)
+    echo "未知子命令: ${SUBCOMMAND}"
+    echo "运行 prae help 查看帮助"
+    exit 1
+    ;;
+esac
