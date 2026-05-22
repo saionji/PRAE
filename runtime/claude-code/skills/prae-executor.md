@@ -3,142 +3,142 @@ name: prae-executor
 description: Use when an infrastructure track is ready for engineering (EXPLORING→LOCKED) or when stable impl code needs extracting from experiments — activates Executor SOP and PDAE integration
 ---
 
-# PRAE 执行者 SOP（Claude Code）
+# PRAE Executor SOP (Claude Code)
 
-> 安装路径：`.claude/skills/prae-executor.md`（由 prae-bootstrap 自动部署）
-> 规格参考：`methodology/PRAE_ROLES.md §3`、`runtime/abstract/EXECUTOR_ROLE.prompt.md`
+> Install path: `.claude/skills/prae-executor.md` (deployed automatically by prae-bootstrap)
+> Spec reference: `methodology/PRAE_ROLES.md §3`, `runtime/abstract/EXECUTOR_ROLE.prompt.md`
 
-本 skill 是项目内给模型读的执行者行为入口，不是安装命令入口。
-若项目还没有 `prae/track_registry.yaml`，说明项目可能只完成了 bootstrap；先走 `/prae-init`，不要把当前 skill 当成“项目已初始化完成”的信号。
-
----
-
-## 激活时宣告
-
-在回复开头写：
-```
-[切换到执行者] 处理轨道 {track_id}（{原因}）
-```
+This skill is the in-project Executor behavior entry the model reads — not an install-command entry.
+If the project does not yet have `prae/track_registry.yaml`, the project may only have been bootstrapped; run `/prae-init` first, and do not treat this skill as a signal that the project is already fully initialized.
 
 ---
 
-## 标准流程 A：基础设施轨道工程化（EXPLORING → LOCKED）
+## Announce on activation
 
-### 前置检查
+Write at the start of your reply:
+```
+[switch to Executor] working on track {track_id} ({reason})
+```
+
+---
+
+## Standard flow A: infrastructure track engineering (EXPLORING → LOCKED)
+
+### Preconditions
 
 ```bash
-# 确认项目已完成初始化
+# Confirm the project has been initialized
 ls prae/track_registry.yaml || {
-  echo "未找到 track_registry.yaml。项目可能只完成了 bootstrap。"
-  echo "请先完成 /prae-init，再进入执行者流程。"
+  echo "track_registry.yaml not found. The project may only have been bootstrapped."
+  echo "Complete /prae-init first, then enter the Executor flow."
   exit 1
 }
 
-# 确认选型已确定（TRACK_LOG.md 有选型结论）
+# Confirm the selection is decided (TRACK_LOG.md has a selection conclusion)
 grep -A5 "Decision Log" prae/phases/phase_00_infra/tracks/{track_id}/TRACK_LOG.md
 
-# 确认 PDAE 工具可用
+# Confirm the PDAE tooling is available
 ls ${PDAE_HOME}/tools/check_unit_gate.py
 ```
 
-若 `track_registry.yaml` 不存在，不要手工创建；先让分析者完成初始化，再继续工程化。
+If `track_registry.yaml` does not exist, do not hand-create it; let the Analyst complete initialization first, then continue engineering.
 
-### Step 1：切换到 PDAE 环境
+### Step 1: Switch to the PDAE environment
 
 ```bash
 cd ${PDAE_HOME}
 source .venv/bin/activate
 ```
 
-### Step 2：PDAE M1 — 写 MODULE_SPEC.md
+### Step 2: PDAE M1 — write MODULE_SPEC.md
 
-按 PDAE_QUICKSTART.md M1 流程，在 PRAE 项目路径下创建：
+Following the PDAE_QUICKSTART.md M1 flow, create under the PRAE project path:
 ```
 src/infra_{name}_v1/MODULE_SPEC.md
 ```
 
-使用 PDAE materialize 工具生成上下文后，由 architect_m1 unit 产出 MODULE_SPEC。
+After generating context with the PDAE materialize tool, the architect_m1 unit produces the MODULE_SPEC.
 
-### Step 3：PDAE M2 — 写 contracts.yaml
+### Step 3: PDAE M2 — write contracts.yaml
 
-按 PDAE CONTRACTS_SPEC.md 格式，在 PRAE 项目路径下创建：
+Following the PDAE CONTRACTS_SPEC.md format, create under the PRAE project path:
 ```
 src/infra_{name}_v1/contracts.yaml
 ```
 
-只暴露研究轨道实际需要的公开接口（最小化暴露面）。
+Expose only the public interface the research tracks actually need (minimize the exposed surface).
 
-### Step 4：PDAE M3 — 实现 + 单元门控
+### Step 4: PDAE M3 — implementation + unit gate
 
 ```bash
-# 回到 PRAE 项目目录
+# Back to the PRAE project directory
 cd /path/to/project
 
-# 实现代码（src/infra_{name}_v1/）
+# Implement the code (src/infra_{name}_v1/)
 # ...
 
-# 运行单元门控
+# Run the unit gate
 python3 ${PDAE_HOME}/tools/check_unit_gate.py \
   --unit reviewer_m3 --repo .
 
-# 运行契约检查
+# Run the contracts check
 python3 ${PDAE_HOME}/tools/check_contracts.py \
   --contracts src/infra_{name}_v1/contracts.yaml --src src/
 ```
 
-### Step 5：LOCKED 确认
+### Step 5: LOCKED confirmation
 
-所有检查通过后：
+After all checks pass:
 
 ```bash
 python3 tools/lock_infra_track.py \
   --project-dir . \
   --track-id "{track_id}" \
-  --approver "<人工批准人>" \
-  --reason "PDAE M3 通过"
+  --approver "<human approver>" \
+  --reason "PDAE M3 passed"
 ```
 
-由正式工具同步更新 `track_registry.yaml` 和 TRACK_LOG.md `## Decision Log`。
+The formal tool synchronously updates `track_registry.yaml` and TRACK_LOG.md's `## Decision Log`.
 
 ---
 
-## 标准流程 B：impl/ 代码提炼
+## Standard flow B: impl/ code extraction
 
-**触发条件**：同一段逻辑在多个 EXP 中重复，分析者建议提炼。
+**Trigger**: the same logic is repeated across multiple EXPs, and the Analyst recommends extraction.
 
 ```bash
-# 创建 impl/ 目录
+# Create the impl/ directory
 mkdir -p src/tracks/{track_id}/impl/
 
-# 将函数从 experiments/ 中提炼，整理接口
-# 注意：原 EXP_NNN.py 保持不变（实验脚本不改）
+# Extract functions from experiments/, tidy the interface
+# Note: the original EXP_NNN.py stays unchanged (experiment scripts are not modified)
 ```
 
-**若 impl/ 中的代码被第 2 个轨道 import → 触发流程 C**。
+**If code in impl/ gets imported by a second track → trigger flow C.**
 
 ---
 
-## 标准流程 C：shared 代码迁移（触发 PDAE M3）
+## Standard flow C: shared code migration (triggers PDAE M3)
 
-**触发条件**：`src/shared/` 下没有但需要的模块，或 impl/ 代码被第 2 处引用。
+**Trigger**: a module that is needed but not under `src/shared/`, or impl/ code referenced from a second place.
 
 ```bash
-# 1. 创建 shared 模块目录
+# 1. Create the shared module directory
 mkdir -p src/shared/{module_name}/
 
-# 2. 迁移代码，整理公开接口
-# 3. 写 MODULE_SPEC.md（PDAE M3 格式）
-# 4. 运行 PDAE M3 单元门控
+# 2. Migrate the code, tidy the public interface
+# 3. Write MODULE_SPEC.md (PDAE M3 format)
+# 4. Run the PDAE M3 unit gate
 python3 ${PDAE_HOME}/tools/check_unit_gate.py \
   --unit reviewer_m3 --repo .
-# 5. 更新所有 import 路径
+# 5. Update all import paths
 ```
 
 ---
 
-## 硬性禁止
+## Hard prohibitions
 
-- 修改 LOCKED 基础设施的源码（需求变更 → 开 v2）
-- 写实验代码（`experiments/`）
-- 跳过 PDAE M1 或 M2 直接进入 M3
-- 在 contracts.yaml 不存在时标记轨道为 LOCKED
+- Modifying the source of LOCKED infrastructure (requirement change → open v2)
+- Writing experiment code (`experiments/`)
+- Skipping PDAE M1 or M2 and going straight to M3
+- Marking a track as LOCKED when contracts.yaml does not exist
