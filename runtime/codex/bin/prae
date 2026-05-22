@@ -17,34 +17,66 @@
 #   graduate <track_id>           graduate a research track to PDAE
 #   finalize                      record the project's terminal decision
 #   reopen                        reopen to Phase 1 based on a CONTINUE decision
+#
+# Requires the Codex CLI. Verified against codex-cli 0.128.0, whose
+# `codex exec` takes the prompt as a positional argument (older
+# `--task <file>` flag is no longer supported). Each subcommand feeds
+# the corresponding task file's contents to `codex exec` as the prompt.
 
 set -euo pipefail
 
+# bin/prae lives at <repo>/runtime/codex/bin/prae — the repo root is 3
+# levels up (bin -> codex -> runtime -> root).
 PRAE_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PRAE_ROOT="$(cd "${PRAE_BIN_DIR}/../.." && pwd)"
+PRAE_ROOT="$(cd "${PRAE_BIN_DIR}/../../.." && pwd)"
 TASKS_DIR="${PRAE_ROOT}/runtime/codex/tasks"
+
+# run_task <task-file> [extra args...]
+# Feeds the task file's contents to `codex exec` as the prompt. Any extra
+# CLI arguments are appended as an explicit "Invocation arguments" block so
+# the agent can see them.
+run_task() {
+  local task_file="$1"; shift
+  local task_path="${TASKS_DIR}/${task_file}"
+  if [ ! -f "${task_path}" ]; then
+    echo "Error: task file not found: ${task_path}" >&2
+    exit 2
+  fi
+  local prompt
+  prompt="$(cat "${task_path}")"
+  if [ "$#" -gt 0 ]; then
+    prompt="${prompt}
+
+---
+Invocation arguments passed to this task: $*"
+  fi
+  # --skip-git-repo-check: PRAE projects are not necessarily git repos.
+  # --sandbox workspace-write: the task writes within the project directory;
+  #   this lets it run autonomously without per-command approval prompts.
+  exec codex exec --skip-git-repo-check --sandbox workspace-write "${prompt}"
+}
 
 SUBCOMMAND="${1:-help}"
 shift || true
 
 case "${SUBCOMMAND}" in
   bootstrap)
-    exec codex exec --task "${TASKS_DIR}/prae-bootstrap.md" -- "$@"
+    run_task "prae-bootstrap.md" "$@"
     ;;
   init)
-    exec codex exec --task "${TASKS_DIR}/prae-init.md" -- "$@"
+    run_task "prae-init.md" "$@"
     ;;
   add-track)
     [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae add-track <track_id> --type <research|infrastructure> [...]"; exit 1; }
-    exec codex exec --task "${TASKS_DIR}/prae-add-track.md" -- "$@"
+    run_task "prae-add-track.md" "$@"
     ;;
   new-track)
     [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae new-track <track_id>"; exit 1; }
-    exec codex exec --task "${TASKS_DIR}/prae-new-track.md" -- "$@"
+    run_task "prae-new-track.md" "$@"
     ;;
   new-exp)
     [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae new-exp <track_id>"; exit 1; }
-    exec codex exec --task "${TASKS_DIR}/prae-new-exp.md" -- "$@"
+    run_task "prae-new-exp.md" "$@"
     ;;
   record-result)
     [ -n "${1:-}" ] && [ -n "${2:-}" ] || {
@@ -52,7 +84,7 @@ case "${SUBCOMMAND}" in
       echo "Usage: prae record-result <track_id> <exp_id>"
       exit 1
     }
-    exec codex exec --task "${TASKS_DIR}/prae-record-result.md" -- "$@"
+    run_task "prae-record-result.md" "$@"
     ;;
   lock-infra)
     [ -n "${1:-}" ] || {
@@ -60,7 +92,7 @@ case "${SUBCOMMAND}" in
       echo "Usage: prae lock-infra <track_id> --approver <name> --reason <reason> [--contracts <path>] [--module-spec <path>]"
       exit 1
     }
-    exec codex exec --task "${TASKS_DIR}/prae-lock-infra.md" -- "$@"
+    run_task "prae-lock-infra.md" "$@"
     ;;
   update-track-state)
     [ -n "${1:-}" ] && [ -n "${2:-}" ] || {
@@ -68,20 +100,20 @@ case "${SUBCOMMAND}" in
       echo "Usage: prae update-track-state <track_id> <ACTIVE|KILLED|MERGED|GRADUATED> --approver <name> --reason <reason>"
       exit 1
     }
-    exec codex exec --task "${TASKS_DIR}/prae-update-track-state.md" -- "$@"
+    run_task "prae-update-track-state.md" "$@"
     ;;
   advance-phase)
-    exec codex exec --task "${TASKS_DIR}/prae-advance-phase.md" -- "$@"
+    run_task "prae-advance-phase.md" "$@"
     ;;
   graduate)
     [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae graduate <track_id>"; exit 1; }
-    exec codex exec --task "${TASKS_DIR}/prae-graduate.md" -- "$@"
+    run_task "prae-graduate.md" "$@"
     ;;
   finalize)
-    exec codex exec --task "${TASKS_DIR}/prae-finalize.md" -- "$@"
+    run_task "prae-finalize.md" "$@"
     ;;
   reopen)
-    exec codex exec --task "${TASKS_DIR}/prae-reopen.md" -- "$@"
+    run_task "prae-reopen.md" "$@"
     ;;
   help|--help|-h)
     cat << 'HELP'
