@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-19
 **Status:** Design Approved, Pre-Implementation
-**Author:** saionji + Claude Code
+**Author:** maintainer + Claude Code
 
 ---
 

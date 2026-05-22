@@ -170,7 +170,7 @@ class TestUpdateTrackState:
             [
                 "--track-id", TRACK_ID,
                 "--to-state", "ACTIVE",
-                "--approver", "saionji",
+                "--approver", "maintainer",
                 "--approved-at", "2026-04-20",
                 "--exp-id", "EXP_001",
                 "--reason", "EXP_001 shows a positive signal",
@@ -192,7 +192,7 @@ class TestUpdateTrackState:
             fake_project / "prae" / "phases" / PHASE / "tracks" / TRACK_ID / "TRACK_LOG.md"
         ).read_text(encoding="utf-8")
         assert "**Current State**: ACTIVE" in log_content
-        assert "| 2026-04-20 | EXPLORING → ACTIVE | AI | saionji | EXP_001: EXP_001 shows a positive signal |" in log_content
+        assert "| 2026-04-20 | EXPLORING → ACTIVE | AI | maintainer | EXP_001: EXP_001 shows a positive signal |" in log_content
 
     def test_exploring_to_killed_is_rejected(self, fake_project):
         prepare_track_project(fake_project, state="EXPLORING", lock_infra=True)
@@ -202,7 +202,7 @@ class TestUpdateTrackState:
             [
                 "--track-id", TRACK_ID,
                 "--to-state", "KILLED",
-                "--approver", "saionji",
+                "--approver", "maintainer",
                 "--reason", "negative signal",
             ],
         )
@@ -222,7 +222,7 @@ class TestUpdateTrackState:
             [
                 "--track-id", TRACK_ID,
                 "--to-state", "MERGED",
-                "--approver", "saionji",
+                "--approver", "maintainer",
                 "--reason", "overlaps with the lead track",
             ],
         )
@@ -243,7 +243,7 @@ class TestUpdateTrackState:
             [
                 "--track-id", TRACK_ID,
                 "--to-state", "MERGED",
-                "--approver", "saionji",
+                "--approver", "maintainer",
                 "--approved-at", "2026-04-20",
                 "--reason", "evidence complements the reversal track, merging forward",
                 "--merged-into", "research_strategy_reversal",
@@ -267,7 +267,7 @@ class TestUpdateTrackState:
             [
                 "--track-id", TRACK_ID,
                 "--to-state", "GRADUATED",
-                "--approver", "saionji",
+                "--approver", "maintainer",
                 "--reason", "validation complete",
             ],
         )
@@ -288,7 +288,7 @@ class TestUpdateTrackState:
             [
                 "--track-id", TRACK_ID,
                 "--to-state", "ACTIVE",
-                "--approver", "saionji",
+                "--approver", "maintainer",
                 "--reason", "positive signal appeared",
             ],
         )

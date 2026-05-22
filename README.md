@@ -2,7 +2,7 @@
 
 > I run real projects across quantitative trading, marine systems, flight log automation, and DEX research — all managed with this toolchain. PRAE is the methodology + tools I extracted. Open-sourced because the discipline of public docs makes it better.
 
-**Status**: `v0.1.0-alpha` · single maintainer · in production use by the author · English documentation is in progress — methodology deep docs are still Chinese in `methodology/`, English translation is the first post-launch backlog item.
+**Status**: `v0.1.0-alpha` · single maintainer · in production use by the author · documentation is in English.
 
 **Quickstart**: see [Quick Start](#quick-start). **Concepts**: see [Core Model](#core-model). **What is PDAE**: see [Relationship to PDAE](#relationship-to-pdae).
 

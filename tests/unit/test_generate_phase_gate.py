@@ -51,7 +51,7 @@ class TestGeneratePhaseGate:
         gate_path.write_text(
             gate_path.read_text(encoding="utf-8").replace(
                 "APPROVED: pending\nAPPROVER: \nAPPROVED_AT: \nCOMMENT: \n",
-                "APPROVED: yes\nAPPROVER: saionji\nAPPROVED_AT: 2026-04-21\nCOMMENT: Agree to advance\n",
+                "APPROVED: yes\nAPPROVER: maintainer\nAPPROVED_AT: 2026-04-21\nCOMMENT: Agree to advance\n",
             ),
             encoding="utf-8",
         )
@@ -61,7 +61,7 @@ class TestGeneratePhaseGate:
 
         content = gate_path.read_text(encoding="utf-8")
         assert "APPROVED: yes" in content
-        assert "APPROVER: saionji" in content
+        assert "APPROVER: maintainer" in content
         assert "APPROVED_AT: 2026-04-21" in content
         assert "COMMENT: Agree to advance" in content
 

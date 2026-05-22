@@ -95,7 +95,7 @@ Switch to the **Analyst** role. Generate `prae/phases/phase_00_infra/PHASE_GATE.
 The user fills in Section 6 of `PHASE_GATE.md`:
 ```
 APPROVED: yes
-APPROVER: saionji
+APPROVER: maintainer
 APPROVED_AT: 2026-04-22
 COMMENT: The data pipeline has passed the pre-launch two-person review and may enter Phase 1
 ```
@@ -202,7 +202,7 @@ When filling in Section 6, the human should additionally explicitly approve or r
 
 ```
 APPROVED: yes
-APPROVER: saionji
+APPROVER: maintainer
 APPROVED_AT: 2026-05-10
 COMMENT:
   - research_strategy_momentum: GRADUATED approved

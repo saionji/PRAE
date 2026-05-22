@@ -67,7 +67,7 @@ def make_valid_phase_gate_doc(from_phase: int, to_phase: int, target_phase: str,
                               unchecked_items: set[str] | None = None,
                               cycle_label: str = "cycle_1") -> str:
     approved_at = "2026-04-20" if approved == "yes" else ""
-    approver = "saionji" if approved == "yes" else ""
+    approver = "maintainer" if approved == "yes" else ""
     unchecked_items = unchecked_items or set()
     checklist_items = [
         item for item in PHASE_CHECKLIST_ITEMS[from_phase]
@@ -120,7 +120,7 @@ def make_phase1_active_track(project_dir: Path, *, with_research_artifacts: bool
     (track_dir / "TRACK_LOG.md").write_text(
         "# TRACK_LOG\n\n**Research Cycle**: cycle_1\n\n## Experiments\n\n| EXP_001 | 2026-04-20 | test | ok | [EXP_001.md](experiments/EXP_001.md) |\n"
         "\n## Evidence Summary\n\n- 2026-04-20 EXP_001: positive signal\n"
-        "\n## Decision Log\n\n| 2026-04-20 | EXPLORING → ACTIVE | AI | saionji | EXP_001 signal positive |\n"
+        "\n## Decision Log\n\n| 2026-04-20 | EXPLORING → ACTIVE | AI | maintainer | EXP_001 signal positive |\n"
     )
 
     if not with_research_artifacts:
@@ -338,7 +338,7 @@ class TestCheckApproved:
         gate_dir = fake_project / "prae" / "phases" / "phase_00_infra"
         gate_dir.mkdir(parents=True, exist_ok=True)
         (gate_dir / "PHASE_GATE.md").write_text(
-            "# Gate\n\nAPPROVED: yes\nAPPROVER: saionji\nAPPROVED_AT: 2026-04-20\n"
+            "# Gate\n\nAPPROVED: yes\nAPPROVER: maintainer\nAPPROVED_AT: 2026-04-20\n"
         )
         rc, out = run_tool(str(fake_project), ["--check-approved"])
         assert rc == 1

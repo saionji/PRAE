@@ -74,7 +74,7 @@ COMMENT: <optional, additional human notes>
 
 <!-- Human-filled example:
 APPROVED: yes
-APPROVER: saionji
+APPROVER: maintainer
 APPROVED_AT: 2026-04-22
 COMMENT: The data pipeline has passed a two-person pre-launch review; ready to enter Phase 1
 -->

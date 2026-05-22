@@ -66,7 +66,7 @@ class TestGenerateConclusion:
         conclusion_path = fake_project / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
         conclusion_path.parent.mkdir(parents=True, exist_ok=True)
         conclusion_path.write_text(
-            "# CONCLUSION\n\n## Final Decision\n\nAPPROVED: yes\nDECISION: GRADUATED_TO_PDAE\nAPPROVER: saionji\nAPPROVED_AT: 2026-04-20\nCOMMENT: ready\n",
+            "# CONCLUSION\n\n## Final Decision\n\nAPPROVED: yes\nDECISION: GRADUATED_TO_PDAE\nAPPROVER: maintainer\nAPPROVED_AT: 2026-04-20\nCOMMENT: ready\n",
             encoding="utf-8",
         )
 
@@ -74,7 +74,7 @@ class TestGenerateConclusion:
         assert rc == 0
         content = conclusion_path.read_text(encoding="utf-8")
         assert "DECISION: GRADUATED_TO_PDAE" in content
-        assert "APPROVER: saionji" in content
+        assert "APPROVER: maintainer" in content
         assert "COMMENT: ready" in content
 
     def test_legacy_final_decision_is_migrated(self, fake_project):
@@ -82,7 +82,7 @@ class TestGenerateConclusion:
         conclusion_path = fake_project / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
         conclusion_path.parent.mkdir(parents=True, exist_ok=True)
         conclusion_path.write_text(
-            "# CONCLUSION\n\n## Final Decision\n\n**APPROVED**: yes\n\n**Decision** (human-filled):\n\n```\nGRADUATED_TO_PDAE\n```\n\n**Approver**: saionji\n**Date**: 2026-04-20\n",
+            "# CONCLUSION\n\n## Final Decision\n\n**APPROVED**: yes\n\n**Decision** (human-filled):\n\n```\nGRADUATED_TO_PDAE\n```\n\n**Approver**: maintainer\n**Date**: 2026-04-20\n",
             encoding="utf-8",
         )
 
@@ -91,7 +91,7 @@ class TestGenerateConclusion:
         content = conclusion_path.read_text(encoding="utf-8")
         assert "APPROVED: yes" in content
         assert "DECISION: GRADUATED_TO_PDAE" in content
-        assert "APPROVER: saionji" in content
+        assert "APPROVER: maintainer" in content
         assert "APPROVED_AT: 2026-04-20" in content
 
     def test_conclusion_can_read_archived_cycle_track_log(self, fake_project):

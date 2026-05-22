@@ -156,7 +156,7 @@ class TestEndToEnd:
         rc, out = run("lock_infra_track.py", [
             "--project-dir", str(research_project),
             "--track-id", "infra_data_v1",
-            "--approver", "saionji",
+            "--approver", "maintainer",
             "--approved-at", "2026-04-20",
             "--reason", "PDAE M3 passed",
         ])
@@ -234,7 +234,7 @@ class TestEndToEnd:
         rc_lock, out_lock = run("lock_infra_track.py", [
             "--project-dir", str(research_project),
             "--track-id", "infra_data_v1",
-            "--approver", "saionji",
+            "--approver", "maintainer",
             "--approved-at", "2026-04-20",
             "--reason", "PDAE M3 passed",
         ])
@@ -247,7 +247,7 @@ class TestEndToEnd:
         gate_path = Path(out["data"]["path"])
         content = gate_path.read_text(encoding="utf-8")
         content = content.replace("APPROVED: pending", "APPROVED: yes")
-        content = content.replace("APPROVER: ", "APPROVER: saionji")
+        content = content.replace("APPROVER: ", "APPROVER: maintainer")
         content = content.replace("APPROVED_AT: ", "APPROVED_AT: 2026-04-20")
         gate_path.write_text(content, encoding="utf-8")
 

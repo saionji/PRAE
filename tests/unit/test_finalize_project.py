@@ -30,7 +30,7 @@ def approve_conclusion(conclusion_path: Path, decision: str) -> None:
     content = conclusion_path.read_text(encoding="utf-8")
     content = content.replace("APPROVED: pending", "APPROVED: yes")
     content = content.replace("DECISION: ", f"DECISION: {decision}")
-    content = content.replace("APPROVER: ", "APPROVER: saionji")
+    content = content.replace("APPROVER: ", "APPROVER: maintainer")
     content = content.replace("APPROVED_AT: ", "APPROVED_AT: 2026-04-20")
     conclusion_path.write_text(content, encoding="utf-8")
 
@@ -59,7 +59,7 @@ class TestFinalizeProject:
 
         registry = yaml.safe_load((fake_project / "prae" / "track_registry.yaml").read_text())
         assert registry["project_decision"] == "ARCHIVED"
-        assert registry["project_approver"] == "saionji"
+        assert registry["project_approver"] == "maintainer"
         assert registry["project_decided_at"] == "2026-04-20"
         assert registry["archived_at"] == "2026-04-20"
 
@@ -79,7 +79,7 @@ class TestFinalizeProject:
 
         registry = yaml.safe_load((fake_project / "prae" / "track_registry.yaml").read_text())
         assert registry["project_decision"] == "GRADUATED_TO_PDAE"
-        assert registry["project_approver"] == "saionji"
+        assert registry["project_approver"] == "maintainer"
         assert registry["project_decided_at"] == "2026-04-20"
 
     def test_finalize_continue_is_rejected(self, fake_project):

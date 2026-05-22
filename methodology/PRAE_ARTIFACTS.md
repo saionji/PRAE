@@ -101,7 +101,7 @@ current_cycle: 1
 current_phase: phase_01_research
 updated: 2026-04-22
 project_decision: GRADUATED_TO_PDAE
-project_approver: saionji
+project_approver: maintainer
 project_decided_at: 2026-04-22
 project_finalized_at: 2026-04-22
 

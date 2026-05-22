@@ -111,13 +111,13 @@ prae init
 prae new-track infra_data_v1
 prae new-exp infra_data_v1 --title "DuckDB selection experiment"
 prae record-result infra_data_v1 EXP_001
-prae lock-infra infra_data_v1 --approver saionji --reason "PDAE M3 passed"
+prae lock-infra infra_data_v1 --approver maintainer --reason "PDAE M3 passed"
 prae advance-phase
 prae add-track research_strategy_reversal --type research --hypothesis "The reversal factor is effective on A-share ETFs" --depends-on infra_data_v1
 prae new-track research_strategy_momentum
 prae new-exp research_strategy_momentum --title "First momentum experiment"
 prae record-result research_strategy_momentum EXP_001
-prae update-track-state research_strategy_momentum ACTIVE --approver saionji --reason "EXP_001 positive signal"
+prae update-track-state research_strategy_momentum ACTIVE --approver maintainer --reason "EXP_001 positive signal"
 prae advance-phase
 ```
 

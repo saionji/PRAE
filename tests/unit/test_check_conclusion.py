@@ -28,7 +28,7 @@ def approve_conclusion(path: Path, decision: str) -> None:
     content = path.read_text(encoding="utf-8")
     content = content.replace("APPROVED: pending", "APPROVED: yes")
     content = content.replace("DECISION: ", f"DECISION: {decision}")
-    content = content.replace("APPROVER: ", "APPROVER: saionji")
+    content = content.replace("APPROVER: ", "APPROVER: maintainer")
     content = content.replace("APPROVED_AT: ", "APPROVED_AT: 2026-04-20")
     path.write_text(content, encoding="utf-8")
 
@@ -88,7 +88,7 @@ class TestCheckConclusion:
         path = fake_project / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
-            "# CONCLUSION — fake-research\n\n## Project Conclusion\n\nok\n\n## Disposition of Each Track\n\n| Track ID | Final State | Conclusion Summary | Notes |\n|---------|---------|---------|------|\n| `research_strategy_momentum` | GRADUATED | ok | — |\n\n## PDAE Project Links for Graduated Tracks\n\n| Track ID | PDAE Project Path |\n|---------|----------------|\n| `research_strategy_momentum` | `to be filled` |\n\n## Unresolved Issues\n\n- none\n\n## Final Decision\n\n**APPROVED**: yes\n\n**Decision** (filled in manually):\n\n```\nGRADUATED_TO_PDAE\n```\n\n**Approver**: saionji\n**Date**: 2026-04-20\n",
+            "# CONCLUSION — fake-research\n\n## Project Conclusion\n\nok\n\n## Disposition of Each Track\n\n| Track ID | Final State | Conclusion Summary | Notes |\n|---------|---------|---------|------|\n| `research_strategy_momentum` | GRADUATED | ok | — |\n\n## PDAE Project Links for Graduated Tracks\n\n| Track ID | PDAE Project Path |\n|---------|----------------|\n| `research_strategy_momentum` | `to be filled` |\n\n## Unresolved Issues\n\n- none\n\n## Final Decision\n\n**APPROVED**: yes\n\n**Decision** (filled in manually):\n\n```\nGRADUATED_TO_PDAE\n```\n\n**Approver**: maintainer\n**Date**: 2026-04-20\n",
             encoding="utf-8",
         )
 
