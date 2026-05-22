@@ -1,33 +1,33 @@
 # Task: prae-finalize
 
-> 根据已批准的 `CONCLUSION.md` 记录项目终态决定
-> 调用方式: `prae finalize`
-> 前置条件: 当前阶段为 `phase_03_conclusion`，且人工已在 `CONCLUSION.md` 填写终态决定
+> Record the project's terminal-state decision based on an approved `CONCLUSION.md`
+> Invocation: `prae finalize`
+> Precondition: the current phase is `phase_03_conclusion`, and a human has filled in the terminal-state decision in `CONCLUSION.md`
 
-## 步骤
+## Steps
 
-### 1. 验证 `CONCLUSION.md`
+### 1. Validate `CONCLUSION.md`
 
 ```bash
 python3 tools/check_conclusion.py --project-dir . --check-approved
 ```
 
-若未通过，先补齐：
+If it does not pass, fill in the missing fields first:
 - `APPROVED: yes`
 - `DECISION: ARCHIVED / GRADUATED_TO_PDAE`
-- `APPROVER: <你的名字>`
+- `APPROVER: <your name>`
 - `APPROVED_AT: <YYYY-MM-DD>`
 
-如果人工决定是 `DECISION: CONTINUE`，不要运行本 task，改用 `prae reopen`。
+If the human decision is `DECISION: CONTINUE`, do not run this task; use `prae reopen` instead.
 
-### 2. 记录最终决定
+### 2. Record the final decision
 
 ```bash
 python3 tools/finalize_project.py --project-dir .
 ```
 
-### 3. 结果说明
+### 3. Result explanation
 
-根据 `project_decision` 的值，后续含义如下：
-- `ARCHIVED`：PRAE 项目收尾完成，不再继续 PDAE 路由
-- `GRADUATED_TO_PDAE`：至少一条轨道已毕业到 PDAE，后续在 PDAE 仓库继续工程化
+Depending on the value of `project_decision`, the implications are as follows:
+- `ARCHIVED`: the PRAE project is wrapped up; no further PDAE routing
+- `GRADUATED_TO_PDAE`: at least one track has graduated to PDAE; engineering work continues in the PDAE repository

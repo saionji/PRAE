@@ -1,78 +1,78 @@
-# bin/prae — CLI 安装说明
+# bin/prae — CLI Installation Notes
 
-`prae` 是 PRAE 方法论框架的统一 CLI 入口（Codex 版本）。
-通过 `prae <subcommand>` 触发对应的 Codex task。
+`prae` is the unified CLI entrypoint for the PRAE methodology (Codex version).
+It triggers the corresponding Codex task via `prae <subcommand>`.
 
-这里也区分三种“入口”：
-- `LLM_ENTRYPOINT.md` / 项目内 `AGENTS.md`：模型上下文入口
-- `prae bootstrap`：项目安装入口
-- `prae init`：项目状态初始化入口
+There are also three distinct "entrypoints" here:
+- `LLM_ENTRYPOINT.md` / the in-project `AGENTS.md`: model context entrypoint
+- `prae bootstrap`: project installation entrypoint
+- `prae init`: project state initialization entrypoint
 
-## 前置条件
+## Prerequisites
 
-- Codex CLI 已安装并可用（`codex` 命令）
-- PRAE 仓库已克隆到本地
+- The Codex CLI is installed and available (the `codex` command)
+- The PRAE repository has been cloned locally
 
-## 安装
+## Installation
 
-### 方法 1：软链到 PATH（推荐）
+### Method 1: Symlink into PATH (recommended)
 
 ```bash
-# 假设 PRAE 仓库在 ${PRAE_HOME}
+# assuming the PRAE repository is at ${PRAE_HOME}
 chmod +x ${PRAE_HOME}/runtime/codex/bin/prae
 ln -sf ${PRAE_HOME}/runtime/codex/bin/prae ~/.local/bin/prae
 
-# 确认 ~/.local/bin 在 PATH 中
+# confirm that ~/.local/bin is in PATH
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 
-# 验证
+# verify
 prae help
 ```
 
-### 方法 2：直接运行（无需安装）
+### Method 2: Run directly (no installation)
 
 ```bash
-# 在研究项目目录下
+# in the research project directory
 bash ${PRAE_HOME}/runtime/codex/bin/prae <subcommand>
 ```
 
-### 方法 3：alias（快速临时方案）
+### Method 3: alias (quick temporary option)
 
 ```bash
 alias prae='${PRAE_HOME}/runtime/codex/bin/prae'
 ```
 
-## 可用命令
+## Available Commands
 
 ```
-prae bootstrap                     首次使用：部署 PRAE 到当前项目
-prae init                          初始化研究项目（从 PRAE_INIT.md 生成 registry 和 Phase 0 工件）
-prae add-track <track_id>          正式注册新轨道到 track_registry.yaml
-prae new-track <track_id>          为已登记轨道创建当前阶段目录
-prae new-exp <track_id>            新建实验
-prae record-result <id> <exp_id>   记录实验结果
-prae lock-infra <id>               在人工批准后正式将基础设施轨道锁定为 LOCKED
-prae update-track-state <id> <state>  在人工批准后正式更新研究轨道状态
-prae advance-phase                 首次生成阶段门控分析；已批准时正式推进阶段
-prae graduate <track_id>           研究轨道毕业到 PDAE
-prae finalize                      记录项目终态决定
-prae reopen                        根据 CONTINUE 决定重开到 Phase 1
+prae bootstrap                     first use: deploy PRAE to the current project
+prae init                          initialize the research project (generate the registry and Phase 0 artifacts from PRAE_INIT.md)
+prae add-track <track_id>          formally register a new track into track_registry.yaml
+prae new-track <track_id>          create the current-phase directory for an already-registered track
+prae new-exp <track_id>            create a new experiment
+prae record-result <id> <exp_id>   record an experiment result
+prae lock-infra <id>               formally lock an infrastructure track to LOCKED after human approval
+prae update-track-state <id> <state>  formally update a research track state after human approval
+prae advance-phase                 generate the phase gate analysis the first time; once approved, formally advance the phase
+prae graduate <track_id>           graduate a research track to PDAE
+prae finalize                      record the project's terminal decision
+prae reopen                        reopen to Phase 1 based on a CONTINUE decision
 ```
 
-## 工作原理
+## How It Works
 
-每个命令对应 `runtime/codex/tasks/prae-{subcommand}.md`，
-通过 `codex exec --task` 执行。Codex 读取 task 文件并完成相应操作。
+Each command maps to `runtime/codex/tasks/prae-{subcommand}.md`,
+executed via `codex exec --task`. Codex reads the task file and performs the corresponding operation.
 
-启动顺序：
-1. `prae bootstrap`：部署最小骨架、templates、tools、Codex tasks
-2. 填写 `prae/PRAE_INIT.md`
-3. `prae init`：生成 `prae/track_registry.yaml`、`prae/phases/phase_00_infra/PHASE_BRIEF.md` 和基础设施 `TRACK_LOG.md`
-4. Phase 0：为基础设施轨道执行选型实验，PDAE M3 通过后用 `prae lock-infra`
-5. 所有基础设施轨道 `LOCKED` 后，运行 `prae advance-phase` 生成 gate；人工批准后再次运行同一命令进入 Phase 1
-6. Phase 1：已登记研究轨道运行 `prae new-track`、`prae new-exp`；若是全新假设，先 `prae add-track`
+Startup sequence:
+1. `prae bootstrap`: deploy the minimal skeleton, templates, tools, and Codex tasks
+2. Fill in `prae/PRAE_INIT.md`
+3. `prae init`: generate `prae/track_registry.yaml`, `prae/phases/phase_00_infra/PHASE_BRIEF.md`, and the infrastructure `TRACK_LOG.md`
+4. Phase 0: run selection experiments for the infrastructure tracks; once PDAE M3 passes, use `prae lock-infra`
+5. After all infrastructure tracks are `LOCKED`, run `prae advance-phase` to generate the gate; after human approval, run the same command again to enter Phase 1
+6. Phase 1: for registered research tracks, run `prae new-track` and `prae new-exp`; for a brand-new hypothesis, run `prae add-track` first
 
-## 更新
+## Updates
 
-PRAE 仓库更新后，CLI 自动使用新版 task 文件，无需重新安装。
+After the PRAE repository is updated, the CLI automatically uses the new task files; no reinstallation is needed.

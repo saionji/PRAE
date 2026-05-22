@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-finalize_project.py — 根据已批准的 CONCLUSION.md 记录项目终态决定
+finalize_project.py — record the project's final-state decision based on an approved CONCLUSION.md
 
-退出码:
-  0  记录成功
-  1  最终决定尚未满足执行条件
-  2  文件缺失或格式错误
+Exit codes:
+  0  recorded successfully
+  1  final decision does not yet meet the conditions for execution
+  2  file missing or format error
 
-用法:
+Usage:
   python3 tools/finalize_project.py --project-dir <path>
 """
 from __future__ import annotations
@@ -31,18 +31,18 @@ def finalize_project(project_dir: Path) -> dict:
     checks = list(evaluation["checks"])
 
     approved_yes = evaluation["data"]["approved"] == "yes"
-    checks.append(check_item("CONCLUSION 已 APPROVED: yes", approved_yes, f"当前值={evaluation['data']['approved']}"))
+    checks.append(check_item("CONCLUSION is APPROVED: yes", approved_yes, f"current value={evaluation['data']['approved']}"))
     terminal_decision = evaluation["data"]["decision"] in {"ARCHIVED", "GRADUATED_TO_PDAE"}
     checks.append(check_item(
-        "DECISION 为终态（ARCHIVED / GRADUATED_TO_PDAE）",
+        "DECISION is terminal (ARCHIVED / GRADUATED_TO_PDAE)",
         terminal_decision,
-        f"当前值={evaluation['data']['decision']}；CONTINUE 请改用 reopen_project.py",
+        f"current value={evaluation['data']['decision']}; for CONTINUE use reopen_project.py instead",
     ))
 
     if not evaluation["passed"] or not approved_yes or not terminal_decision:
         return {
             "passed": False,
-            "summary": "项目收尾失败：CONCLUSION.md 尚未满足终态决定要求",
+            "summary": "Project finalization failed: CONCLUSION.md does not yet meet the terminal-decision requirements",
             "checks": checks,
             "data": {"finalized": False, **evaluation["data"]},
         }
@@ -63,11 +63,11 @@ def finalize_project(project_dir: Path) -> dict:
         registry.pop("archived_at")
 
     registry_path = save_registry(project_dir, registry)
-    checks.append(check_item("track_registry.yaml 已记录项目终态决定", True, str(registry_path)))
+    checks.append(check_item("track_registry.yaml recorded the project's final-state decision", True, str(registry_path)))
 
     return {
         "passed": True,
-        "summary": f"项目终态决定已记录: {decision}",
+        "summary": f"Project final-state decision recorded: {decision}",
         "checks": checks,
         "data": {
             **evaluation["data"],

@@ -1,109 +1,109 @@
-# Naming Conventions / 命名规范
+# Naming Conventions
 
-## 1. 目的 / Purpose
+## 1. Purpose
 
-LLM 内容审核会把某些英文 / 中文术语分类为 cyber risk，无视业务上下文。当这些术语出现在**会被加载进 prompt 的工件**（skill 描述、文件名、运行时文档）里，会导致工作流被审核器拒回。
+LLM content moderation classifies certain English / Chinese terms as cyber risk, ignoring the business context. When such terms appear in **artifacts that get loaded into a prompt** (skill descriptions, file names, runtime documents), the workflow gets rejected by the moderator.
 
 This convention defines vocabulary rules so framework artifacts do not trigger LLM moderation while preserving the methodology's conceptual integrity.
 
-历史触发事件参考各项目本地的运行复盘（不在本文件正文展开，避免重复触发）。
+For historical trigger incidents, refer to each project's local run retrospectives (not expanded in the body of this file, to avoid re-triggering).
 
 ---
 
-## 2. 两层模型 / Two-Tier Model
+## 2. Two-Tier Model
 
-### Tier 1 — Methodology Layer（方法论层）
+### Tier 1 — Methodology Layer
 
-**不会被自动加载进 prompt** 的文档，按需读取：
+Documents that **are not automatically loaded into a prompt**, read on demand:
 
 - `*.md` whitepaper / methodology / role library / generation guide
-- `methodology/` 目录下所有文件
-- `README.md`、`MASTER_METHODOLOGY.md` 等顶层方法论文档
-- `tools/*.py` 中的 CLI 参数字符串与 unit ID
+- All files under the `methodology/` directory
+- Top-level methodology documents such as `README.md`, `MASTER_METHODOLOGY.md`
+- CLI argument strings and unit IDs in `tools/*.py`
 
-→ **可以保留原始概念名称**。这一层的曝光是按需且离散的，单点风险低。
+→ **Original conceptual names may be kept.** Exposure at this layer is on-demand and discrete, so single-point risk is low.
 
-### Tier 2 — Runtime Layer（运行时层）
+### Tier 2 — Runtime Layer
 
-**会被加载进 prompt** 的工件，每次会话或每次调用都注入：
+Artifacts that **do get loaded into a prompt**, injected on every session or every invocation:
 
-- `~/.agents/skills/*/SKILL.md`（frontmatter description 每个 turn 都进 base_instructions）
-- `runtime/codex/prompts/*.md`、`runtime/codex/tasks/*.md`
-- `runtime/claude-code/agents/*.md`、`runtime/claude-code/skills/*.md`、`runtime/claude-code/commands/*.md`
-- 项目根目录 / 顶级 docs 中的 agent 入口提示文件
-- 测试函数名（agent 读测试时进 prompt）
-- agent 产出物的文件名（被 ls / grep 时进 prompt）
+- `~/.agents/skills/*/SKILL.md` (the frontmatter description enters base_instructions on every turn)
+- `runtime/codex/prompts/*.md`, `runtime/codex/tasks/*.md`
+- `runtime/claude-code/agents/*.md`, `runtime/claude-code/skills/*.md`, `runtime/claude-code/commands/*.md`
+- Agent entry-point prompt files in the project root / top-level docs
+- Test function names (they enter the prompt when an agent reads tests)
+- File names of agent output artifacts (they enter the prompt when `ls` / `grep` is run)
 
-→ **必须使用安全词汇**。
+→ **Safe vocabulary must be used.**
 
-### 边界判定（Default = Tier 2 if uncertain）
+### Boundary Decision (Default = Tier 2 if uncertain)
 
-如果一份文件**通常会被 agent 在常规会话中 cat / read**，无论它在什么目录都按 Tier 2 处理。
+If a file **would normally be cat'd / read by an agent during a routine session**, treat it as Tier 2 regardless of which directory it sits in.
 
 ---
 
-## 3. 词汇对照表 / Vocabulary Mapping
+## 3. Vocabulary Mapping
 
-| 概念 / Concept | 避免 / Avoid | 优先 / Prefer |
+| Concept | Avoid | Prefer |
 |---|---|---|
-| 调研、侦察 / Reconnaissance | `scout`, `recon`, `probe`, `侦察`, `探测` | `discovery`, `fact-finding`, `verify`, `inspect`, `调研` |
-| 数据获取 / Data acquisition | `scrape`, `crawl`, `crawler`, `harvest`, `抓取`, `爬取`, `爬虫`, `采集` (when paired with "dirty data") | `fetch`, `download`, `loader`, `collect`, `拉取`, `下载`, `收集` |
-| 跳过、回退 / Skip-fallback | `bypass`, `circumvent`, `绕过` | `fallback`, `alternate`, `skip`, `跳过` |
-| 限流相关 / Rate limit | "evade limit", "avoid throttling", "5 次/分 别封号" 类口语 | "follow provider rate spec", "respect throttling", "按 provider 文档允许范围" |
-| 数据质量 / Data quality | `dirty data`, `脏数据`（仅限于 frontmatter / description 字段） | `edge cases`, `anomalies`, `boundary samples`, `异常样本`, `边界样本` |
-| 凭据 / Credentials | 任何明文 token / key / cookie / JWT / connection string with password | 仅出现变量名，如 `$X_API_KEY`、keyring path |
-| 多源轮换 / Multi-source rotation | 同句枚举 ≥3 家 provider 名 + "都试试 / 都失败" | "按 provider 优先级表", "已登记 provider 中" |
-| 网络路由 / Network routing | "代理" + "国外/境外" 同句、"换节点试试" | "按域名走对应网络配置"，或干脆不写 |
+| Reconnaissance | `scout`, `recon`, `probe`, `侦察`, `探测` | `discovery`, `fact-finding`, `verify`, `inspect`, `调研` |
+| Data acquisition | `scrape`, `crawl`, `crawler`, `harvest`, `抓取`, `爬取`, `爬虫`, `采集` (when paired with "dirty data") | `fetch`, `download`, `loader`, `collect`, `拉取`, `下载`, `收集` |
+| Skip-fallback | `bypass`, `circumvent`, `绕过` | `fallback`, `alternate`, `skip`, `跳过` |
+| Rate limit | "evade limit", "avoid throttling", colloquial phrases like "5 times/min or you get banned" | "follow provider rate spec", "respect throttling", "within the range allowed by the provider docs" |
+| Data quality | `dirty data`, `脏数据` (only in frontmatter / description fields) | `edge cases`, `anomalies`, `boundary samples`, `异常样本`, `边界样本` |
+| Credentials | any plaintext token / key / cookie / JWT / connection string with password | only variable names, e.g. `$X_API_KEY`, keyring path |
+| Multi-source rotation | enumerating ≥3 provider names in one sentence + "try them all / all fail" | "by the provider priority table", "among the registered providers" |
+| Network routing | "proxy" + "overseas/abroad" in the same sentence, "try switching nodes" | "route by domain to the corresponding network config", or simply omit it |
 
 ---
 
-## 4. 例外清单 / Allowed Exceptions
+## 4. Allowed Exceptions
 
-下列情形**保留原始术语**，不属于 cyber 行为命名：
+The following cases **keep the original terminology**; they do not count as cyber-behavior naming:
 
-| 例外 | 理由 | 实例 |
+| Exception | Rationale | Examples |
 |---|---|---|
-| **Unit ID 字符串** | 是单元标识符，非自然语言；CLI 参数 dispatch 依赖它 | `scout_m1`, `pm_m1`, `architect_m1`（PDAE）|
-| **Gate keyword strings** | 是 gate 工具 string-match 的合约词；产出物 (FINDINGS.md / CONCLUSION.md) 必须含这些词才能过 gate | `脏数据`, `速率限制`, `延迟`, `事实`, `推测`（仅在产出物文件里，不在 description）|
-| **测试数据常量** | unit ID 作为 literal string 出现在 assertion | `assert "scout_m1" in out` |
-| **CLI argv** | 命令行调用，不是描述行为 | `python3 check_unit_gate.py --unit scout_m1` |
-| **方法论概念在 Tier 1 文档里的引用** | 方法论文档用原概念名描述自己 | PDAE_WHITEPAPER.md §5.1 中的 "Scout 角色" |
-| **禁令性表述** | 文本是 prohibitive，语义反向 | "不得跳过 Research Gate"（注：用"跳过"比"绕过"更安全）|
+| **Unit ID strings** | They are unit identifiers, not natural language; CLI argument dispatch depends on them | `scout_m1`, `pm_m1`, `architect_m1` (PDAE) |
+| **Gate keyword strings** | They are contract words that gate tools string-match; output artifacts (FINDINGS.md / CONCLUSION.md) must contain these words to pass the gate | `脏数据`, `速率限制`, `延迟`, `事实`, `推测` (only in output artifact files, not in descriptions) |
+| **Test data constants** | A unit ID appears as a literal string in an assertion | `assert "scout_m1" in out` |
+| **CLI argv** | A command-line invocation, not a description of behavior | `python3 check_unit_gate.py --unit scout_m1` |
+| **References to methodology concepts in Tier 1 documents** | Methodology documents use the original concept names to describe themselves | The "Scout role" in PDAE_WHITEPAPER.md §5.1 |
+| **Prohibitive statements** | The text is prohibitive, the meaning is reversed | "Do not skip the Research Gate" (note: "skip" is safer than "bypass") |
 
 ---
 
-## 5. 新建工件检查清单 / Checklist for New Artifacts
+## 5. Checklist for New Artifacts
 
-新建 skill / agent / role / 测试时，逐项过：
+When creating a new skill / agent / role / test, go through each item:
 
-- [ ] **Skill / agent 目录名**：对照 §3 表
-- [ ] **SKILL.md / agent.md 的 frontmatter `name`**：对照 §3 表
-- [ ] **frontmatter `description`**：检查是否含触发词；该字段每 turn 进 base_instructions，曝光最高
-- [ ] **本工件产出的文件名**：FINDINGS.md / REPORT.md 等（文件名用安全词，内容里的 gate keyword 仍按 §4 例外）
-- [ ] **测试函数名 / 测试文件名**
-- [ ] **顶级文档（README、ENTRYPOINT）里的引用**
-- [ ] 如果是改名既有工件 → 在 §6 加一条记录
+- [ ] **Skill / agent directory name**: check against the §3 table
+- [ ] **The frontmatter `name` of SKILL.md / agent.md**: check against the §3 table
+- [ ] **The frontmatter `description`**: check whether it contains trigger words; this field enters base_instructions every turn and has the highest exposure
+- [ ] **File names of the artifacts this artifact produces**: FINDINGS.md / REPORT.md etc. (use safe words for file names; gate keywords in the content still follow the §4 exceptions)
+- [ ] **Test function names / test file names**
+- [ ] **References in top-level documents (README, ENTRYPOINT)**
+- [ ] If you are renaming an existing artifact → add a record in §6
 
 ---
 
-## 6. 迁移记录 / Migration Log
+## 6. Migration Log
 
-| 日期 | 原 | 新 | 位置 | 备注 |
+| Date | Old | New | Location | Notes |
 |---|---|---|---|---|
-| 2026-05-01 | `scout`（skill 目录） | `discovery` | `~/.agents/skills/` | 旧目录为 0 字节 stub，重命名 + 写规范 SKILL.md |
-| 2026-05-01 | `literature-scout`（PRAE prompt + agent） | `literature-review` | `PRAE/runtime/codex/prompts/`, `PRAE/runtime/claude-code/agents/` | 文献综述 agent；2 文件改名 + frontmatter `name:` 字段 + `prae-bootstrap.md` 安装清单 ×2 处 + `tests/unit/test_prae_bootstrap.py` 断言；10/10 bootstrap 单元测试通过 |
+| 2026-05-01 | `scout` (skill directory) | `discovery` | `~/.agents/skills/` | The old directory was a 0-byte stub; renamed + wrote a conventional SKILL.md |
+| 2026-05-01 | `literature-scout` (PRAE prompt + agent) | `literature-review` | `PRAE/runtime/codex/prompts/`, `PRAE/runtime/claude-code/agents/` | Literature review agent; 2 files renamed + frontmatter `name:` field + `prae-bootstrap.md` install manifest ×2 places + `tests/unit/test_prae_bootstrap.py` assertion; 10/10 bootstrap unit tests passed |
 
 ---
 
-## 7. 已知存量（暂不处理 / Known Backlog）
+## 7. Known Backlog (Not Addressed Yet)
 
-| 项 | 位置 | 处理时机 |
+| Item | Location | When to Address |
 |---|---|---|
-| PRAE 中 5 处 `绕过` | `PRAE_ROLES.md`, `prae-bootstrap.md` 等 | 下次自然修订这些文件时一并改成 `跳过` |
-| PDAE 方法论文档里 `scout / 侦察 / 脏数据` 等 | root `*.md` (×19) | 不动；按 §2 Tier 1 例外保留 |
+| 5 occurrences of `绕过` in PRAE | `PRAE_ROLES.md`, `prae-bootstrap.md`, etc. | Change them all to `跳过` the next time these files are naturally revised |
+| `scout / 侦察 / 脏数据` etc. in PDAE methodology documents | root `*.md` (×19) | Leave untouched; keep them per the §2 Tier 1 exception |
 
 ---
 
-## 修订记录 / Revision Log
+## Revision Log
 
-- 2026-05-01 v1：初稿；基于两个仓库的实际触发词扫描结果起草
+- 2026-05-01 v1: first draft; based on the actual trigger-word scan results from the two repositories

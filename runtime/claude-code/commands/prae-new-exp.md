@@ -1,25 +1,25 @@
 # /prae-new-exp
 
-> **用途**: 为指定轨道新建一个实验，创建 `EXP_NNN.md` 记录和 `EXP_NNN.py` 代码文件
-> **参数**: `<track_id> [--title <实验标题>]` 或 `<track_id> [实验标题]`
-> **前置条件**: 项目已完成 `/prae-init`，且轨道已存在（通过 `/prae-new-track` 创建）
+> **Purpose**: Create a new experiment for a given track, creating an `EXP_NNN.md` record and an `EXP_NNN.py` code file
+> **Arguments**: `<track_id> [--title <experiment_title>]` or `<track_id> [experiment_title]`
+> **Preconditions**: The project has completed `/prae-init`, and the track already exists (created via `/prae-new-track`)
 
-## 执行步骤
+## Execution Steps
 
-### 1. 解析参数
+### 1. Parse arguments
 
 ```bash
-TRACK_ID="${1:?'用法: /prae-new-exp <track_id> [--title <实验标题>]'}"
+TRACK_ID="${1:?'Usage: /prae-new-exp <track_id> [--title <experiment_title>]'}"
 shift || true
-TITLE="实验"
+TITLE="experiment"
 if [ "${1:-}" = "--title" ]; then
-  TITLE="${2:-实验}"
+  TITLE="${2:-experiment}"
 elif [ -n "${1:-}" ]; then
   TITLE="${1}"
 fi
 ```
 
-### 2. 调用正式工具
+### 2. Invoke the formal tool
 
 ```bash
 python3 tools/new_exp.py \

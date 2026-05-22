@@ -23,34 +23,34 @@ PHASE_NAME_TO_NUM = {
 
 PHASE_BRIEF_CONFIG = {
     "phase_01_research": {
-        "goal": "完成研究轨道的首轮实验与证据积累，识别值得进入验证期的 ACTIVE 路线。",
+        "goal": "Complete the first round of experiments and evidence accumulation for research tracks, and identify ACTIVE routes worth entering the validation period.",
         "success": [
-            "每条在场研究轨道至少完成 1 次实验并记录到 TRACK_LOG.md",
-            "至少 1 条研究轨道出现正向信号并进入 ACTIVE",
-            "所有仍 EXPLORING 的轨道形成明确去留建议",
+            "Each research track present completes at least 1 experiment and records it to TRACK_LOG.md",
+            "At least 1 research track shows a positive signal and enters ACTIVE",
+            "All tracks still EXPLORING have a clear keep-or-drop recommendation",
         ],
         "target_state": "ACTIVE / KILLED / MERGED",
-        "milestone": ("首轮实验完成", "待定", "完成第一轮 EXP 记录并沉淀证据摘要"),
+        "milestone": ("First experiment round completed", "TBD", "Complete the first round of EXP records and consolidate the evidence summary"),
     },
     "phase_02_validation": {
-        "goal": "对进入验证期的 ACTIVE 轨道做严格验证，收敛到明确终态并筛出 GRADUATED 候选。",
+        "goal": "Rigorously validate the ACTIVE tracks that entered the validation period, converge to a clear terminal state, and select GRADUATED candidates.",
         "success": [
-            "每条在场轨道完成严格验证实验并补齐证据摘要",
-            "所有在场轨道形成明确终态建议（GRADUATED / KILLED / MERGED）",
-            "至少 1 条轨道满足进入 Phase 3 的 GRADUATED 条件",
+            "Each track present completes rigorous validation experiments and fills in the evidence summary",
+            "All tracks present have a clear terminal-state recommendation (GRADUATED / KILLED / MERGED)",
+            "At least 1 track meets the GRADUATED conditions for entering Phase 3",
         ],
         "target_state": "GRADUATED / KILLED / MERGED",
-        "milestone": ("验证结论收敛", "待定", "完成终态建议并准备 PHASE_GATE.md"),
+        "milestone": ("Validation conclusion converged", "TBD", "Complete the terminal-state recommendation and prepare PHASE_GATE.md"),
     },
     "phase_03_conclusion": {
-        "goal": "汇总项目最终结论，为所有 GRADUATED 轨道登记待 PDAE 路由，并准备项目收尾。",
+        "goal": "Summarize the project's final conclusion, register all GRADUATED tracks for pending PDAE routing, and prepare to wrap up the project.",
         "success": [
-            "所有 GRADUATED 轨道在 PHASE_BRIEF.md 中登记待 PDAE 路由",
-            "项目级 CONCLUSION.md 完成最终结论整理",
-            "所有遗留风险、未决事项和后续工程化动作已留痕",
+            "All GRADUATED tracks are registered for pending PDAE routing in PHASE_BRIEF.md",
+            "The project-level CONCLUSION.md completes the final conclusion writeup",
+            "All remaining risks, open items, and follow-up engineering actions are recorded",
         ],
-        "target_state": "待 PDAE 路由",
-        "milestone": ("项目结论收口", "待定", "生成 CONCLUSION.md 并安排 PDAE 路由"),
+        "target_state": "Pending PDAE routing",
+        "milestone": ("Project conclusion closed out", "TBD", "Generate CONCLUSION.md and arrange PDAE routing"),
     },
 }
 
@@ -62,59 +62,59 @@ def render_phase0_brief(registry: dict, infra_tracks: list[dict]) -> str:
     if infra_tracks:
         track_rows = "\n".join(
             f"| `{track['id']}` | infrastructure | EXPLORING | LOCKED | "
-            f"{track.get('description', '待补充')}；LOCKED 标准：{track.get('lock_criteria', '待补充')} |"
+            f"{track.get('description', 'To be filled in')}; LOCKED criteria: {track.get('lock_criteria', 'To be filled in')} |"
             for track in infra_tracks
         )
     else:
-        track_rows = "| `—` | infrastructure | — | — | 当前无基础设施轨道 |"
+        track_rows = "| `—` | infrastructure | — | — | No infrastructure tracks at present |"
 
     return "\n".join([
-        "# Phase 00_infra 阶段简报",
+        "# Phase 00_infra Brief",
         "",
-        "**阶段**: phase_00_infra",
-        f"**研究轮次**: {cycle_label}",
-        f"**创建日期**: {today}",
-        "**创建者**: AI（分析者角色）",
-        "",
-        "---",
-        "",
-        "## 阶段目标",
-        "",
-        "完成所有基础设施轨道的选型、契约冻结和 PDAE M3 实现，为研究阶段提供稳定底座。",
+        "**Phase**: phase_00_infra",
+        f"**Research Cycle**: {cycle_label}",
+        f"**Created**: {today}",
+        "**Creator**: AI (Analyst role)",
         "",
         "---",
         "",
-        "## 成功标准",
+        "## Phase Goal",
         "",
-        "> 满足以下所有条件时，可以由 AI 生成 PHASE_GATE.md 提请人工批准进入下一阶段。",
-        "",
-        "- [ ] 所有基础设施轨道 state = LOCKED",
-        "- [ ] 每条 LOCKED 轨道产出 contracts.yaml 和 MODULE_SPEC.md",
-        "- [ ] 每条 LOCKED 轨道在 TRACK_LOG.md 留下 PDAE M3 通过记录",
+        "Complete the selection, contract freeze, and PDAE M3 implementation for all infrastructure tracks, providing a stable foundation for the research phase.",
         "",
         "---",
         "",
-        "## 本阶段在场的轨道",
+        "## Success Criteria",
         "",
-        "| 轨道 ID | 类型 | 初始状态 | 阶段目标状态 | 备注 |",
+        "> When all of the following conditions are met, AI may generate PHASE_GATE.md to request human approval to advance to the next phase.",
+        "",
+        "- [ ] All infrastructure tracks state = LOCKED",
+        "- [ ] Each LOCKED track produces contracts.yaml and MODULE_SPEC.md",
+        "- [ ] Each LOCKED track leaves a PDAE M3 pass record in TRACK_LOG.md",
+        "",
+        "---",
+        "",
+        "## Tracks Present in This Phase",
+        "",
+        "| Track ID | Type | Initial State | Phase Target State | Notes |",
         "|---------|------|---------|-------------|------|",
         track_rows,
         "",
         "---",
         "",
-        "## 关键时间节点（可选）",
+        "## Key Time Milestones (Optional)",
         "",
-        "| 里程碑 | 目标日期 | 说明 |",
+        "| Milestone | Target Date | Description |",
         "|--------|---------|------|",
-        "| 基础设施底座冻结 | 待定 | 完成 contracts.yaml、MODULE_SPEC.md 并通过 Phase 0 Gate |",
+        "| Infrastructure foundation frozen | TBD | Complete contracts.yaml, MODULE_SPEC.md and pass the Phase 0 Gate |",
         "",
         "---",
         "",
-        "## 关联文件",
+        "## Related Files",
         "",
-        "- `prae/track_registry.yaml` — 轨道状态总表",
-        "- `prae/phases/phase_00_infra/PHASE_GATE.md` — 本阶段结束时生成",
-        "- `prae/PRAE_INIT.md` — 项目初始化文档",
+        "- `prae/track_registry.yaml` — track state master table",
+        "- `prae/phases/phase_00_infra/PHASE_GATE.md` — generated at the end of this phase",
+        "- `prae/PRAE_INIT.md` — project initialization document",
         "",
     ])
 
@@ -123,15 +123,15 @@ def _build_track_note(track: dict, target_phase: str) -> str:
     notes: list[str] = []
     hypothesis = track.get("hypothesis")
     if hypothesis:
-        notes.append(f"假设={hypothesis}")
+        notes.append(f"hypothesis={hypothesis}")
     depends_on = track.get("depends_on") or []
     if depends_on:
         notes.append(f"depends_on={', '.join(depends_on)}")
     if track.get("evidence_summary"):
         notes.append(str(track["evidence_summary"]))
     if target_phase == "phase_03_conclusion":
-        notes.append("待 PDAE 路由")
-    return "；".join(notes) if notes else "—"
+        notes.append("Pending PDAE routing")
+    return "; ".join(notes) if notes else "—"
 
 
 def render_phase_brief(target_phase: str, registry: dict, selected_tracks: list[dict]) -> str:
@@ -149,53 +149,53 @@ def render_phase_brief(target_phase: str, registry: dict, selected_tracks: list[
         ]
         track_table = "\n".join(track_rows)
     else:
-        track_table = "| `—` | research | — | — | 当前阶段无在场轨道 |"
+        track_table = "| `—` | research | — | — | No tracks present in this phase |"
 
     return "\n".join([
-        f"# Phase {target_phase.replace('phase_', '')} 阶段简报",
+        f"# Phase {target_phase.replace('phase_', '')} Brief",
         "",
-        f"**阶段**: {target_phase}",
-        f"**研究轮次**: {cycle_label}",
-        f"**创建日期**: {today}",
-        "**创建者**: AI（分析者角色）",
+        f"**Phase**: {target_phase}",
+        f"**Research Cycle**: {cycle_label}",
+        f"**Created**: {today}",
+        "**Creator**: AI (Analyst role)",
         "",
         "---",
         "",
-        "## 阶段目标",
+        "## Phase Goal",
         "",
         config["goal"],
         "",
         "---",
         "",
-        "## 成功标准",
+        "## Success Criteria",
         "",
-        "> 满足以下所有条件时，可以由 AI 生成 PHASE_GATE.md 提请人工批准进入下一阶段。",
+        "> When all of the following conditions are met, AI may generate PHASE_GATE.md to request human approval to advance to the next phase.",
         "",
         success_lines,
         "",
         "---",
         "",
-        "## 本阶段在场的轨道",
+        "## Tracks Present in This Phase",
         "",
-        "| 轨道 ID | 类型 | 初始状态 | 阶段目标状态 | 备注 |",
+        "| Track ID | Type | Initial State | Phase Target State | Notes |",
         "|---------|------|---------|-------------|------|",
         track_table,
         "",
         "---",
         "",
-        "## 关键时间节点（可选）",
+        "## Key Time Milestones (Optional)",
         "",
-        "| 里程碑 | 目标日期 | 说明 |",
+        "| Milestone | Target Date | Description |",
         "|--------|---------|------|",
         f"| {milestone_name} | {milestone_date} | {milestone_desc} |",
         "",
         "---",
         "",
-        "## 关联文件",
+        "## Related Files",
         "",
-        "- `prae/track_registry.yaml` — 轨道状态总表",
-        f"- `prae/phases/{target_phase}/PHASE_GATE.md` — 本阶段结束时生成",
-        "- `prae/PRAE_INIT.md` — 项目初始化文档",
+        "- `prae/track_registry.yaml` — track state master table",
+        f"- `prae/phases/{target_phase}/PHASE_GATE.md` — generated at the end of this phase",
+        "- `prae/PRAE_INIT.md` — project initialization document",
         "",
     ])
 
@@ -209,11 +209,11 @@ def _relevant_tracks(registry: dict, from_phase_num: int) -> list[dict]:
 def _build_current_state_section(registry: dict) -> str:
     recorded_phase = get_recorded_phase(registry, "unknown")
     lines = [
-        "## 1. 当前阶段状态",
+        "## 1. Current Phase State",
         "",
-        f"> 来源：`prae/track_registry.yaml`（current_phase: {recorded_phase}）",
+        f"> Source: `prae/track_registry.yaml` (current_phase: {recorded_phase})",
         "",
-        "| 轨道 ID | 类型 | 当前 state | 备注 |",
+        "| Track ID | Type | Current state | Notes |",
         "|---------|------|-----------|------|",
     ]
     for track in registry.get("tracks", []):
@@ -224,7 +224,7 @@ def _build_current_state_section(registry: dict) -> str:
             note_parts.append(f"experiments={track.get('experiments', 0)}")
         if track.get("evidence_summary"):
             note_parts.append(str(track["evidence_summary"]))
-        note = "；".join(note_parts) if note_parts else "—"
+        note = "; ".join(note_parts) if note_parts else "—"
         lines.append(
             f"| `{track['id']}` | {track.get('type', 'unknown')} | {track.get('state', 'unknown')} | {note} |"
         )
@@ -233,7 +233,7 @@ def _build_current_state_section(registry: dict) -> str:
 
 def _build_checklist_section(from_phase_num: int, gate_conditions: dict[str, bool], required_items: dict[int, list[str]]) -> str:
     lines = [
-        "## 2. 门控条件逐项检查",
+        "## 2. Gate Conditions — Item-by-Item Check",
         "",
     ]
     for item in required_items[from_phase_num]:
@@ -252,26 +252,26 @@ def _find_latest_experiment_link(project_dir: Path, current_phase: str, track_id
     if not md_files:
         return ""
     latest = md_files[-1]
-    return f"；关键实验见 [{latest}](tracks/{track_id}/experiments/{latest})"
+    return f"; key experiment see [{latest}](tracks/{track_id}/experiments/{latest})"
 
 
 def _build_evidence_section(project_dir: Path, registry: dict, from_phase_num: int) -> str:
     current_phase = registry.get("current_phase", "")
     lines = [
-        "## 3. 证据摘要",
+        "## 3. Evidence Summary",
         "",
-        "> 每条关键证据 1-2 句，链接到 EXP_NNN.md 或 TRACK_LOG.md。",
+        "> 1-2 sentences per key piece of evidence, linked to EXP_NNN.md or TRACK_LOG.md.",
         "",
     ]
     for track in _relevant_tracks(registry, from_phase_num):
         track_id = track["id"]
-        summary = track.get("evidence_summary") or f"当前 state={track.get('state', 'unknown')}"
+        summary = track.get("evidence_summary") or f"current state={track.get('state', 'unknown')}"
         latest_exp = _find_latest_experiment_link(project_dir, current_phase, track_id)
         lines.append(
-            f"- **`{track_id}`**：{summary}。详见 [TRACK_LOG.md](tracks/{track_id}/TRACK_LOG.md){latest_exp}。"
+            f"- **`{track_id}`**: {summary}. See [TRACK_LOG.md](tracks/{track_id}/TRACK_LOG.md){latest_exp}."
         )
     if len(lines) == 4:
-        lines.append("- 暂无可引用轨道证据。")
+        lines.append("- No referenceable track evidence yet.")
     return "\n".join(lines)
 
 
@@ -281,37 +281,37 @@ def _build_risks_section(evaluation: dict, from_phase_num: int, required_items: 
         if not evaluation["gate_conditions"].get(item, False)
     ]
     lines = [
-        "## 4. 风险与未决项",
+        "## 4. Risks and Open Items",
         "",
-        "> 可能影响下一阶段的风险或尚未解决的疑问。",
+        "> Risks that may affect the next phase, or questions not yet resolved.",
         "",
     ]
     if not unmet_conditions:
-        lines.append("- 无已知阻塞风险。")
+        lines.append("- No known blocking risks.")
         return "\n".join(lines)
 
     for item in unmet_conditions:
-        lines.append(f"- `{item}` 未满足，当前不建议推进。")
+        lines.append(f"- `{item}` not met; advancing is not recommended at this time.")
     return "\n".join(lines)
 
 
 def _build_recommendation_section(evaluation: dict, from_phase_num: int, required_items: dict[int, list[str]]) -> str:
     gate_passed = all(evaluation["gate_conditions"].values())
-    action = "推进" if gate_passed else "暂不推进"
+    action = "Advance" if gate_passed else "Do not advance yet"
     unmet_count = sum(
         1 for item in required_items[from_phase_num]
         if not evaluation["gate_conditions"].get(item, False)
     )
     if gate_passed:
-        reason = "所有阶段门控条件已满足，PHASE_GATE.md 已完成留痕，可提交人工批准。"
+        reason = "All phase gate conditions are met and PHASE_GATE.md is fully recorded; ready to submit for human approval."
     else:
-        reason = f"仍有 {unmet_count} 项门控条件未满足；请先解决第 2 节和第 4 节中的阻塞项。"
+        reason = f"{unmet_count} gate conditions still not met; please resolve the blocking items in Section 2 and Section 4 first."
     return "\n".join([
-        "## 5. 建议",
+        "## 5. Recommendation",
         "",
-        f"**推荐动作**: {action}",
+        f"**Recommended Action**: {action}",
         "",
-        f"**理由**: {reason}",
+        f"**Rationale**: {reason}",
     ])
 
 
@@ -330,7 +330,7 @@ def _single_line(value: str) -> str:
 
 def render_approval_section(fields: dict[str, str]) -> str:
     return "\n".join([
-        "## 6. 待人工批准",
+        "## 6. Pending Human Approval",
         "",
         f"APPROVED: {_single_line(fields.get('APPROVED', PHASE_GATE_APPROVAL_DEFAULTS['APPROVED'])) or PHASE_GATE_APPROVAL_DEFAULTS['APPROVED']}",
         f"APPROVER: {_single_line(fields.get('APPROVER', ''))}",
@@ -344,7 +344,7 @@ def default_approval_section() -> str:
 
 
 def extract_approval_section(existing_content: str) -> str:
-    match = re.search(r"## 6\. 待人工批准\n(.*)\Z", existing_content, re.DOTALL)
+    match = re.search(r"## 6\. Pending Human Approval\n(.*)\Z", existing_content, re.DOTALL)
     if not match:
         return default_approval_section()
 
@@ -370,12 +370,12 @@ def render_phase_gate_content(
     approval_section: str | None = None,
 ) -> str:
     sections = [
-        f"# Phase {from_phase_num} → Phase {to_phase_num} 门控分析",
+        f"# Phase {from_phase_num} → Phase {to_phase_num} Gate Analysis",
         "",
-        f"**研究轮次**: {get_cycle_label(registry)}",
-        f"**生成日期**: {datetime.date.today()}",
-        "**生成者**: AI（分析者角色）",
-        f"**目标阶段**: {target_phase}",
+        f"**Research Cycle**: {get_cycle_label(registry)}",
+        f"**Generated**: {datetime.date.today()}",
+        "**Generated by**: AI (Analyst role)",
+        f"**Target Phase**: {target_phase}",
         "",
         "---",
         "",

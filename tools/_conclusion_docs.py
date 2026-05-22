@@ -14,11 +14,11 @@ FINAL_DECISION_DEFAULTS = {
 }
 FINAL_DECISION_FIELDS = tuple(FINAL_DECISION_DEFAULTS.keys())
 CONCLUSION_SECTIONS = [
-    "## 项目结论",
-    "## 各轨道去向",
-    "## 毕业轨道的 PDAE 项目链接",
-    "## 未解决问题",
-    "## 最终决定",
+    "## Project Conclusion",
+    "## Disposition of Each Track",
+    "## PDAE Project Links for Graduated Tracks",
+    "## Unresolved Issues",
+    "## Final Decision",
 ]
 
 
@@ -32,7 +32,7 @@ def _normalize_decision_value(value: str) -> str:
 
 
 def extract_final_decision_body(content: str) -> str:
-    match = re.search(r"## 最终决定\n(.*)\Z", content, re.DOTALL)
+    match = re.search(r"## Final Decision\n(.*)\Z", content, re.DOTALL)
     return match.group(1).strip("\n") if match else ""
 
 
@@ -65,11 +65,11 @@ def parse_final_decision_fields(final_section: str) -> dict[str, str]:
                 fields["DECISION"] = decision
                 break
 
-    approver_match = re.search(r"\*\*批准人\*\*：\s*(.*)", final_section)
+    approver_match = re.search(r"\*\*Approver\*\*:\s*(.*)", final_section)
     if approver_match:
         fields["APPROVER"] = _single_line(approver_match.group(1))
 
-    date_match = re.search(r"\*\*日期\*\*：\s*(.*)", final_section)
+    date_match = re.search(r"\*\*Date\*\*:\s*(.*)", final_section)
     if date_match:
         fields["APPROVED_AT"] = _single_line(date_match.group(1))
 
@@ -78,9 +78,9 @@ def parse_final_decision_fields(final_section: str) -> dict[str, str]:
 
 def render_final_decision_section(fields: dict[str, str]) -> str:
     return "\n".join([
-        "## 最终决定",
+        "## Final Decision",
         "",
-        "> DECISION 可选值: ARCHIVED / GRADUATED_TO_PDAE / CONTINUE",
+        "> DECISION allowed values: ARCHIVED / GRADUATED_TO_PDAE / CONTINUE",
         "",
         f"APPROVED: {_single_line(fields.get('APPROVED', FINAL_DECISION_DEFAULTS['APPROVED'])) or FINAL_DECISION_DEFAULTS['APPROVED']}",
         f"DECISION: {_single_line(fields.get('DECISION', ''))}",
@@ -99,7 +99,7 @@ def extract_final_decision_section(existing_content: str) -> str:
     if not body:
         return default_final_decision_section()
     if has_structured_final_decision_fields(body):
-        return "## 最终决定\n" + body
+        return "## Final Decision\n" + body
     return render_final_decision_section(parse_final_decision_fields(body))
 
 
@@ -116,33 +116,33 @@ def render_conclusion_document(
     return "\n".join([
         f"# CONCLUSION — {project_name}",
         "",
-        f"**研究轮次**: {cycle_label}",
+        f"**Research Cycle**: {cycle_label}",
         "",
         "---",
         "",
-        "## 项目结论",
+        "## Project Conclusion",
         "",
         project_conclusion,
         "",
         "---",
         "",
-        "## 各轨道去向",
+        "## Disposition of Each Track",
         "",
-        "| 轨道 ID | 最终状态 | 结论摘要 | 备注 |",
+        "| Track ID | Final State | Conclusion Summary | Notes |",
         "|---------|---------|---------|------|",
         track_outcomes_rows,
         "",
         "---",
         "",
-        "## 毕业轨道的 PDAE 项目链接",
+        "## PDAE Project Links for Graduated Tracks",
         "",
-        "| 轨道 ID | PDAE 项目路径 |",
+        "| Track ID | PDAE Project Path |",
         "|---------|----------------|",
         pdae_links_rows,
         "",
         "---",
         "",
-        "## 未解决问题",
+        "## Unresolved Issues",
         "",
         unresolved_issues,
         "",

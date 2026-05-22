@@ -62,7 +62,7 @@ class TestAdvancePhase:
         brief = locked_infra_project / "prae" / "phases" / "phase_01_research" / "PHASE_BRIEF.md"
         assert brief.exists()
         brief_content = brief.read_text(encoding="utf-8")
-        assert "完成研究轨道的首轮实验与证据积累" in brief_content
+        assert "Complete the first round of experiments and evidence accumulation for research tracks" in brief_content
         assert "cycle_1" in brief_content
         assert "research_strategy_momentum" in brief_content
 
@@ -72,7 +72,7 @@ class TestAdvancePhase:
         )
         assert log_path.exists()
         log_content = log_path.read_text(encoding="utf-8")
-        assert "动量因子在A股日频数据上有显著正向收益" in log_content
+        assert "The momentum factor yields significant positive returns on daily-frequency equity data" in log_content
         assert "cycle_1" in log_content
         assert "{{" not in log_content
 
@@ -123,7 +123,7 @@ class TestAdvancePhase:
 
         brief = fake_project / "prae" / "phases" / "phase_03_conclusion" / "PHASE_BRIEF.md"
         content = brief.read_text(encoding="utf-8")
-        assert "待 PDAE 路由" in content
+        assert "Pending PDAE routing" in content
         assert "cycle_1" in content
         assert "research_strategy_momentum" in content
 

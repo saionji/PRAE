@@ -65,16 +65,16 @@ class TestNewTrack:
         assert (fake_project / "src" / "tracks" / TRACK_ID / "impl").is_dir()
 
         content = log_path.read_text(encoding="utf-8")
-        assert "**当前阶段**: phase_01_research" in content
-        assert "**类型**: research" in content
-        assert "动量因子在A股日频数据上有显著正向收益" in content
+        assert "**Current Phase**: phase_01_research" in content
+        assert "**Type**: research" in content
+        assert "The momentum factor yields significant positive returns on daily-frequency equity data" in content
 
     def test_new_track_rejects_research_track_in_phase_0(self, fake_project):
         rc, out = run_tool(str(fake_project), ["--track-id", TRACK_ID])
 
         assert rc == 1, out
         assert out["passed"] is False
-        assert "当前阶段允许创建轨道目录" in out["summary"]
+        assert "Current phase permits create track directory" in out["summary"]
 
     def test_new_track_respects_current_phase_override(self, fake_project):
         set_phase(fake_project, "phase_02_validation")
@@ -99,5 +99,5 @@ class TestNewTrack:
 
         assert rc == 0, out
         assert out["passed"] is True
-        assert "已就绪" in out["summary"]
+        assert "Track ready" in out["summary"]
         assert existing_log.read_text(encoding="utf-8") == before

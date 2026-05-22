@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-lock_infra_track.py — 正式将基础设施轨道从 EXPLORING 推进到 LOCKED
+lock_infra_track.py — Formally advance an infrastructure track from EXPLORING to LOCKED
 
-退出码:
-  0  锁定成功
-  1  锁定条件未满足
-  2  文件缺失、格式错误或参数错误
+Exit codes:
+  0  Lock succeeded
+  1  Lock conditions not met
+  2  Missing file, format error, or argument error
 
-用法:
+Usage:
   python3 tools/lock_infra_track.py \
     --project-dir <path> \
     --track-id <infra_track_id> \
@@ -48,7 +48,7 @@ from update_track_state import (
 
 
 class InfraLockError(RuntimeError):
-    """基础设施锁定输入错误。"""
+    """Infrastructure lock input error."""
 
 def load_registry(project_dir: str) -> dict:
     return _shared_load_registry(project_dir, error_cls=InfraLockError)
@@ -81,12 +81,12 @@ def lock_infra_track(
     checks: list[dict] = []
 
     checks.append(check_item(
-        "当前阶段允许锁定基础设施轨道",
+        "Current phase permits locking an infrastructure track",
         current_phase == "phase_00_infra",
         describe_phase_context(registry),
     ))
     checks.append(check_item(
-        "基础设施轨道状态迁移合法",
+        "Infrastructure track state transition is valid",
         old_state == "EXPLORING",
         f"{old_state} → LOCKED",
     ))
@@ -105,30 +105,30 @@ def lock_infra_track(
     module_spec_path = project_dir / module_spec_rel if module_spec_rel else None
     log_path = track_log_path(project_dir, current_phase, track_id)
 
-    checks.append(check_item("contracts 路径已确定", bool(contracts_rel), str(contracts_rel or "")))
-    checks.append(check_item("MODULE_SPEC 路径已确定", bool(module_spec_rel), str(module_spec_rel or "")))
-    checks.append(check_item("contracts 文件存在", bool(contracts_path and contracts_path.exists()), str(contracts_path or "")))
-    checks.append(check_item("MODULE_SPEC 文件存在", bool(module_spec_path and module_spec_path.exists()), str(module_spec_path or "")))
-    checks.append(check_item("TRACK_LOG.md 存在", log_path.exists(), str(log_path)))
+    checks.append(check_item("contracts path determined", bool(contracts_rel), str(contracts_rel or "")))
+    checks.append(check_item("MODULE_SPEC path determined", bool(module_spec_rel), str(module_spec_rel or "")))
+    checks.append(check_item("contracts file exists", bool(contracts_path and contracts_path.exists()), str(contracts_path or "")))
+    checks.append(check_item("MODULE_SPEC file exists", bool(module_spec_path and module_spec_path.exists()), str(module_spec_path or "")))
+    checks.append(check_item("TRACK_LOG.md exists", log_path.exists(), str(log_path)))
 
     contracts_passed = False
     if contracts_path and contracts_path.exists():
         violations = run_check(contracts_path, [project_dir / "src"])
         contracts_passed = not (violations.has_immutable() or violations.has_critical())
         detail = (
-            f"{contracts_rel} 已通过"
+            f"{contracts_rel} passed"
             if contracts_passed
             else summarize_violations(track_id, violations)
         )
-        checks.append(check_item("Contracts Gate 通过", contracts_passed, detail))
+        checks.append(check_item("Contracts Gate passed", contracts_passed, detail))
     else:
-        checks.append(check_item("Contracts Gate 通过", False, "contracts 文件不存在，无法检查"))
+        checks.append(check_item("Contracts Gate passed", False, "contracts file does not exist, cannot check"))
 
     passed = all(item["passed"] for item in checks)
     if not passed:
         return {
             "passed": False,
-            "summary": f"基础设施轨道锁定失败: {track_id} 不能从 {old_state} 迁移到 LOCKED",
+            "summary": f"Infrastructure track lock failed: {track_id} cannot transition from {old_state} to LOCKED",
             "checks": checks,
             "data": {
                 "track_id": track_id,
@@ -155,12 +155,12 @@ def lock_infra_track(
     log_content = upsert_decision_log_row(log_content, row)
     log_path.write_text(log_content, encoding="utf-8")
 
-    checks.append(check_item("track_registry.yaml 已更新为 LOCKED", True, str(registry_path)))
-    checks.append(check_item("TRACK_LOG.md 已记录 LOCKED 决策", True, str(log_path)))
+    checks.append(check_item("track_registry.yaml updated to LOCKED", True, str(registry_path)))
+    checks.append(check_item("TRACK_LOG.md recorded the LOCKED decision", True, str(log_path)))
 
     return {
         "passed": True,
-        "summary": f"基础设施轨道已锁定: {track_id}",
+        "summary": f"Infrastructure track locked: {track_id}",
         "checks": checks,
         "data": {
             "track_id": track_id,

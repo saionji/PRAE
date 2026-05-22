@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-generate_phase_gate.py — 基于当前项目状态生成 PHASE_GATE.md 草稿
+generate_phase_gate.py — generate a PHASE_GATE.md draft based on the current project state
 
-退出码:
-  0  PHASE_GATE.md 生成成功（无论当前是否推荐推进）
-  2  文件缺失或格式错误
+Exit codes:
+  0  PHASE_GATE.md generated successfully (regardless of whether advancement is currently recommended)
+  2  file missing or format error
 
-用法:
+Usage:
   python3 tools/generate_phase_gate.py --project-dir <path>
 """
 from __future__ import annotations
@@ -48,11 +48,11 @@ def load_registry(project_dir: Path) -> dict:
 def evaluate_phase(project_dir: Path, registry: dict) -> tuple[str, str, int, int, dict]:
     override = get_phase_override(registry)
     if override:
-        error("检测到 current_phase_override 正在生效；常规 PHASE_GATE 生成已暂停，请先完成例外处理并移除 override")
+        error("current_phase_override detected as active; the normal PHASE_GATE generation is suspended, please complete the exception handling and remove the override first")
 
     current_phase = get_recorded_phase(registry, "")
     if current_phase not in PHASE_TRANSITIONS:
-        error(f"当前阶段 {current_phase} 不支持生成 PHASE_GATE.md（可能已在最终阶段）")
+        error(f"current phase {current_phase} does not support generating PHASE_GATE.md (may already be at the final phase)")
     target_phase = PHASE_TRANSITIONS[current_phase]
     from_phase_num = PHASE_NAME_TO_NUM[current_phase]
     to_phase_num = PHASE_NAME_TO_NUM[target_phase]
@@ -64,7 +64,7 @@ def evaluate_phase(project_dir: Path, registry: dict) -> tuple[str, str, int, in
     elif from_phase_num == 2:
         evaluation = _evaluate_phase_2_to_3(str(project_dir), registry)
     else:
-        error(f"不支持的阶段编号: {from_phase_num}")
+        error(f"unsupported phase number: {from_phase_num}")
 
     return current_phase, target_phase, from_phase_num, to_phase_num, evaluation
 
@@ -94,17 +94,17 @@ def render_phase_gate(project_dir: Path) -> dict:
 
     gate_passed = all(evaluation["gate_conditions"].values())
     return {
-        "summary": f"PHASE_GATE.md 已生成（{'推荐推进' if gate_passed else '暂不推进'}）",
+        "summary": f"PHASE_GATE.md generated ({'advancement recommended' if gate_passed else 'do not advance yet'})",
         "checks": [
-            check_item("PHASE_GATE.md 已写入", True, str(gate_path)),
-            check_item("阶段门控已评估", True, evaluation["summary"]),
+            check_item("PHASE_GATE.md written", True, str(gate_path)),
+            check_item("phase gate evaluated", True, evaluation["summary"]),
         ],
         "data": {
             "path": str(gate_path),
             "current_phase": current_phase,
             "target_phase": target_phase,
             "gate_passed": gate_passed,
-            "recommendation": "推进" if gate_passed else "暂不推进",
+            "recommendation": "advance" if gate_passed else "do not advance yet",
             "failed_conditions": [
                 item for item, passed in evaluation["gate_conditions"].items() if not passed
             ],

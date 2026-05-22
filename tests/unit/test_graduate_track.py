@@ -50,7 +50,7 @@ class TestGraduateTrack:
 
         log_path = fake_project / "prae" / "phases" / "phase_03_conclusion" / "tracks" / "research_strategy_momentum" / "TRACK_LOG.md"
         log_content = log_path.read_text(encoding="utf-8")
-        assert "## PDAE 毕业记录" in log_content
+        assert "## PDAE Graduation Record" in log_content
         assert str(pdae_project) in log_content
 
         conclusion = fake_project / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
@@ -91,5 +91,5 @@ class TestGraduateTrack:
         assert out["passed"] is True
 
         log_content = phase3_log.read_text(encoding="utf-8")
-        assert "**研究轮次**: cycle_1" in log_content
-        assert "## PDAE 毕业记录" in log_content
+        assert "**Research Cycle**: cycle_1" in log_content
+        assert "## PDAE Graduation Record" in log_content

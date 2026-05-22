@@ -1,25 +1,25 @@
 # /prae-record-result
 
-> **用途**: 实验跑完后，调用正式工具将结果同步到 `TRACK_LOG.md`；若有状态变更建议，会一并写入待批准 `Decision Log`
-> **参数**: `<track_id> <exp_id>`（例如：`research_strategy_momentum EXP_003`）
-> **前置条件**: 项目已完成 `/prae-init`，且 `EXP_NNN.md` 的 Result 和 Conclusion 已填写
+> **Purpose**: After an experiment finishes, invoke the formal tool to sync the results into `TRACK_LOG.md`; if there is a state-change recommendation, it is also written into a pending-approval `Decision Log`
+> **Arguments**: `<track_id> <exp_id>` (for example: `research_strategy_momentum EXP_003`)
+> **Preconditions**: The project has completed `/prae-init`, and the Result and Conclusion of `EXP_NNN.md` have been filled in
 
-## 执行步骤
+## Execution Steps
 
-### 1. 解析参数并检查初始化
+### 1. Parse arguments and check initialization
 
 ```bash
-TRACK_ID="${1:?'用法: /prae-record-result <track_id> <exp_id>'}"
-EXP_ID="${2:?'用法: /prae-record-result <track_id> <exp_id>'}"
+TRACK_ID="${1:?'Usage: /prae-record-result <track_id> <exp_id>'}"
+EXP_ID="${2:?'Usage: /prae-record-result <track_id> <exp_id>'}"
 
 [ -f "prae/track_registry.yaml" ] || {
-  echo "未找到 prae/track_registry.yaml。项目可能只完成了 bootstrap。"
-  echo "请先填写 prae/PRAE_INIT.md，然后运行 /prae-init。"
+  echo "prae/track_registry.yaml not found. The project may have only completed bootstrap."
+  echo "Fill in prae/PRAE_INIT.md first, then run /prae-init."
   exit 1
 }
 ```
 
-### 2. 调用正式工具
+### 2. Invoke the formal tool
 
 ```bash
 python3 tools/record_result.py \
@@ -28,7 +28,7 @@ python3 tools/record_result.py \
   --exp-id "${EXP_ID}"
 ```
 
-### 3. 读取状态建议
+### 3. Read the state recommendation
 
 ```bash
 PHASE=$(python3 -c "import yaml; r=yaml.safe_load(open('prae/track_registry.yaml')); print(r['current_phase'])")
@@ -38,25 +38,25 @@ python3 -c "
 import re
 with open('${EXP_MD}', encoding='utf-8') as f:
     content = f.read()
-m = re.search(r'建议 state 变更[:：]\\s*(.+)', content)
+m = re.search(r'Recommended state change[:：]\\s*(.+)', content)
 if m:
-    print(f'状态变更建议: {m.group(1).strip()}')
-    print('record_result.py 已将该建议写入 TRACK_LOG.md 的待批准 Decision Log')
-    print('如果你同意这个建议，我将继续调用 /prae-update-track-state，')
-    print('由正式工具更新 track_registry.yaml 和 TRACK_LOG.md 的 Decision Log。')
+    print(f'State change recommendation: {m.group(1).strip()}')
+    print('record_result.py has written this recommendation into the pending-approval Decision Log in TRACK_LOG.md')
+    print('If you agree with this recommendation, I will proceed to invoke /prae-update-track-state,')
+    print('so the formal tool updates track_registry.yaml and the Decision Log in TRACK_LOG.md.')
 else:
-    print('未发现明确状态变更建议；本次仅完成结果记录。')
+    print('No explicit state-change recommendation found; only the result record was completed this time.')
 "
 ```
 
-### 4. 仅在用户确认后，调用正式状态工具
+### 4. Only after the user confirms, invoke the formal state tool
 
 ```bash
 SUGGESTED_STATE=$(python3 -c "
 import re
 with open('${EXP_MD}', encoding='utf-8') as f:
     c = f.read()
-m = re.search(r'建议 state 变更[:：]\\s*(.+)', c)
+m = re.search(r'Recommended state change[:：]\\s*(.+)', c)
 text = m.group(1).strip() if m else ''
 if '→' in text:
     print(text.split('→')[-1].strip())
@@ -70,7 +70,7 @@ python3 tools/update_track_state.py \
   --project-dir . \
   --track-id "${TRACK_ID}" \
   --to-state "${SUGGESTED_STATE}" \
-  --approver "<人工批准人>" \
-  --reason "${EXP_ID} 结果已人工批准" \
+  --approver "<human approver>" \
+  --reason "${EXP_ID} result has been approved by a human" \
   --exp-id "${EXP_ID}"
 ```

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-add_track.py — 正式向 track_registry.yaml 注册新轨道
+add_track.py — formally register a new track in track_registry.yaml
 
-退出码:
-  0  注册成功
-  1  注册条件未满足
-  2  文件缺失、格式错误或参数错误
+Exit codes:
+  0  registered successfully
+  1  registration conditions not met
+  2  file missing, format error, or argument error
 
-用法:
+Usage:
   python3 tools/add_track.py \
     --project-dir <path> \
     --track-id <track_id> \
@@ -32,7 +32,7 @@ from _registry import get_current_phase, load_registry as _shared_load_registry,
 
 
 class AddTrackError(RuntimeError):
-    """轨道注册输入错误。"""
+    """Track registration input error."""
 
 
 def load_registry(project_dir: str) -> dict:
@@ -46,12 +46,12 @@ def validate_track_id(track_id: str, track_type: str) -> None:
     }
     prefix = prefixes[track_type]
     if not track_id.startswith(prefix):
-        raise AddTrackError(f"track_id={track_id} 与 type={track_type} 不匹配（应以 {prefix} 开头）")
+        raise AddTrackError(f"track_id={track_id} does not match type={track_type} (should start with {prefix})")
 
 
 def ensure_unique_track_id(registry: dict, track_id: str) -> None:
     if any(track.get("id") == track_id for track in registry.get("tracks", [])):
-        raise AddTrackError(f"轨道 {track_id} 已存在于 track_registry.yaml 中")
+        raise AddTrackError(f"track {track_id} already exists in track_registry.yaml")
 
 
 def default_src(track_id: str, track_type: str) -> str:
@@ -65,7 +65,7 @@ def build_track_entry(args: argparse.Namespace) -> dict:
 
     if args.type == "research":
         if not args.hypothesis:
-            raise AddTrackError("research 轨道必须提供 --hypothesis")
+            raise AddTrackError("a research track must provide --hypothesis")
         return {
             "id": args.track_id,
             "type": "research",
@@ -84,7 +84,7 @@ def build_track_entry(args: argparse.Namespace) -> dict:
         "type": "infrastructure",
         "state": "EXPLORING",
         "src": src,
-        "description": args.description or "待补充",
+        "description": args.description or "to be filled in",
         "module_spec": None,
         "contracts": None,
         "locked_at": None,
@@ -103,14 +103,14 @@ def add_track(project_dir: Path, args: argparse.Namespace) -> dict:
     registry_path = save_registry(project_dir, registry)
 
     checks = [
-        check_item("track_id 与类型匹配", True, f"{args.track_id} / {args.type}"),
-        check_item("轨道 ID 尚未占用", True, args.track_id),
-        check_item("track_registry.yaml 已追加新轨道", True, str(registry_path)),
+        check_item("track_id matches the type", True, f"{args.track_id} / {args.type}"),
+        check_item("track ID is not yet taken", True, args.track_id),
+        check_item("track_registry.yaml has appended the new track", True, str(registry_path)),
     ]
 
     return {
         "passed": True,
-        "summary": f"已注册新轨道: {args.track_id}",
+        "summary": f"new track registered: {args.track_id}",
         "checks": checks,
         "data": {
             "track_id": args.track_id,

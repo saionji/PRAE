@@ -45,35 +45,35 @@ def prepare_research_project(base: Path, *, complete: bool, phase: str = PHASE) 
     exp_dir.mkdir(parents=True, exist_ok=True)
     (track_dir / "TRACK_LOG.md").write_text(
         "\n".join([
-            f"# 轨道日志：{TRACK_ID}",
+            f"# Track Log: {TRACK_ID}",
             "",
-            f"**轨道 ID**: `{TRACK_ID}`",
-            "**类型**: research",
-            f"**当前阶段**: {phase}",
-            "**研究轮次**: cycle_1",
-            "**创建日期**: 2026-04-20",
+            f"**Track ID**: `{TRACK_ID}`",
+            "**Type**: research",
+            f"**Current Phase**: {phase}",
+            "**Research Cycle**: cycle_1",
+            "**Created**: 2026-04-20",
             "",
             "---",
             "",
             "## State",
             "",
-            "**当前状态**: EXPLORING",
-            "**依赖的轨道**:",
+            "**Current State**: EXPLORING",
+            "**Depends On**:",
             "- `infra_data_v1`",
             "",
             "---",
             "",
             "## Experiments",
             "",
-            "| EXP ID | 日期 | 目的 | 结论 | 链接 |",
+            "| EXP ID | Date | Purpose | Conclusion | Link |",
             "|--------|------|------|------|------|",
-            "| — | — | 尚无实验记录 | — | — |",
+            "| — | — | No experiment records yet | — | — |",
             "",
             "---",
             "",
             "## Evidence Summary",
             "",
-            "- 暂无实验记录。",
+            "- No experiment records yet.",
             "",
             "---",
             "",
@@ -83,28 +83,28 @@ def prepare_research_project(base: Path, *, complete: bool, phase: str = PHASE) 
 
     if complete:
         exp_md = (
-            "# EXP_001\n\n## Goal\n测试动量因子\n\n## Method\n"
-            "- 数据源: infra_data_v1.load_daily_bars\n"
-            "- 时间窗: 2020-01-01 至 2023-12-31\n"
-            "- 随机种子: seed=42\n"
-            "- 对照组: 无对照组\n\n"
+            "# EXP_001\n\n## Goal\nTest the momentum factor\n\n## Method\n"
+            "- Data Source: infra_data_v1.load_daily_bars\n"
+            "- Time Window: 2020-01-01 to 2023-12-31\n"
+            "- Random Seed: seed=42\n"
+            "- Control Group: no control group\n\n"
             "## Preflight Check\n"
-            "**最小冒烟检查**: 30s 内跑完，并打印 sharpe\n\n"
-            "**输出契约**: stdout 至少包含 sharpe\n\n"
-            "**本次不做**: 不抽象到 impl/\n\n"
-            "## Expected Signal\n夏普>1.0\n\n"
-            "## Result\n夏普: 1.2\n\n"
-            "## Conclusion\n**结论**: 支持假设\n\n建议 state 变更: EXPLORING → ACTIVE\n"
+            "**Minimal Smoke Check**: finishes within 30s and prints sharpe\n\n"
+            "**Output Contract**: stdout contains at least sharpe\n\n"
+            "**Out of Scope This Time**: do not abstract into impl/\n\n"
+            "## Expected Signal\nSharpe > 1.0\n\n"
+            "## Result\nSharpe: 1.2\n\n"
+            "## Conclusion\n**Conclusion**: supports the hypothesis\n\nRecommended state change: EXPLORING → ACTIVE\n"
         )
     else:
         exp_md = (
-            "# EXP_001\n\n## Goal\n测试动量因子\n\n## Method\n"
-            "- 数据源: infra_data_v1.load_daily_bars\n"
-            "- 时间窗: 2020-01-01 至 2023-12-31\n"
-            "- 随机种子: seed=42\n"
-            "- 对照组: 无对照组\n\n"
-            "## Result\n{{粘贴实验关键输出}}\n\n"
-            "## Conclusion\n支持 / 证伪 / 部分支持 假设\n"
+            "# EXP_001\n\n## Goal\nTest the momentum factor\n\n## Method\n"
+            "- Data Source: infra_data_v1.load_daily_bars\n"
+            "- Time Window: 2020-01-01 to 2023-12-31\n"
+            "- Random Seed: seed=42\n"
+            "- Control Group: no control group\n\n"
+            "## Result\n{{paste key experiment output}}\n\n"
+            "## Conclusion\nsupports / falsifies / partially supports the hypothesis\n"
         )
     (exp_dir / "EXP_001.md").write_text(exp_md, encoding="utf-8")
 
@@ -133,15 +133,15 @@ class TestRecordResult:
 
         registry = yaml.safe_load((fake_project / "prae" / "track_registry.yaml").read_text(encoding="utf-8"))
         track = next(t for t in registry["tracks"] if t["id"] == TRACK_ID)
-        assert track["evidence_summary"] == "EXP_001: 支持假设"
+        assert track["evidence_summary"] == "EXP_001: supports the hypothesis"
 
         log_content = (
             fake_project / "prae" / "phases" / PHASE / "tracks" / TRACK_ID / "TRACK_LOG.md"
         ).read_text(encoding="utf-8")
         assert "| EXP_001 |" in log_content
-        assert "结论：支持假设。" in log_content
-        assert "建议 EXPLORING → ACTIVE" in log_content
-        assert "EXP_001 结果已记录，待人工批准" in log_content
+        assert "Conclusion: supports the hypothesis." in log_content
+        assert "Recommend EXPLORING → ACTIVE" in log_content
+        assert "EXP_001 result recorded, pending human approval" in log_content
 
     def test_record_result_rejects_incomplete_exp(self, fake_project):
         prepare_research_project(fake_project, complete=False)
@@ -168,7 +168,7 @@ class TestRecordResult:
 
         assert rc == 1, out
         assert out["passed"] is False
-        assert "当前阶段允许记录实验结果" in out["summary"]
+        assert "Current phase permits record experiment result" in out["summary"]
 
     def test_record_result_respects_current_phase_override(self, fake_project):
         prepare_research_project(fake_project, complete=True, phase=PHASE)
@@ -194,4 +194,4 @@ class TestRecordResult:
         assert rc == 1, out
         assert out["passed"] is False
         assert out["data"]["recorded"] is False
-        assert "当前阶段允许记录实验结果" in out["summary"]
+        assert "Current phase permits record experiment result" in out["summary"]

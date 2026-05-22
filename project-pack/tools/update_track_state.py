@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-update_track_state.py — 研究轨道状态变更的正式工具
+update_track_state.py — Official tool for changing the state of a research track
 
-退出码:
-  0  状态更新成功
-  1  状态迁移条件未满足
-  2  文件缺失、格式错误或参数错误
+Exit codes:
+  0  State update succeeded
+  1  State transition conditions not met
+  2  Missing file, format error, or argument error
 
-用法:
+Usage:
   python3 tools/update_track_state.py \
     --project-dir <path> \
     --track-id <research_track_id> \
@@ -55,7 +55,7 @@ EXECUTABLE_PHASES = {"phase_01_research", "phase_02_validation"}
 
 
 class TrackStateError(RuntimeError):
-    """状态变更输入错误。"""
+    """State change input error."""
 
 
 def load_registry(project_dir: str) -> dict:
@@ -68,7 +68,7 @@ def parse_approved_at(value: str | None) -> str:
     try:
         return str(datetime.date.fromisoformat(value))
     except ValueError as exc:
-        raise TrackStateError(f"approved_at 格式错误: {value}（期望 YYYY-MM-DD）") from exc
+        raise TrackStateError(f"approved_at format error: {value} (expected YYYY-MM-DD)") from exc
 
 
 def sanitize_table_cell(value: str) -> str:
@@ -93,16 +93,16 @@ def exp_md_path(project_dir: Path, current_phase: str, track_id: str, exp_id: st
 
 
 def ensure_state_section(content: str, track: dict, new_state: str) -> str:
-    state_line = f"**当前状态**: {new_state}"
-    if re.search(r"\*\*当前状态\*\*: .+", content):
-        return re.sub(r"\*\*当前状态\*\*: .+", state_line, content, count=1)
+    state_line = f"**Current State**: {new_state}"
+    if re.search(r"\*\*Current State\*\*: .+", content):
+        return re.sub(r"\*\*Current State\*\*: .+", state_line, content, count=1)
 
     depends_lines = render_depends_lines(track.get("depends_on"))
     state_block = "\n".join([
         "## State",
         "",
         state_line,
-        "**依赖的轨道**:",
+        "**Depends On**:",
         depends_lines,
         "",
         "---",
@@ -119,7 +119,7 @@ def ensure_state_section(content: str, track: dict, new_state: str) -> str:
 def update_track_log(project_dir: Path, current_phase: str, track: dict, new_state: str, row: str) -> Path:
     log_path = track_log_path(project_dir, current_phase, track["id"])
     if not log_path.exists():
-        raise TrackStateError(f"未找到 TRACK_LOG.md: {log_path}")
+        raise TrackStateError(f"TRACK_LOG.md not found: {log_path}")
 
     content = log_path.read_text(encoding="utf-8")
     content = ensure_state_section(content, track, new_state)
@@ -131,23 +131,23 @@ def update_track_log(project_dir: Path, current_phase: str, track: dict, new_sta
 def validate_dependencies_locked(registry: dict, track: dict) -> dict:
     depends_on = track.get("depends_on") or []
     if not depends_on:
-        return check_item("依赖的基础设施轨道已 LOCKED", True, "无 depends_on 依赖")
+        return check_item("Depended-on infrastructure tracks are LOCKED", True, "no depends_on dependencies")
 
     infra_by_id = {item["id"]: item for item in registry.get("tracks", [])}
     failures: list[str] = []
     for dep_id in depends_on:
         dep = infra_by_id.get(dep_id)
         if dep is None:
-            failures.append(f"{dep_id}: 未在 track_registry.yaml 中声明")
+            failures.append(f"{dep_id}: not declared in track_registry.yaml")
             continue
         if dep.get("type") != "infrastructure":
-            failures.append(f"{dep_id}: type={dep.get('type')}（应为 infrastructure）")
+            failures.append(f"{dep_id}: type={dep.get('type')} (should be infrastructure)")
             continue
         if dep.get("state") != "LOCKED":
-            failures.append(f"{dep_id}: state={dep.get('state')}（应为 LOCKED）")
+            failures.append(f"{dep_id}: state={dep.get('state')} (should be LOCKED)")
 
     return check_item(
-        "依赖的基础设施轨道已 LOCKED",
+        "Depended-on infrastructure tracks are LOCKED",
         not failures,
         "; ".join(failures[:3]) + ("..." if len(failures) > 3 else ""),
     )
@@ -155,25 +155,25 @@ def validate_dependencies_locked(registry: dict, track: dict) -> dict:
 
 def validate_merged_target(registry: dict, track_id: str, merged_into: str | None) -> dict:
     if not merged_into:
-        return check_item("MERGED 时提供 merged_into", False, "缺少 --merged-into <target_track_id>")
+        return check_item("merged_into provided when MERGED", False, "missing --merged-into <target_track_id>")
 
     if merged_into == track_id:
-        return check_item("MERGED 目标轨道合法", False, "merged_into 不能指向自己")
+        return check_item("MERGED target track is valid", False, "merged_into cannot point to itself")
 
     target = next((t for t in registry.get("tracks", []) if t.get("id") == merged_into), None)
     if target is None:
-        return check_item("MERGED 目标轨道合法", False, f"{merged_into} 不存在")
+        return check_item("MERGED target track is valid", False, f"{merged_into} does not exist")
     if target.get("type") != "research":
-        return check_item("MERGED 目标轨道合法", False, f"{merged_into} type={target.get('type')}")
-    return check_item("MERGED 目标轨道合法", True, merged_into)
+        return check_item("MERGED target track is valid", False, f"{merged_into} type={target.get('type')}")
+    return check_item("MERGED target track is valid", True, merged_into)
 
 
 def validate_exp_reference(project_dir: Path, current_phase: str, track_id: str, exp_id: str | None) -> dict:
     if not exp_id:
-        return check_item("EXP 引用检查（未提供 exp_id，跳过）", True, "未提供 --exp-id")
+        return check_item("EXP reference check (no exp_id provided, skipped)", True, "--exp-id not provided")
 
     exp_path = exp_md_path(project_dir, current_phase, track_id, exp_id)
-    return check_item("EXP 引用存在", exp_path.exists(), str(exp_path))
+    return check_item("EXP reference exists", exp_path.exists(), str(exp_path))
 
 
 def evaluate_transition(
@@ -202,12 +202,12 @@ def evaluate_transition(
     old_state = track.get("state", "")
     checks: list[dict] = []
     checks.append(check_item(
-        "当前阶段允许更新研究轨道状态",
+        "Current phase permits updating research track state",
         current_phase in EXECUTABLE_PHASES,
         describe_phase_context(registry),
     ))
     checks.append(check_item(
-        "状态迁移合法",
+        "State transition is valid",
         to_state in ALLOWED_TRANSITIONS.get(old_state, set()),
         f"{old_state} → {to_state}",
     ))
@@ -229,7 +229,7 @@ def evaluate_transition(
     if not passed:
         return {
             "passed": False,
-            "summary": f"研究轨道状态更新失败: {track_id} 不能从 {old_state} 迁移到 {to_state}",
+            "summary": f"Research track state update failed: {track_id} cannot transition from {old_state} to {to_state}",
             "checks": checks,
             "data": {
                 "track_id": track_id,
@@ -264,12 +264,12 @@ def evaluate_transition(
     registry_path = save_registry(project_dir, registry)
     log_path = update_track_log(project_dir, current_phase, track, to_state, row)
 
-    checks.append(check_item("track_registry.yaml 已更新", True, str(registry_path)))
-    checks.append(check_item("TRACK_LOG.md 已记录状态变更", True, str(log_path)))
+    checks.append(check_item("track_registry.yaml updated", True, str(registry_path)))
+    checks.append(check_item("TRACK_LOG.md recorded the state change", True, str(log_path)))
 
     return {
         "passed": True,
-        "summary": f"研究轨道状态已更新: {track_id} {old_state} → {to_state}",
+        "summary": f"Research track state updated: {track_id} {old_state} → {to_state}",
         "checks": checks,
         "data": {
             "track_id": track_id,

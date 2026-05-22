@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-generate_conclusion.py — 生成或刷新 Phase 3 的 CONCLUSION.md
+generate_conclusion.py — generate or refresh the Phase 3 CONCLUSION.md
 
-退出码:
-  0  CONCLUSION.md 生成成功
-  2  文件缺失、格式错误或当前不在 Phase 3
+Exit codes:
+  0  CONCLUSION.md generated successfully
+  2  file missing, format error, or not currently in Phase 3
 
-用法:
+Usage:
   python3 tools/generate_conclusion.py --project-dir <path>
 """
 from __future__ import annotations
@@ -78,7 +78,7 @@ def summarize_track(project_dir: Path, track: dict) -> str:
     log_path = find_track_log(project_dir, track)
     if log_path and log_path.exists():
         content = log_path.read_text(encoding="utf-8")
-        for title in ("## 最终结论", "## Evidence Summary", "## 选型目标"):
+        for title in ("## Final Conclusion", "## Evidence Summary", "## Selection Goal"):
             section = extract_section(content, title)
             if section:
                 for line in section.splitlines():
@@ -88,15 +88,15 @@ def summarize_track(project_dir: Path, track: dict) -> str:
 
     state = track.get("state", "unknown")
     if track.get("type") == "infrastructure":
-        return "基础设施轨道已完成底座留痕，可为研究轨道稳定提供能力。"
+        return "The infrastructure track has completed its foundational record and can stably provide capabilities to research tracks."
     if state == "GRADUATED":
-        return "验证期结论支持该轨道进入 PDAE 工程化。"
+        return "The validation-phase conclusion supports promoting this track to PDAE engineering."
     if state == "MERGED":
-        merged_into = track.get("merged_into") or "待补充"
-        return f"该轨道已并入 {merged_into}，不再独立推进。"
+        merged_into = track.get("merged_into") or "to be filled in"
+        return f"This track has been merged into {merged_into} and is no longer advanced independently."
     if state == "KILLED":
-        return "证据不足或被证伪，轨道已终止。"
-    return f"当前状态为 {state}。"
+        return "Evidence insufficient or hypothesis disproved; the track has been terminated."
+    return f"Current state is {state}."
 
 
 def build_project_conclusion(registry: dict) -> str:
@@ -107,12 +107,12 @@ def build_project_conclusion(registry: dict) -> str:
 
     if graduated:
         return (
-            f"本项目已完成研究收敛，共识别出 {len(graduated)} 条可工程化轨道；"
-            f"{len(killed)} 条轨道终止，{len(merged)} 条轨道被并入其他方向。"
+            f"This project has completed research convergence, identifying {len(graduated)} engineerable tracks; "
+            f"{len(killed)} tracks were terminated and {len(merged)} tracks were merged into other directions."
         )
     return (
-        "本项目已完成研究收尾，但当前没有形成可直接工程化的 GRADUATED 轨道；"
-        "如无新增证据，建议人工评估是否归档。"
+        "This project has completed research wrap-up, but currently has no GRADUATED track ready for direct engineering; "
+        "absent new evidence, a human should assess whether to archive it."
     )
 
 
@@ -124,7 +124,7 @@ def build_track_outcomes(project_dir: Path, registry: dict) -> str:
             note_parts.append(f"merged_into={track['merged_into']}")
         if track.get("pdae_project"):
             note_parts.append(f"PDAE={track['pdae_project']}")
-        note = "；".join(note_parts) if note_parts else "—"
+        note = "; ".join(note_parts) if note_parts else "—"
         rows.append(
             f"| `{track['id']}` | {track.get('state', 'unknown')} | {summarize_track(project_dir, track)} | {note} |"
         )
@@ -134,11 +134,11 @@ def build_track_outcomes(project_dir: Path, registry: dict) -> str:
 def build_pdae_links(registry: dict) -> str:
     graduated = [t for t in registry.get("tracks", []) if t.get("type") == "research" and t.get("state") == "GRADUATED"]
     if not graduated:
-        return "| `—` | `当前无 GRADUATED 轨道` |"
+        return "| `—` | `no GRADUATED track currently` |"
 
     rows = []
     for track in graduated:
-        path = track.get("pdae_project") or "待填写"
+        path = track.get("pdae_project") or "to be filled in"
         rows.append(f"| `{track['id']}` | `{path}` |")
     return "\n".join(rows)
 
@@ -148,17 +148,17 @@ def build_unresolved_issues(registry: dict) -> str:
     graduated = [t for t in registry.get("tracks", []) if t.get("type") == "research" and t.get("state") == "GRADUATED"]
     for track in graduated:
         if not track.get("pdae_project"):
-            issues.append(f"- `{track['id']}` 已 GRADUATED，但尚未登记 PDAE 项目路径。")
+            issues.append(f"- `{track['id']}` is GRADUATED but has no registered PDAE project path yet.")
 
     non_terminal = [
         t["id"] for t in registry.get("tracks", [])
         if t.get("type") == "research" and t.get("state") not in {"KILLED", "MERGED", "GRADUATED"}
     ]
     if non_terminal:
-        issues.append(f"- 仍有研究轨道未进入终态：{', '.join(non_terminal)}。")
+        issues.append(f"- Some research tracks have not reached a terminal state: {', '.join(non_terminal)}.")
 
     if not issues:
-        issues.append("- 无显著未决问题。")
+        issues.append("- No significant open issues.")
     return "\n".join(issues)
 
 
@@ -178,7 +178,7 @@ def write_conclusion(project_dir: Path) -> dict:
     registry = load_registry(project_dir)
     current_phase = get_recorded_phase(registry, "")
     if current_phase != "phase_03_conclusion":
-        raise ConclusionError(f"当前阶段为 {current_phase}，只有 phase_03_conclusion 可以生成 CONCLUSION.md")
+        raise ConclusionError(f"Current phase is {current_phase}; only phase_03_conclusion can generate CONCLUSION.md")
 
     conclusion_path = project_dir / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
     conclusion_path.parent.mkdir(parents=True, exist_ok=True)
@@ -196,10 +196,10 @@ def write_conclusion(project_dir: Path) -> dict:
         if t.get("type") == "research" and t.get("state") == "GRADUATED" and t.get("pdae_project")
     ]
     return {
-        "summary": "CONCLUSION.md 已生成",
+        "summary": "CONCLUSION.md generated",
         "checks": [
-            check_item("CONCLUSION.md 已写入", True, str(conclusion_path)),
-            check_item("当前阶段为 phase_03_conclusion", True),
+            check_item("CONCLUSION.md written", True, str(conclusion_path)),
+            check_item("Current phase is phase_03_conclusion", True),
         ],
         "data": {
             "path": str(conclusion_path),

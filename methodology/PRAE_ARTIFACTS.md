@@ -57,10 +57,10 @@ The table below lists them in reading order. Detailed specifications follow in l
 - **When created**: During project startup, filled in only once
 - **Update rule**: In principle, do not change it. If you discover mid-project that a component classification is wrong, append a record to the `CHANGE_LOG` section; do not delete the original content
 - **Main fields (required)**:
-  - `## 问题陈述` (Problem Statement): what the research aims to solve and what the success criteria are
-  - `## 组件分类 → 基础设施轨道` (Component Classification → Infrastructure Tracks): a table (track ID / description / dependencies)
-  - `## 组件分类 → 研究轨道` (Component Classification → Research Tracks): a table (track ID / hypothesis / infrastructure depended on)
-  - `## Phase 0 成功标准` (Phase 0 Success Criteria): the concrete criteria for judging that all infrastructure is LOCKED
+  - `## Problem Statement`: what the research aims to solve and what the success criteria are
+  - `## Component Classification → Infrastructure Tracks`: a table (track ID / description / dependencies)
+  - `## Component Classification → Research Tracks`: a table (track ID / hypothesis / infrastructure depended on)
+  - `## Phase 0 Success Criteria`: the concrete criteria for judging that all infrastructure is LOCKED
 - **Relations**:
   - All track IDs must be synchronized and registered in `track_registry.yaml`
   - The `hypothesis` of each research track must be consistent with the later `TRACK_LOG.md`
@@ -133,10 +133,10 @@ If the project is judged by a human at `Phase 3` with `DECISION: CONTINUE`, the 
 - **When created**: When creating this phase's directory immediately after the previous phase's PHASE_GATE is approved
 - **Update rule**: Minor adjustments are allowed within a phase (for example, adding a research track), but the overall goal of the phase cannot be changed
 - **Main fields**:
-  - `## 阶段目标` (Phase Goal)
-  - `## 成功标准` (Success Criteria) (corresponding to the exit gate)
-  - `## 本阶段在场的轨道` (Tracks Present in This Phase)
-  - `## 关键时间节点` (Key Time Milestones) (optional)
+  - `## Phase Goal`
+  - `## Success Criteria` (corresponding to the exit gate)
+  - `## Tracks Present in This Phase`
+  - `## Key Time Milestones` (optional)
 - **Relations**: Points to the PHASE_GATE.md of the phase it belongs to (left empty until it is generated)
 
 ### 2.5 `prae/phases/phase_NN_{name}/PHASE_GATE.md`
@@ -146,7 +146,7 @@ If the project is judged by a human at `Phase 3` with `DECISION: CONTINUE`, the 
 - **When created**: When you believe you can enter the next phase, generated proactively by the AI (or triggered by `/prae-advance-phase`)
 - **Update rule**: The filename is fixed as `PHASE_GATE.md`. When regenerating, you may overwrite the same file, but you should preserve the human-filled approval fields in Section 6; after approval, if you want to actually advance the phase, you must invoke the official tool — filling in `APPROVED` alone does not take effect
 - **Main fields** (6 sections, see PRAE_PHASE_GATES.md § 2):
-  - `**研究轮次**: cycle_N` (Research Cycle)
+  - `**Research Cycle**: cycle_N`
   1. Current phase status
   2. Item-by-item check of gate conditions
   3. Evidence summary
@@ -166,15 +166,15 @@ If the project is judged by a human at `Phase 3` with `DECISION: CONTINUE`, the 
 - **Path rule**: The **only** correct path for `TRACK_LOG.md` is `prae/phases/phase_NN_*/tracks/{track_id}/TRACK_LOG.md`. It is a methodology artifact, located under the `prae/` directory tree, **not under `src/`**.
 - **Update rule**: Append an entry for every experiment and every state change; research-track state changes should be synchronized here via `update_track_state.py` / `prae update-track-state`; do not delete history
 - **Main fields**:
-  - `**研究轮次**: cycle_N` (Research Cycle) (must be consistent with `track_registry.yaml.current_cycle`)
-  - `## Hypothesis` (research track) / `## 选型目标` (Selection Goal) (infrastructure track)
+  - `**Research Cycle**: cycle_N` (must be consistent with `track_registry.yaml.current_cycle`)
+  - `## Hypothesis` (research track) / `## Selection Goal` (infrastructure track)
   - `## State` + `## Depends On`
   - `## Experiments` (a table: EXP_ID / date / purpose / conclusion / link to the corresponding EXP_NNN.md)
   - `## Evidence Summary` (append a paragraph after each experiment)
   - `## Decision Log` (state-change records: when it changed from EXPLORING to ACTIVE, who proposed it, who approved it)
 - **Relations**:
   - References the experiment records `prae/phases/phase_NN_*/tracks/{track_id}/experiments/EXP_NNN.md` under the same track
-  - `**研究轮次**` must match the current cycle; after `CONTINUE`, the new cycle's `TRACK_LOG.md` is recreated in the new phase directory, and the old cycle's history remains in `prae/history/cycle_N/phases/`
+  - `**Research Cycle**` must match the current cycle; after `CONTINUE`, the new cycle's `TRACK_LOG.md` is recreated in the new phase directory, and the old cycle's history remains in `prae/history/cycle_N/phases/`
   - Referenced upward by `PHASE_GATE.md`
 
 ### 2.7 `prae/phases/phase_NN_*/tracks/{track_id}/experiments/EXP_NNN.md`
@@ -202,11 +202,11 @@ If the project is judged by a human at `Phase 3` with `DECISION: CONTINUE`, the 
 - **When created**: Phase 3
 - **Update rule**: May be revised multiple times until a human decides to archive / graduate
 - **Main fields**:
-  - `## 项目结论` (Project Conclusion)
-  - `## 各轨道去向` (Disposition of Each Track)
-  - `## 毕业轨道的 PDAE 项目链接` (PDAE Project Links for Graduated Tracks)
-  - `## 未解决问题` (Unresolved Issues)
-  - `## 最终决定` (Final Decision)
+  - `## Project Conclusion`
+  - `## Disposition of Each Track`
+  - `## PDAE Project Links for Graduated Tracks`
+  - `## Unresolved Issues`
+  - `## Final Decision`
   - `APPROVED: <pending | yes | no>`
   - `DECISION: <ARCHIVED | GRADUATED_TO_PDAE | CONTINUE>`
   - `APPROVER: <user name or identifier>`

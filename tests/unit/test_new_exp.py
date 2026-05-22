@@ -72,7 +72,7 @@ class TestNewExp:
 
         rc, out = run_tool(
             str(fake_project),
-            ["--track-id", TRACK_ID, "--title", "首个动量实验"],
+            ["--track-id", TRACK_ID, "--title", "First Momentum Experiment"],
         )
 
         assert rc == 0, out
@@ -88,11 +88,11 @@ class TestNewExp:
 
         md_content = exp_md.read_text(encoding="utf-8")
         py_content = exp_py.read_text(encoding="utf-8")
-        assert "# EXP_001：首个动量实验" in md_content
-        assert "**状态**: 进行中" in md_content
+        assert "# EXP_001: First Momentum Experiment" in md_content
+        assert "**State**: In Progress" in md_content
         assert "{{NNN}}" not in md_content
-        assert "EXP_001: 首个动量实验" in py_content
-        assert "此文件不能被其他代码 import" in py_content
+        assert "EXP_001: First Momentum Experiment" in py_content
+        assert "This file must not be imported by other code" in py_content
 
         registry = yaml.safe_load((fake_project / "prae" / "track_registry.yaml").read_text(encoding="utf-8"))
         track = next(t for t in registry["tracks"] if t["id"] == TRACK_ID)
@@ -104,12 +104,12 @@ class TestNewExp:
 
         rc, out = run_tool(
             str(fake_project),
-            ["--track-id", TRACK_ID, "--title", "不应创建"],
+            ["--track-id", TRACK_ID, "--title", "Should Not Create"],
         )
 
         assert rc == 1, out
         assert out["passed"] is False
-        assert "当前阶段允许创建实验" in out["summary"]
+        assert "Current phase permits create experiment" in out["summary"]
 
     def test_new_exp_respects_current_phase_override(self, fake_project):
         prepare_templates(fake_project)
@@ -119,10 +119,10 @@ class TestNewExp:
 
         rc, out = run_tool(
             str(fake_project),
-            ["--track-id", TRACK_ID, "--title", "不应创建"],
+            ["--track-id", TRACK_ID, "--title", "Should Not Create"],
         )
 
         assert rc == 1, out
         assert out["passed"] is False
         assert out["data"]["current_phase"] == "phase_00_infra"
-        assert "当前阶段允许创建实验" in out["summary"]
+        assert "Current phase permits create experiment" in out["summary"]

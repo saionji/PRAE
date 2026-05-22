@@ -1,47 +1,47 @@
 # Codex Start Prompt
 
-把下面整段直接发给 Codex 会话即可：
+Send the entire block below directly to a Codex session:
 
 ```text
-这是一个 PRAE 环境。先读仓库根目录的 LLM_ENTRYPOINT.md，并严格按其中的文件读取顺序建立上下文。
-标准入口定义：
-- `LLM_ENTRYPOINT.md`：模型上下文入口
-- `prae bootstrap`：项目安装入口
-- `prae init`：项目状态初始化入口
+This is a PRAE environment. First read LLM_ENTRYPOINT.md in the repository root, and build your context strictly following the file reading order it specifies.
+Standard entry-point definitions:
+- `LLM_ENTRYPOINT.md`: model context entry point
+- `prae bootstrap`: project installation entry point
+- `prae init`: project state initialization entry point
 
-先判断你当前是在：
-1. PRAE 框架仓库本身
-2. 某个使用了 PRAE 的研究项目
+First determine whether you are currently in:
+1. The PRAE framework repository itself
+2. A research project that uses PRAE
 
-如果你在 PRAE 框架仓库里：
-- 先读 README.md
-- 再读 methodology/PRAE_QUICKSTART.md、methodology/PRAE_CORE_MODEL.md、methodology/PRAE_ROLES.md
-- 然后只读与你当前任务直接相关的 tools/、runtime/、tests/
+If you are in the PRAE framework repository:
+- First read README.md
+- Then read methodology/PRAE_QUICKSTART.md, methodology/PRAE_CORE_MODEL.md, methodology/PRAE_ROLES.md
+- Then read only the tools/, runtime/, tests/ that are directly relevant to your current task
 
-如果你在某个使用 PRAE 的研究项目里：
-- 先读 AGENTS.md 或 CLAUDE.md
-- 再读 prae/PRAE_INIT.md、prae/track_registry.yaml、当前 phase 的 PHASE_BRIEF.md、目标轨道 TRACK_LOG.md、最近的 EXP_NNN.md
-- 如果 prae/track_registry.yaml 不存在，说明项目可能只完成了 bootstrap、尚未 init；先提示我完成 init，不要假设项目已经初始化
-- 如果 current_phase=phase_00_infra，说明项目仍在基础设施锁定期；先完成 Phase 0，不要直接创建研究轨道实验
+If you are in a research project that uses PRAE:
+- First read AGENTS.md or CLAUDE.md
+- Then read prae/PRAE_INIT.md, prae/track_registry.yaml, the current phase's PHASE_BRIEF.md, the target track's TRACK_LOG.md, and the most recent EXP_NNN.md
+- If prae/track_registry.yaml does not exist, the project has likely only completed bootstrap and has not been initialized yet; first prompt me to complete init, and do not assume the project is already initialized
+- If current_phase=phase_00_infra, the project is still in the infrastructure lock period; first complete Phase 0, and do not directly create research-track experiments
 
-严格遵守以下规则：
-- 不跳过任何 gate
-- 不手工修改研究轨道的 state
-- 不手工把基础设施轨道改成 LOCKED；必须走 tools/lock_infra_track.py 或 prae lock-infra
-- 研究轨道状态变更必须走 tools/update_track_state.py 或 prae update-track-state
-- 研究轨道不能 EXPLORING → KILLED 直接终止
-- ACTIVE 轨道进入终态前必须通过 Research Gate
-- LOCKED 基础设施不可直接修改；有新需求就开 v2
-- 实验编码采用轻量 PDAE 顺序：先设计、先定义 Preflight Check、再实现、再验收
+Strictly follow these rules:
+- Do not skip any gate
+- Do not manually modify a research track's state
+- Do not manually set an infrastructure track to LOCKED; you must use tools/lock_infra_track.py or prae lock-infra
+- Research-track state changes must go through tools/update_track_state.py or prae update-track-state
+- A research track cannot terminate directly from EXPLORING to KILLED
+- An ACTIVE track must pass the Research Gate before entering a terminal state
+- LOCKED infrastructure cannot be modified directly; open a v2 for new requirements
+- Experiment coding follows the lightweight PDAE sequence: design first, define the Preflight Check first, then implement, then verify
 
-建立上下文后，先用 3 段输出：
-1. 你判断当前属于哪种场景
-2. 你已经读取了哪些关键文件
-3. 当前最合理的下一步动作
+After building your context, first produce 3 sections of output:
+1. Which scenario you judge the current situation to be
+2. Which key files you have already read
+3. The most reasonable next action right now
 
-如果我要你直接执行，请优先使用项目内已有的正式入口：
+If I ask you to execute directly, prefer the formal entry points already present in the project:
 - Codex CLI: prae add-track / new-track / new-exp / record-result / lock-infra / update-track-state / advance-phase / finalize / reopen
-- 正式工具: python3 tools/*.py
+- Formal tools: python3 tools/*.py
 
-除非我明确要求，否则不要跳过方法论文档直接改代码。
+Unless I explicitly request it, do not skip the methodology documents and modify code directly.
 ```

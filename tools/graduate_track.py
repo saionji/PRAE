@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-graduate_track.py — 记录单条 GRADUATED 轨道的 PDAE 毕业信息
+graduate_track.py — record PDAE graduation info for a single GRADUATED track
 
-退出码:
-  0  记录成功
-  1  前置条件不满足
-  2  文件缺失或格式错误
+Exit codes:
+  0  recorded successfully
+  1  preconditions not met
+  2  file missing or format error
 
-用法:
+Usage:
   python3 tools/graduate_track.py --project-dir <path> --track-id <id> --pdae-project-path <path>
 """
 from __future__ import annotations
@@ -60,7 +60,7 @@ def ensure_phase3_track_log(project_dir: Path, track: dict) -> Path:
             track,
             "phase_03_conclusion",
             cycle_label=cycle_label,
-            created_reason="结论阶段补建轨道日志",
+            created_reason="track log backfilled during the conclusion phase",
         ),
         encoding="utf-8",
     )
@@ -70,17 +70,17 @@ def ensure_phase3_track_log(project_dir: Path, track: dict) -> Path:
 def upsert_pdae_record(log_path: Path, pdae_project_path: str, transfer_status: str) -> None:
     today = str(datetime.date.today())
     section = "\n".join([
-        "## PDAE 毕业记录",
+        "## PDAE Graduation Record",
         "",
-        f"**毕业日期**: {today}",
-        f"**PDAE 项目路径**: {pdae_project_path}",
-        f"**移交状态**: {transfer_status}",
+        f"**Graduation Date**: {today}",
+        f"**PDAE Project Path**: {pdae_project_path}",
+        f"**Handoff Status**: {transfer_status}",
     ])
 
     content = log_path.read_text(encoding="utf-8") if log_path.exists() else ""
-    if "## PDAE 毕业记录" in content:
+    if "## PDAE Graduation Record" in content:
         updated = re.sub(
-            r"\n## PDAE 毕业记录\n.*?(?=\n## |\Z)",
+            r"\n## PDAE Graduation Record\n.*?(?=\n## |\Z)",
             "\n" + section + "\n",
             content,
             flags=re.DOTALL,
@@ -98,15 +98,15 @@ def graduate_track(project_dir: Path, track_id: str, pdae_project_path: str, tra
     registry = load_registry(project_dir)
     current_phase = get_current_phase(registry, default="")
     if current_phase != "phase_03_conclusion":
-        raise GraduateTrackError(f"当前阶段为 {current_phase}，必须是 phase_03_conclusion")
+        raise GraduateTrackError(f"current phase is {current_phase}, must be phase_03_conclusion")
 
     pdae_path = Path(pdae_project_path)
     if not pdae_path.exists():
-        raise GraduateTrackError(f"PDAE 项目路径不存在: {pdae_path}")
+        raise GraduateTrackError(f"PDAE project path does not exist: {pdae_path}")
 
     track = require_track(registry, track_id, error_cls=GraduateTrackError, expected_type="research")
     if track.get("state") != "GRADUATED":
-        raise GraduateTrackError(f"轨道 {track_id} 当前 state={track.get('state')}，必须为 GRADUATED")
+        raise GraduateTrackError(f"track {track_id} currently state={track.get('state')}, must be GRADUATED")
 
     log_path = ensure_phase3_track_log(project_dir, track)
     upsert_pdae_record(log_path, str(pdae_path), transfer_status)
@@ -124,17 +124,17 @@ def graduate_track(project_dir: Path, track_id: str, pdae_project_path: str, tra
         conclusion_payload = None
 
     checks = [
-        check_item("轨道为 GRADUATED 且位于 phase_03_conclusion", True, track_id),
-        check_item("PDAE 项目路径存在", True, str(pdae_path)),
-        check_item("TRACK_LOG.md 已记录 PDAE 毕业信息", True, str(log_path)),
-        check_item("track_registry.yaml 已登记 pdae_project", True, str(registry_path)),
+        check_item("track is GRADUATED and in phase_03_conclusion", True, track_id),
+        check_item("PDAE project path exists", True, str(pdae_path)),
+        check_item("TRACK_LOG.md has recorded PDAE graduation info", True, str(log_path)),
+        check_item("track_registry.yaml has registered pdae_project", True, str(registry_path)),
     ]
     if conclusion_payload is not None:
-        checks.append(check_item("CONCLUSION.md 已刷新", True, conclusion_payload["data"]["path"]))
+        checks.append(check_item("CONCLUSION.md refreshed", True, conclusion_payload["data"]["path"]))
 
     return {
         "passed": True,
-        "summary": f"轨道 {track_id} 已登记到 PDAE",
+        "summary": f"track {track_id} registered to PDAE",
         "checks": checks,
         "data": {
             "track_id": track_id,

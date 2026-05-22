@@ -1,22 +1,22 @@
 # /prae-advance-phase
 
-> **用途**: 检查当前阶段门控条件；首次调用生成 PHASE_GATE.md，已批准时直接推进
-> **参数**: 无（读取 track_registry.yaml 自动确定目标阶段）
-> **前置条件**: 项目已完成 /prae-init，且你认为当前阶段的目标已达成，或用户要求检查是否可以推进
+> **Purpose**: Check the current phase's gate conditions; the first invocation generates PHASE_GATE.md, and once approved it advances directly
+> **Arguments**: none (reads track_registry.yaml to determine the target phase automatically)
+> **Precondition**: the project has completed /prae-init, and you believe the current phase's goal has been met, or the user asks to check whether advancing is possible
 
-## 重要提示
+## Important Note
 
-若当前阶段已存在 `APPROVED: yes` 的 `PHASE_GATE.md`，此命令应直接验证并推进，不要重生 gate。
-只有在当前 gate 尚未生成或尚未批准时，才进入“生成并等待批准”的路径。
+If the current phase already has a `PHASE_GATE.md` with `APPROVED: yes`, this command should verify and advance directly — do not regenerate the gate.
+Only enter the "generate and wait for approval" path when the current gate has not yet been generated or not yet approved.
 
-## 执行步骤
+## Execution Steps
 
-### 1. 读取当前状态
+### 1. Read the Current State
 
 ```bash
 [ -f "prae/track_registry.yaml" ] || {
-  echo "未找到 prae/track_registry.yaml。项目可能只完成了 bootstrap。"
-  echo "请先填写 prae/PRAE_INIT.md，然后运行 /prae-init。"
+  echo "prae/track_registry.yaml not found. The project may have only completed bootstrap."
+  echo "Fill in prae/PRAE_INIT.md first, then run /prae-init."
   exit 1
 }
 
@@ -25,7 +25,7 @@ import yaml
 r = yaml.safe_load(open('prae/track_registry.yaml'))
 override = r.get('current_phase_override')
 if override:
-    print(f'检测到 current_phase_override={override}；常规阶段推进已暂停，请先完成例外处理并移除 override')
+    print(f'Detected current_phase_override={override}; regular phase advancement is suspended. Handle the exception first and remove the override.')
     exit(1)
 current = r['current_phase']
 phase_map = {
@@ -35,85 +35,85 @@ phase_map = {
 }
 target = phase_map.get(current, None)
 if target is None:
-    print(f'当前已在最终阶段: {current}，无需推进')
+    print(f'Already at the final phase: {current}; nothing to advance.')
     exit(0)
 print(f'current={current}')
 print(f'target={target}')
 "
 ```
 
-### 2. 若当前阶段已存在 APPROVED: yes 的 PHASE_GATE.md，则直接推进
+### 2. If the Current Phase Already Has a PHASE_GATE.md with APPROVED: yes, Advance Directly
 
 ```bash
 python3 tools/check_phase_gate.py --project-dir . --check-approved && \
 python3 tools/advance_phase.py --project-dir .
 ```
 
-若以上命令通过，到此结束；不要再重生成 `PHASE_GATE.md`。
-若 `--check-approved` 失败，说明 gate 尚未批准或尚未生成，继续下面的生成流程。
+If the commands above succeed, stop here; do not regenerate `PHASE_GATE.md`.
+If `--check-approved` fails, the gate has not yet been approved or generated — continue with the generation flow below.
 
-### 3. 生成 PHASE_GATE.md 草稿
+### 3. Generate the PHASE_GATE.md Draft
 
 ```bash
 python3 tools/generate_phase_gate.py --project-dir .
 ```
 
-### 4. 展示检查结果
+### 4. Present the Check Results
 
-读取工具 JSON 输出并向用户展示：
+Read the tool's JSON output and present it to the user:
 
 ```
-阶段门控分析完成
+Phase gate analysis complete
 
-当前阶段: {current_phase}
-目标阶段: {target_phase}
+Current Phase: {current_phase}
+Target Phase: {target_phase}
 
-门控条件:
-  [x] 条件1（已满足）
-  [ ] 条件2（未满足）
+Gate Conditions:
+  [x] Condition 1 (met)
+  [ ] Condition 2 (not met)
 
-推荐动作: 推进 / 暂不推进
-理由: ...
+Recommended Action: advance / do not advance yet
+Rationale: ...
 
-PHASE_GATE.md 已创建: {path}
+PHASE_GATE.md has been created: {path}
 
 ---
-请在 PHASE_GATE.md 第 6 节填写:
-  APPROVED: yes  （推进）或  APPROVED: no  （驳回）
-  APPROVER: {你的名字}
-  APPROVED_AT: {日期}
-  COMMENT: {可选说明}
+In section 6 of PHASE_GATE.md, please fill in:
+  APPROVED: yes  (advance)  or  APPROVED: no  (reject)
+  APPROVER: {your name}
+  APPROVED_AT: {date}
+  COMMENT: {optional note}
 
-填写完成后，告诉我"已批准"，我将执行后续动作。
+Once filled in, tell me "approved" and I will execute the follow-up actions.
 ```
 
-然后运行一次：
+Then run once:
 
 ```bash
 python3 tools/check_phase_gate.py --project-dir .
 ```
 
-确认生成文档与当前门控状态一致。
+Confirm that the generated document is consistent with the current gate state.
 
-### 5. 等待批准信号
+### 5. Wait for the Approval Signal
 
-等用户在 PHASE_GATE.md 填写 `APPROVED: yes` 并告知后，再次调用：
+After the user fills in `APPROVED: yes` in PHASE_GATE.md and notifies you, invoke again:
 
 ```bash
 /prae-advance-phase
 ```
 
-或直接执行：
+Or run directly:
 
 ```bash
 python3 tools/check_phase_gate.py --project-dir . --check-approved
 ```
 
-再次调用 `/prae-advance-phase` 时，应先检查已批准 gate，并直接推进；不要重生成 `PHASE_GATE.md`。
+When `/prae-advance-phase` is invoked again, it should check the approved gate first and advance directly; do not regenerate `PHASE_GATE.md`.
 
-### 6. 批准后的后续动作
+### 6. Follow-Up Actions After Approval
 
-当检测到 `APPROVED: yes` 后，按 `methodology/PRAE_PHASE_GATES.md` 对应章节执行：
+Once `APPROVED: yes` is detected, execute per the corresponding section of `methodology/PRAE_PHASE_GATES.md`:
 
 ```bash
 python3 tools/advance_phase.py --project-dir .

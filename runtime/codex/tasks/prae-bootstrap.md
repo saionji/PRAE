@@ -1,25 +1,25 @@
 # Task: prae-bootstrap
 
-> 在当前研究项目中部署 PRAE 框架（Codex 版本）
-> 调用方式: `prae bootstrap` 或 `codex exec --task path/to/prae-bootstrap.md`
+> Deploy the PRAE framework into the current research project (Codex version)
+> Invocation: `prae bootstrap` or `codex exec --task path/to/prae-bootstrap.md`
 
-这是 **项目安装入口 task**，不是模型上下文入口。
-项目安装完成后，模型应先从项目内 `AGENTS.md` / `CLAUDE.md` 建立上下文；项目状态初始化则由后续 `prae init` 完成。
+This is the **project-install entry task**, not the model-context entry.
+Once the project install is complete, the model should first build context from the project's `AGENTS.md` / `CLAUDE.md`; project state initialization is done later by `prae init`.
 
-## 步骤
+## Steps
 
-### 1. 检测 PRAE 仓库位置
+### 1. Detect the PRAE repository location
 
 ```bash
 PRAE_ROOT=""
 for p in ${PRAE_HOME} ~/prae ~/PRAE; do
   [ -f "$p/runtime/abstract/PRAE_INIT.template.md" ] && PRAE_ROOT="$p" && break
 done
-[ -z "$PRAE_ROOT" ] && echo "错误: 未找到 PRAE 仓库，设置环境变量 PRAE_ROOT 后重试" && exit 1
-echo "PRAE 仓库: $PRAE_ROOT"
+[ -z "$PRAE_ROOT" ] && echo "Error: PRAE repository not found, set the PRAE_ROOT environment variable and retry" && exit 1
+echo "PRAE repository: $PRAE_ROOT"
 ```
 
-### 2. 检测客户端类型
+### 2. Detect the client type
 
 ```bash
 if [ -d ".claude" ] || [ -f "CLAUDE.md" ]; then
@@ -27,14 +27,14 @@ if [ -d ".claude" ] || [ -f "CLAUDE.md" ]; then
 elif [ -f "AGENTS.md" ]; then
   CLIENT="codex"
 else
-  echo "未检测到 .claude/ 或 AGENTS.md"
-  echo "请创建 AGENTS.md（Codex 项目）或 .claude/（Claude Code 项目）后重试"
+  echo "No .claude/ or AGENTS.md detected"
+  echo "Create AGENTS.md (for a Codex project) or .claude/ (for a Claude Code project) and retry"
   exit 1
 fi
-echo "客户端类型: $CLIENT"
+echo "Client type: $CLIENT"
 ```
 
-### 3. 运行 bootstrap 脚本
+### 3. Run the bootstrap script
 
 ```bash
 python3 "${PRAE_ROOT}/tools/prae_bootstrap.py" \
@@ -42,25 +42,25 @@ python3 "${PRAE_ROOT}/tools/prae_bootstrap.py" \
   --client "${CLIENT}"
 ```
 
-### 4. 检查 PDAE
+### 4. Check for PDAE
 
 ```bash
 if ls ${PDAE_HOME}/tools/check_contracts.py &>/dev/null; then
-  echo "PDAE 已检测到"
+  echo "PDAE detected"
 else
-  echo "注意: PDAE 未安装。基础设施轨道工程化和契约检查依赖 PDAE。"
-  echo "如需安装，请参考 PDAE 仓库的部署说明。"
+  echo "Note: PDAE is not installed. Infrastructure-track engineering and contract checks depend on PDAE."
+  echo "To install it, see the deployment instructions in the PDAE repository."
 fi
 ```
 
-### 6. 输出总结
+### 6. Print the summary
 
 ```bash
 echo ""
-echo "PRAE 部署完成"
-echo "已创建: prae/templates/, prae/PRAE_INIT.md（模板）"
+echo "PRAE deployment complete"
+echo "Created: prae/templates/, prae/PRAE_INIT.md (template)"
 echo ""
-echo "下一步:"
-echo "  1. 填写 prae/PRAE_INIT.md（问题陈述和组件分类）"
-echo "  2. 运行: prae init（生成 track_registry.yaml 和 Phase 0 工件）"
+echo "Next steps:"
+echo "  1. Fill in prae/PRAE_INIT.md (problem statement and component classification)"
+echo "  2. Run: prae init (generates track_registry.yaml and Phase 0 artifacts)"
 ```

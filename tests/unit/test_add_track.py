@@ -34,7 +34,7 @@ class TestAddTrack:
             [
                 "--track-id", "research_strategy_reversal",
                 "--type", "research",
-                "--hypothesis", "反转因子在A股ETF上有效",
+                "--hypothesis", "The reversal factor works on A-share ETFs",
                 "--depends-on", "infra_data_v1",
             ],
         )
@@ -55,7 +55,7 @@ class TestAddTrack:
             [
                 "--track-id", "infra_feature_v2",
                 "--type", "infrastructure",
-                "--description", "新特征管道",
+                "--description", "New feature pipeline",
             ],
         )
 
@@ -63,7 +63,7 @@ class TestAddTrack:
         registry = yaml.safe_load((fake_project / "prae" / "track_registry.yaml").read_text(encoding="utf-8"))
         track = next(t for t in registry["tracks"] if t["id"] == "infra_feature_v2")
         assert track["src"] == "src/infra_feature_v2/"
-        assert track["description"] == "新特征管道"
+        assert track["description"] == "New feature pipeline"
 
     def test_add_track_rejects_prefix_type_mismatch(self, fake_project):
         rc, out = run_tool(
@@ -71,9 +71,9 @@ class TestAddTrack:
             [
                 "--track-id", "infra_feature_v2",
                 "--type", "research",
-                "--hypothesis", "无效",
+                "--hypothesis", "invalid",
             ],
         )
 
         assert rc == 2, out
-        assert "与 type=research 不匹配" in out["error"]
+        assert "does not match type=research" in out["error"]

@@ -88,7 +88,7 @@ class TestCheckConclusion:
         path = fake_project / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
-            "# CONCLUSION — fake-research\n\n## 项目结论\n\nok\n\n## 各轨道去向\n\n| 轨道 ID | 最终状态 | 结论摘要 | 备注 |\n|---------|---------|---------|------|\n| `research_strategy_momentum` | GRADUATED | ok | — |\n\n## 毕业轨道的 PDAE 项目链接\n\n| 轨道 ID | PDAE 项目路径 |\n|---------|----------------|\n| `research_strategy_momentum` | `待填写` |\n\n## 未解决问题\n\n- none\n\n## 最终决定\n\n**APPROVED**: yes\n\n**决定**（人工填写）：\n\n```\nGRADUATED_TO_PDAE\n```\n\n**批准人**：saionji\n**日期**：2026-04-20\n",
+            "# CONCLUSION — fake-research\n\n## Project Conclusion\n\nok\n\n## Disposition of Each Track\n\n| Track ID | Final State | Conclusion Summary | Notes |\n|---------|---------|---------|------|\n| `research_strategy_momentum` | GRADUATED | ok | — |\n\n## PDAE Project Links for Graduated Tracks\n\n| Track ID | PDAE Project Path |\n|---------|----------------|\n| `research_strategy_momentum` | `to be filled` |\n\n## Unresolved Issues\n\n- none\n\n## Final Decision\n\n**APPROVED**: yes\n\n**Decision** (filled in manually):\n\n```\nGRADUATED_TO_PDAE\n```\n\n**Approver**: saionji\n**Date**: 2026-04-20\n",
             encoding="utf-8",
         )
 

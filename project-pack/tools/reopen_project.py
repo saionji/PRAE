@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-reopen_project.py — 根据已批准的 CONTINUE 决定将项目重开到 Phase 1
+reopen_project.py — reopen the project to Phase 1 based on an approved CONTINUE decision
 
-退出码:
-  0  重开成功
-  1  CONTINUE 决定尚未满足执行条件
-  2  文件缺失或格式错误
+Exit codes:
+  0  reopened successfully
+  1  the CONTINUE decision does not yet meet the execution conditions
+  2  file missing or format error
 
-用法:
+Usage:
   python3 tools/reopen_project.py --project-dir <path>
 """
 from __future__ import annotations
@@ -74,24 +74,24 @@ def reopen_project(project_dir: Path) -> dict:
 
     approved_yes = evaluation["data"]["approved"] == "yes"
     decision_continue = evaluation["data"]["decision"] == "CONTINUE"
-    checks.append(check_item("CONCLUSION 已 APPROVED: yes", approved_yes, f"当前值={evaluation['data']['approved']}"))
-    checks.append(check_item("DECISION: CONTINUE", decision_continue, f"当前值={evaluation['data']['decision']}"))
+    checks.append(check_item("CONCLUSION is APPROVED: yes", approved_yes, f"current value={evaluation['data']['approved']}"))
+    checks.append(check_item("DECISION: CONTINUE", decision_continue, f"current value={evaluation['data']['decision']}"))
 
     if not evaluation["passed"] or not approved_yes or not decision_continue:
         return {
             "passed": False,
-            "summary": "项目重开失败：CONCLUSION.md 尚未满足 CONTINUE 执行条件",
+            "summary": "project reopen failed: CONCLUSION.md does not yet meet the CONTINUE execution conditions",
             "checks": checks,
             "data": {"reopened": False, **evaluation["data"]},
         }
 
     registry = load_registry(project_dir)
     current_phase = get_recorded_phase(registry, "")
-    checks.append(check_item("当前阶段为 phase_03_conclusion", current_phase == "phase_03_conclusion", current_phase))
+    checks.append(check_item("current phase is phase_03_conclusion", current_phase == "phase_03_conclusion", current_phase))
     if current_phase != "phase_03_conclusion":
         return {
             "passed": False,
-            "summary": f"项目重开失败：当前阶段为 {current_phase}",
+            "summary": f"project reopen failed: current phase is {current_phase}",
             "checks": checks,
             "data": {"reopened": False, **evaluation["data"]},
         }
@@ -100,8 +100,8 @@ def reopen_project(project_dir: Path) -> dict:
     archived_dirs = archive_cycle_phases(project_dir, current_cycle)
     for phase_name in ARCHIVE_PHASE_DIRS:
         archived = next((path for path in archived_dirs if path.name == phase_name), None)
-        detail = str(archived) if archived else "原目录不存在，跳过"
-        checks.append(check_item(f"归档 {phase_name}", True, detail))
+        detail = str(archived) if archived else "source directory does not exist, skipped"
+        checks.append(check_item(f"archive {phase_name}", True, detail))
 
     today = str(datetime.date.today())
     registry["current_cycle"] = current_cycle + 1
@@ -115,15 +115,15 @@ def reopen_project(project_dir: Path) -> dict:
     registry.pop("archived_at", None)
 
     registry_path = save_registry(project_dir, registry)
-    checks.append(check_item("track_registry.yaml 已切回 phase_01_research", True, str(registry_path)))
-    checks.append(check_item("current_cycle 已递增", True, f"{current_cycle} -> {registry['current_cycle']}"))
+    checks.append(check_item("track_registry.yaml switched back to phase_01_research", True, str(registry_path)))
+    checks.append(check_item("current_cycle incremented", True, f"{current_cycle} -> {registry['current_cycle']}"))
 
     brief_path = write_reopen_phase_brief(project_dir, registry)
-    checks.append(check_item("新的 Phase 1 PHASE_BRIEF.md 已生成", True, str(brief_path)))
+    checks.append(check_item("new Phase 1 PHASE_BRIEF.md generated", True, str(brief_path)))
 
     return {
         "passed": True,
-        "summary": "项目已根据 CONTINUE 决定重开到 Phase 1",
+        "summary": "project reopened to Phase 1 based on the CONTINUE decision",
         "checks": checks,
         "data": {
             **evaluation["data"],

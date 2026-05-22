@@ -1,36 +1,36 @@
 # Task: prae-init
 
-> 初始化 PRAE 研究项目（读 PRAE_INIT.md → 生成 track_registry.yaml → 创建 Phase 0 工件）
-> 调用方式: `prae init` 或 `codex exec --task path/to/prae-init.md`
-> 前置条件: 已运行 prae bootstrap，prae/PRAE_INIT.md 已填写完整
+> Initialize a PRAE research project (read PRAE_INIT.md → generate track_registry.yaml → create Phase 0 artifacts)
+> Invocation: `prae init` or `codex exec --task path/to/prae-init.md`
+> Prerequisites: `prae bootstrap` has been run, and prae/PRAE_INIT.md is fully filled in
 
-这是 **项目状态初始化入口 task**。
-它不负责把 PRAE 装进项目；那一步是 `prae bootstrap`。它也不是模型上下文入口；模型上下文应先从项目内 `AGENTS.md` / `CLAUDE.md` 建立。
+This is the **project-state initialization entry task**.
+It is not responsible for installing PRAE into the project; that step is `prae bootstrap`. It is also not the model-context entry; model context should first be built from the project's `AGENTS.md` / `CLAUDE.md`.
 
-## 步骤
+## Steps
 
-### 1. 验证 PRAE_INIT.md
+### 1. Verify PRAE_INIT.md
 
 ```bash
-[ -f "prae/PRAE_INIT.md" ] || { echo "错误: prae/PRAE_INIT.md 不存在，请先运行 prae bootstrap"; exit 1; }
+[ -f "prae/PRAE_INIT.md" ] || { echo "Error: prae/PRAE_INIT.md does not exist, run prae bootstrap first"; exit 1; }
 
 python3 -c "
 with open('prae/PRAE_INIT.md') as f:
     content = f.read()
 issues = []
-if '{{研究项目试图解决的核心问题}}' in content:
-    issues.append('问题陈述未填写')
+if '{{the core problem the research project tries to solve}}' in content:
+    issues.append('Problem Statement not filled in')
 if '{{track_id}}' in content or content.count('infra_') == 0:
-    issues.append('基础设施轨道未填写')
+    issues.append('Infrastructure tracks not filled in')
 if issues:
-    print('PRAE_INIT.md 不完整:')
+    print('PRAE_INIT.md is incomplete:')
     for i in issues: print(f'  - {i}')
     exit(1)
-print('PRAE_INIT.md 验证通过')
+print('PRAE_INIT.md validation passed')
 "
 ```
 
-### 2. 调用初始化工具
+### 2. Invoke the initialization tool
 
 ```bash
 PROJECT_NAME="${1:-$(basename $(pwd))}"
@@ -40,12 +40,12 @@ python3 tools/init_project.py \
   --output-dir .
 ```
 
-若工具不可用，先恢复工具，再重新运行：
+If the tool is unavailable, restore it first, then re-run:
 
 ```bash
 if [ ! -f "tools/init_project.py" ]; then
-  echo "缺少 tools/init_project.py"
-  echo "请先重新运行 prae bootstrap，或从 PRAE 仓库复制 tools/init_project.py 到当前项目的 tools/"
+  echo "tools/init_project.py is missing"
+  echo "Re-run prae bootstrap first, or copy tools/init_project.py from the PRAE repository into this project's tools/"
   exit 1
 fi
 
@@ -54,7 +54,7 @@ python3 tools/init_project.py \
   --output-dir .
 ```
 
-### 3. 初始化结果检查
+### 3. Check the initialization result
 
 ```bash
 python3 -c "
@@ -68,25 +68,25 @@ for t in r['tracks']:
         log_path = f'prae/phases/phase_00_infra/tracks/{t[\"id\"]}/TRACK_LOG.md'
         assert os.path.exists(log_path), log_path
         content = open(log_path, encoding='utf-8').read()
-        assert '{{' not in content, f'{t[\"id\"]} TRACK_LOG.md 仍含模板占位符'
-        print(f'  {t[\"id\"]}: Phase 0 TRACK_LOG.md 已生成')
+        assert '{{' not in content, f'{t[\"id\"]} TRACK_LOG.md still contains template placeholders'
+        print(f'  {t[\"id\"]}: Phase 0 TRACK_LOG.md generated')
 "
 ```
 
-### 4. 输出总结
+### 4. Print the summary
 
 ```bash
 echo ""
-echo "PRAE 项目初始化完成"
+echo "PRAE project initialization complete"
 python3 -c "
 import yaml
 r = yaml.safe_load(open('prae/track_registry.yaml'))
-print(f'  项目: {r[\"project\"]}')
-print(f'  当前阶段: {r[\"current_phase\"]}')
-print(f'  当前轮次: cycle_{r[\"current_cycle\"]}')
-print(f'  轨道数: {len(r[\"tracks\"])}')
+print(f'  Project: {r[\"project\"]}')
+print(f'  Current phase: {r[\"current_phase\"]}')
+print(f'  Current cycle: cycle_{r[\"current_cycle\"]}')
+print(f'  Track count: {len(r[\"tracks\"])}')
 "
 echo ""
-echo "下一步:"
-echo "  运行 prae new-track <infra_track_id> 开始基础设施选型"
+echo "Next step:"
+echo "  Run prae new-track <infra_track_id> to begin infrastructure selection"
 ```

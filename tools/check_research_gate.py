@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-check_research_gate.py — 验证研究轨道的五条 Research Gate 规则
+check_research_gate.py — verify the five Research Gate rules for a research track
 
-退出码:
-  0  所有规则通过
-  1  违反规则 1-5 中任一项
-  2  轨道不存在或文件缺失
+Exit codes:
+  0  all rules passed
+  1  one of rules 1-5 violated
+  2  track does not exist or files missing
 
-用法:
+Usage:
   python3 tools/check_research_gate.py --track-id <id> --project-dir <path>
 """
 from __future__ import annotations
@@ -43,13 +43,13 @@ EXP_REQUIRED_SECTIONS = [
     "## Conclusion",
 ]
 PREFLIGHT_REQUIRED_MARKERS = [
-    "最小冒烟检查",
-    "输出契约",
+    "Minimal Smoke Check",
+    "Output Contract",
 ]
 
 
 class ResearchGateError(RuntimeError):
-    """Research Gate 配置或输入错误。"""
+    """Research Gate configuration or input error."""
 
 
 def find_current_phase(project_dir: str, registry: dict) -> str:
@@ -91,67 +91,67 @@ def _preview_output(stdout: str, stderr: str, limit: int = 120) -> str:
     return text if len(text) <= limit else text[: limit - 3] + "..."
 
 def rule1_track_log(project_dir: str, track_id: str, current_phase: str, context: dict, cycle_label: str) -> dict:
-    """规则 1：TRACK_LOG.md 有本次实验记录（至少一条完整条目）。"""
+    """Rule 1: TRACK_LOG.md has a record of this experiment (at least one complete entry)."""
     log_path = os.path.join(project_dir, "prae", "phases", current_phase,
                              "tracks", track_id, "TRACK_LOG.md")
     if not os.path.exists(log_path):
-        return check_item("规则1: TRACK_LOG.md 存在", False, log_path)
+        return check_item("Rule 1: TRACK_LOG.md exists", False, log_path)
 
     with open(log_path, encoding="utf-8") as f:
         content = f.read()
 
-    expected_cycle_line = f"**研究轮次**: {cycle_label}"
+    expected_cycle_line = f"**Research Cycle**: {cycle_label}"
     if expected_cycle_line not in content:
         return check_item(
-            "规则1: TRACK_LOG.md 研究轮次匹配",
+            "Rule 1: TRACK_LOG.md research cycle matches",
             False,
-            f"缺少或错误，期望 {expected_cycle_line}",
+            f"missing or incorrect, expected {expected_cycle_line}",
         )
 
-    # 检查 Experiments 表格有数据行（不只是表头）
+    # Check that the Experiments table has data rows (not just the header)
     exp_section = re.search(r"## Experiments\n(.*?)(?=\n##|\Z)", content, re.DOTALL)
     has_data_row = False
     if exp_section:
         lines = exp_section.group(1).strip().splitlines()
-        # 数据行：含 | EXP_ 的行
+        # Data rows: lines containing | EXP_
         data_rows = [l for l in lines if "EXP_" in l and l.strip().startswith("|")]
         has_data_row = len(data_rows) >= 1
 
     if not has_data_row:
-        return check_item("规则1: TRACK_LOG.md 有完整实验条目", False,
-                          "Experiments 表格中没有数据行（或未找到含 EXP_ 的行）")
+        return check_item("Rule 1: TRACK_LOG.md has a complete experiment entry", False,
+                          "no data rows in the Experiments table (or no line containing EXP_ found)")
 
     latest_exp_id = context.get("latest_exp_id", "")
     if latest_exp_id and latest_exp_id not in content:
-        return check_item("规则1: TRACK_LOG.md 记录最新实验", False,
-                          f"未在 TRACK_LOG.md 中找到最新实验 {latest_exp_id}")
+        return check_item("Rule 1: TRACK_LOG.md records the latest experiment", False,
+                          f"latest experiment {latest_exp_id} not found in TRACK_LOG.md")
 
     detail = (
-        f"研究轮次={cycle_label}; 最新实验={latest_exp_id}"
-        if latest_exp_id else f"研究轮次={cycle_label}; 尚未发现 EXP_NNN.md，已验证 TRACK_LOG 行"
+        f"research cycle={cycle_label}; latest experiment={latest_exp_id}"
+        if latest_exp_id else f"research cycle={cycle_label}; no EXP_NNN.md found yet, TRACK_LOG line verified"
     )
-    return check_item("规则1: TRACK_LOG.md 有完整实验条目", True, detail)
+    return check_item("Rule 1: TRACK_LOG.md has a complete experiment entry", True, detail)
 
 
 def rule2_smoke_test(project_dir: str, track_id: str, context: dict) -> dict:
-    """规则 2：experiments/ 下至少一个 EXP_NNN.py 存在且最近脚本能跑通。"""
+    """Rule 2: at least one EXP_NNN.py exists under experiments/ and the most recent script runs successfully."""
     exp_code_dir = os.path.join(project_dir, "src", "tracks", track_id, "experiments")
     if not os.path.isdir(exp_code_dir):
-        return check_item("规则2: experiments/ 目录存在", False, exp_code_dir)
+        return check_item("Rule 2: experiments/ directory exists", False, exp_code_dir)
 
     py_files = [f for f in os.listdir(exp_code_dir) if f.startswith("EXP_") and f.endswith(".py")]
     has_exp_py = len(py_files) >= 1
     if not has_exp_py:
-        return check_item("规则2: experiments/ 下有 EXP_NNN.py", False,
-                          f"src/tracks/{track_id}/experiments/ 中没有 EXP_*.py 文件")
+        return check_item("Rule 2: experiments/ has EXP_NNN.py", False,
+                          f"no EXP_*.py files in src/tracks/{track_id}/experiments/")
 
     latest_exp_id = context.get("latest_exp_id", "")
     if latest_exp_id:
         latest_py = f"{latest_exp_id}.py"
         script_path = os.path.join(exp_code_dir, latest_py)
         if not os.path.exists(script_path):
-            return check_item("规则2: 最新实验有对应 EXP_NNN.py", False,
-                              f"{latest_exp_id}.md 存在，但缺少对应脚本 {latest_py}")
+            return check_item("Rule 2: the latest experiment has a corresponding EXP_NNN.py", False,
+                              f"{latest_exp_id}.md exists, but the corresponding script {latest_py} is missing")
     else:
         latest_py = sorted(py_files)[-1]
         script_path = os.path.join(exp_code_dir, latest_py)
@@ -170,26 +170,26 @@ def rule2_smoke_test(project_dir: str, track_id: str, context: dict) -> dict:
             env=env,
         )
     except subprocess.TimeoutExpired:
-        return check_item("规则2: 最近实验脚本可运行", False,
-                          f"{latest_py} 运行超时（>{SMOKE_TIMEOUT_SECONDS}s）")
+        return check_item("Rule 2: the most recent experiment script runs", False,
+                          f"{latest_py} timed out (>{SMOKE_TIMEOUT_SECONDS}s)")
 
     preview = _preview_output(proc.stdout, proc.stderr)
     detail = f"{latest_py} exit={proc.returncode}"
     if preview:
         detail += f"; output={preview}"
-    return check_item("规则2: 最近实验脚本可运行", proc.returncode == 0, detail)
+    return check_item("Rule 2: the most recent experiment script runs", proc.returncode == 0, detail)
 
 
 def rule3_params_recorded(project_dir: str, track_id: str, current_phase: str) -> dict:
-    """规则 3：最新 EXP_NNN.md 结构完整，且先定义最小检查与复现参数。"""
+    """Rule 3: the latest EXP_NNN.md is structurally complete and defines the minimal check and reproduction parameters first."""
     exp_md_dir = os.path.join(project_dir, "prae", "phases", current_phase,
                                "tracks", track_id, "experiments")
     if not os.path.isdir(exp_md_dir):
-        return check_item("规则3: experiments/ 记录目录存在", False, exp_md_dir)
+        return check_item("Rule 3: experiments/ record directory exists", False, exp_md_dir)
 
     md_files = sorted([f for f in os.listdir(exp_md_dir) if f.startswith("EXP_") and f.endswith(".md")])
     if not md_files:
-        return check_item("规则3: 有 EXP_NNN.md 记录", False, "没有实验记录文件")
+        return check_item("Rule 3: has an EXP_NNN.md record", False, "no experiment record files")
 
     latest_md = os.path.join(exp_md_dir, md_files[-1])
     with open(latest_md, encoding="utf-8") as f:
@@ -197,41 +197,41 @@ def rule3_params_recorded(project_dir: str, track_id: str, current_phase: str) -
 
     missing_sections = [section for section in EXP_REQUIRED_SECTIONS if section not in content]
     if missing_sections:
-        return check_item("规则3: EXP_NNN.md 结构完整", False,
-                          f"缺少章节: {', '.join(missing_sections)}")
+        return check_item("Rule 3: EXP_NNN.md is structurally complete", False,
+                          f"missing sections: {', '.join(missing_sections)}")
 
     method_section = re.search(r"## Method\n(.*?)(?=\n##|\Z)", content, re.DOTALL)
     if not method_section:
-        return check_item("规则3: Method 节存在", False, f"{md_files[-1]}")
+        return check_item("Rule 3: Method section exists", False, f"{md_files[-1]}")
 
     method_text = method_section.group(1)
-    # 检查关键词
-    has_seed = re.search(r"seed|随机种子|无随机性", method_text, re.IGNORECASE) is not None
-    has_time = re.search(r"\d{4}-\d{2}-\d{2}|时间窗|time", method_text, re.IGNORECASE) is not None
-    has_data = re.search(r"数据源|data|infra_", method_text, re.IGNORECASE) is not None
-    has_control = re.search(r"对照组|无对照组|baseline|control", method_text, re.IGNORECASE) is not None
+    # Check keywords
+    has_seed = re.search(r"seed|Random Seed|no randomness", method_text, re.IGNORECASE) is not None
+    has_time = re.search(r"\d{4}-\d{2}-\d{2}|Time Window|time", method_text, re.IGNORECASE) is not None
+    has_data = re.search(r"Data Source|data|infra_", method_text, re.IGNORECASE) is not None
+    has_control = re.search(r"Control Group|no control group|baseline|control", method_text, re.IGNORECASE) is not None
 
     passed = has_seed and has_time and has_data and has_control
     missing = []
     if not has_seed:
-        missing.append("随机种子")
+        missing.append("Random Seed")
     if not has_time:
-        missing.append("时间范围")
+        missing.append("time range")
     if not has_data:
-        missing.append("数据源")
+        missing.append("Data Source")
     if not has_control:
-        missing.append("对照组")
+        missing.append("Control Group")
 
     if not passed:
         return check_item(
-            "规则3: Method 节有种子/时间范围/数据源/对照组",
+            "Rule 3: Method section has seed/time range/data source/control group",
             False,
-            f"缺少: {', '.join(missing)}",
+            f"missing: {', '.join(missing)}",
         )
 
     preflight_section = re.search(r"## Preflight Check\n(.*?)(?=\n##|\Z)", content, re.DOTALL)
     if not preflight_section:
-        return check_item("规则3: Preflight Check 节存在", False, f"{md_files[-1]}")
+        return check_item("Rule 3: Preflight Check section exists", False, f"{md_files[-1]}")
 
     preflight_text = preflight_section.group(1)
     missing_markers = [
@@ -240,32 +240,32 @@ def rule3_params_recorded(project_dir: str, track_id: str, current_phase: str) -
     ]
     if missing_markers:
         return check_item(
-            "规则3: Preflight Check 定义最小冒烟检查和输出契约",
+            "Rule 3: Preflight Check defines the minimal smoke check and output contract",
             False,
-            f"缺少: {', '.join(missing_markers)}",
+            f"missing: {', '.join(missing_markers)}",
         )
 
     return check_item(
-        "规则3: Method/Preflight 已定义复现参数和最小检查",
+        "Rule 3: Method/Preflight have defined reproduction parameters and the minimal check",
         True,
-        "Method 与 Preflight Check 结构完整",
+        "Method and Preflight Check are structurally complete",
     )
 
 
 def rule4_contracts(project_dir: str, registry: dict) -> dict:
-    """规则 4：对所有 LOCKED 基础设施实际运行 Contracts Gate。"""
+    """Rule 4: actually run the Contracts Gate against all LOCKED infrastructure."""
     infra_tracks = [t for t in registry.get("tracks", []) if t.get("type") == "infrastructure"]
     if not infra_tracks:
-        return check_item("规则4: 有基础设施契约可检查", False, "没有基础设施轨道，无法运行契约检查")
+        return check_item("Rule 4: there is an infrastructure contract to check", False, "no infrastructure tracks, cannot run contract checks")
 
     locked = [t for t in infra_tracks if t.get("state") == "LOCKED" and t.get("contracts")]
     if not locked:
-        return check_item("规则4: 契约检查（无 LOCKED 基础设施，跳过）", True,
-                           "暂无 LOCKED 基础设施契约，无需检查（Phase 0 期间正常）")
+        return check_item("Rule 4: contract check (no LOCKED infrastructure, skipped)", True,
+                           "no LOCKED infrastructure contracts yet, no check needed (normal during Phase 0)")
 
     src_dir = Path(project_dir) / "src"
     if not src_dir.is_dir():
-        return check_item("规则4: Contracts Gate 通过", False, f"src 目录不存在: {src_dir}")
+        return check_item("Rule 4: Contracts Gate passed", False, f"src directory does not exist: {src_dir}")
     failures: list[str] = []
     warnings: list[str] = []
 
@@ -275,17 +275,17 @@ def rule4_contracts(project_dir: str, registry: dict) -> dict:
         contracts_path = Path(project_dir) / contracts_rel
 
         if not contracts_path.exists():
-            failures.append(f"{track_id}: contracts 文件不存在 ({contracts_rel})")
+            failures.append(f"{track_id}: contracts file does not exist ({contracts_rel})")
             continue
 
         try:
             with open(contracts_path, encoding="utf-8") as f:
                 contract_data = yaml.safe_load(f)
         except (OSError, yaml.YAMLError) as exc:
-            failures.append(f"{track_id}: contracts 解析失败 ({exc})")
+            failures.append(f"{track_id}: contracts parse failed ({exc})")
             continue
         if contract_data is not None and not isinstance(contract_data, dict):
-            failures.append(f"{track_id}: contracts 顶层必须是 mapping")
+            failures.append(f"{track_id}: contracts top level must be a mapping")
             continue
 
         violations = run_check(contracts_path, [src_dir])
@@ -296,43 +296,43 @@ def rule4_contracts(project_dir: str, registry: dict) -> dict:
 
     if failures:
         detail = "; ".join(failures[:3]) + ("..." if len(failures) > 3 else "")
-        return check_item("规则4: Contracts Gate 通过", False, detail)
+        return check_item("Rule 4: Contracts Gate passed", False, detail)
 
-    detail = f"已检查 {len(locked)} 条 LOCKED 基础设施契约"
+    detail = f"checked {len(locked)} LOCKED infrastructure contracts"
     if warnings:
         detail += f"; NEED_REVIEW: {'; '.join(warnings[:2])}"
         if len(warnings) > 2:
             detail += "..."
-    return check_item("规则4: Contracts Gate 通过", True, detail)
+    return check_item("Rule 4: Contracts Gate passed", True, detail)
 
 
 def rule5_no_import_experiments(project_dir: str, track_id: str) -> dict:
-    """规则 5：experiments/ 下的脚本不被其他代码 import（扫描整个 src/）。"""
+    """Rule 5: scripts under experiments/ are not imported by other code (scans the entire src/)."""
     src_track_dir = os.path.join(project_dir, "src", "tracks", track_id)
     if not os.path.isdir(src_track_dir):
-        return check_item("规则5: src/tracks/ 目录存在", False, src_track_dir)
+        return check_item("Rule 5: src/tracks/ directory exists", False, src_track_dir)
 
     violations: list[str] = []
     exp_dir = os.path.join(src_track_dir, "experiments")
 
-    # 找出 experiments/ 下的所有 py 模块名
+    # Find all py module names under experiments/
     exp_modules: set[str] = set()
     if os.path.isdir(exp_dir):
         for f in os.listdir(exp_dir):
             if f.endswith(".py") and not f.startswith("__"):
-                exp_modules.add(f[:-3])  # 去掉 .py
+                exp_modules.add(f[:-3])  # strip .py
 
     if not exp_modules:
-        return check_item("规则5: experiments/ 有 py 文件（可检查 import）", False,
-                           "没有实验脚本，无法检查 import（请先创建实验）")
+        return check_item("Rule 5: experiments/ has py files (imports can be checked)", False,
+                           "no experiment scripts, cannot check imports (please create an experiment first)")
 
-    # 扫描整个 src/（跨轨道也检查），跳过该轨道自身的 experiments/
+    # Scan the entire src/ (cross-track too), skipping this track's own experiments/
     src_dir = os.path.join(project_dir, "src")
     scan_root = src_dir if os.path.isdir(src_dir) else src_track_dir
 
     for root, dirs, files in os.walk(scan_root):
         dirs[:] = [d for d in dirs if d != "__pycache__"]
-        # 跳过被检查轨道自身的 experiments/ 目录（它本身当然有这些模块）
+        # Skip the checked track's own experiments/ directory (it naturally contains these modules)
         if os.path.abspath(root) == os.path.abspath(exp_dir):
             dirs[:] = []
             continue
@@ -362,7 +362,7 @@ def rule5_no_import_experiments(project_dir: str, track_id: str) -> dict:
                             violations.append(f"{fpath}: import {name}")
 
     passed = len(violations) == 0
-    return check_item("规则5: 没有代码 import experiments/", passed,
+    return check_item("Rule 5: no code imports experiments/", passed,
                        "; ".join(violations[:3]) + ("..." if len(violations) > 3 else ""))
 
 

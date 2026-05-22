@@ -1,66 +1,66 @@
-# PRAE 项目初始化文档
+# PRAE Project Initialization Document
 
-<!-- 模板来源: PRAE/runtime/abstract/PRAE_INIT.template.md -->
-<!-- 规格参考: methodology/PRAE_ARTIFACTS.md §2.2 -->
-<!-- 此文件由 AI 分析者起草，人工确认后生效；原则上只填一次 -->
-
----
-
-## 问题陈述
-
-> **研究问题**（一句话）：{{研究项目试图解决的核心问题}}
-
-**背景**：
-{{2-4 句话说明为什么这个问题值得研究，当前已有方案的局限性是什么}}
-
-**成功标准**：
-{{可量化的成功判据，例如"在历史数据上夏普比率 ≥ 1.5，最大回撤 ≤ 20%"}}
-
-**失败判据**：
-{{触发整体 KILL 的条件，例如"Phase 2 结束后无任何轨道达到成功标准"}}
+<!-- Template source: PRAE/runtime/abstract/PRAE_INIT.template.md -->
+<!-- Spec reference: methodology/PRAE_ARTIFACTS.md §2.2 -->
+<!-- This file is drafted by the AI Analyst and takes effect after human confirmation; in principle it is filled in only once -->
 
 ---
 
-## 组件分类 → 基础设施轨道
+## Problem Statement
 
-> **基础设施轨道** = 多条研究轨道都会依赖的底层能力；需工程化（走 PDAE M1-M3）后才能被研究轨道稳定使用。
+> **Research Question** (one sentence): {{the core problem the research project tries to solve}}
 
-| 轨道 ID | 描述 | 依赖的外部系统 | 备注 |
+**Background**:
+{{2-4 sentences explaining why this problem is worth researching and what the limitations of existing solutions are}}
+
+**Success Criteria**:
+{{quantifiable success criteria, e.g. "Sharpe ratio ≥ 1.5 on historical data, maximum drawdown ≤ 20%"}}
+
+**Failure Criterion**:
+{{the condition that triggers an overall KILL, e.g. "no track reaches the success criteria after Phase 2 ends"}}
+
+---
+
+## Component Classification → Infrastructure Tracks
+
+> **Infrastructure Track** = a foundational capability that multiple research tracks depend on; it must be engineered (through PDAE M1-M3) before research tracks can use it stably.
+
+| Track ID | Description | External Systems Depended On | Notes |
 |---------|------|---------------|------|
-| `infra_{{name}}_v1` | {{该基础设施提供什么能力}} | {{外部数据源、API 等}} | {{可选备注}} |
+| `infra_{{name}}_v1` | {{what capability this infrastructure provides}} | {{external data sources, APIs, etc.}} | {{optional notes}} |
 
-<!-- 命名规则: infra_{name}_v{N}，示例: infra_data_v1, infra_sim_v1 -->
-<!-- 若暂时没有基础设施轨道，填"无"，但要说明研究轨道如何获取数据 -->
+<!-- Naming rule: infra_{name}_v{N}, example: infra_data_v1, infra_sim_v1 -->
+<!-- If there is no infrastructure track for now, fill in "none", but explain how research tracks obtain data -->
 
 ---
 
-## 组件分类 → 研究轨道
+## Component Classification → Research Tracks
 
-> **研究轨道** = 针对核心研究问题的某种算法路线或假设；在证据不足时可以被 KILLED 或 MERGED。
+> **Research Track** = an algorithmic approach or hypothesis aimed at the core research question; it can be KILLED or MERGED when evidence is insufficient.
 
-| 轨道 ID | 假设（一句话） | 依赖的基础设施 | 初始优先级 |
+| Track ID | Hypothesis (one sentence) | Infrastructure Depended On | Initial Priority |
 |---------|--------------|---------------|------------|
-| `research_{{topic}}_{{variant}}` | {{这条轨道试图验证什么}} | `infra_{{name}}_v1` | 高/中/低 |
+| `research_{{topic}}_{{variant}}` | {{what this track tries to verify}} | `infra_{{name}}_v1` | High/Medium/Low |
 
-<!-- 命名规则: research_{topic}_{variant}，示例: research_strategy_momentum -->
-<!-- 假设要可证伪：能明确说出什么情况下这条路不走了 -->
+<!-- Naming rule: research_{topic}_{variant}, example: research_strategy_momentum -->
+<!-- The hypothesis must be falsifiable: you can clearly state under what conditions this approach is abandoned -->
 
 ---
 
-## Phase 0 成功标准
+## Phase 0 Success Criteria
 
-> Phase 0 结束的判断标准：以下所有基础设施轨道都达到 LOCKED 状态。
+> Criterion for Phase 0 to end: all of the following infrastructure tracks have reached the LOCKED state.
 
-| 基础设施轨道 ID | LOCKED 判断标准 | 当前状态 |
+| Infrastructure Track ID | LOCKED Criterion | Current State |
 |----------------|----------------|---------|
-| `infra_{{name}}_v1` | {{什么情况下认为该基础设施已可投入使用}} | EXPLORING |
+| `infra_{{name}}_v1` | {{under what conditions this infrastructure is considered ready for use}} | EXPLORING |
 
 ---
 
 ## CHANGE_LOG
 
-<!-- 若中途发现组件分类需要调整，在此追加记录，不删原内容 -->
+<!-- If you find that the component classification needs adjustment along the way, append a record here without deleting the original content -->
 
-| 日期 | 变更内容 | 原因 |
+| Date | Change | Reason |
 |------|---------|------|
-| {{YYYY-MM-DD}} | 初始化 | 项目启动 |
+| {{YYYY-MM-DD}} | Initialization | Project startup |

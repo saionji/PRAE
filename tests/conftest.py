@@ -30,7 +30,7 @@ def locked_infra_project(fake_project: Path) -> Path:
 
     # Update TRACK_LOG.md to mention PDAE M3
     log_path = fake_project / "prae" / "phases" / "phase_00_infra" / "tracks" / "infra_data_v1" / "TRACK_LOG.md"
-    log_path.write_text(log_path.read_text() + "\n| 2026-04-20 | EXPLORING → LOCKED | AI | saionji | PDAE M3 通过 |")
+    log_path.write_text(log_path.read_text() + "\n| 2026-04-20 | EXPLORING → LOCKED | AI | saionji | PDAE M3 passed |")
 
     # Update track_registry.yaml
     registry_path = fake_project / "prae" / "track_registry.yaml"

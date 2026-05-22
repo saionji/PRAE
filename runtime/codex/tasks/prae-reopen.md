@@ -1,33 +1,33 @@
 # Task: prae-reopen
 
-> 根据已批准的 `CONCLUSION.md` 中 `DECISION: CONTINUE` 将项目重开到 `phase_01_research`
-> 调用方式: `prae reopen`
-> 前置条件: 当前阶段为 `phase_03_conclusion`，且人工已在 `CONCLUSION.md` 填写 `APPROVED: yes` 和 `DECISION: CONTINUE`
+> Reopen the project to `phase_01_research` based on an approved `DECISION: CONTINUE` in `CONCLUSION.md`
+> Invocation: `prae reopen`
+> Precondition: the current phase is `phase_03_conclusion`, and a human has written `APPROVED: yes` and `DECISION: CONTINUE` in `CONCLUSION.md`
 
-## 步骤
+## Steps
 
-### 1. 验证 `CONCLUSION.md`
+### 1. Validate `CONCLUSION.md`
 
 ```bash
 python3 tools/check_conclusion.py --project-dir . --check-approved
 ```
 
-若未通过，先补齐：
+If it does not pass, fill in the missing fields first:
 - `APPROVED: yes`
 - `DECISION: CONTINUE`
-- `APPROVER: <你的名字>`
+- `APPROVER: <your name>`
 - `APPROVED_AT: <YYYY-MM-DD>`
 
-### 2. 重开项目
+### 2. Reopen the project
 
 ```bash
 python3 tools/reopen_project.py --project-dir .
 ```
 
-### 3. 结果说明
+### 3. Result explanation
 
-执行成功后：
-- `track_registry.yaml` 的 `current_phase` 会切回 `phase_01_research`
-- `track_registry.yaml` 的 `current_cycle` 会递增到下一轮
-- 旧的 `phase_01/02/03` 目录会整体归档到 `prae/history/cycle_N/phases/`
-- 会生成新的 `prae/phases/phase_01_research/PHASE_BRIEF.md` 作为下一轮研究入口
+After a successful run:
+- `current_phase` in `track_registry.yaml` switches back to `phase_01_research`
+- `current_cycle` in `track_registry.yaml` is incremented to the next cycle
+- The old `phase_01/02/03` directories are archived as a whole into `prae/history/cycle_N/phases/`
+- A new `prae/phases/phase_01_research/PHASE_BRIEF.md` is generated as the entry point for the next research cycle

@@ -1,54 +1,54 @@
-# PRAE Bootstrap 提示词（Codex 会话启动）
+# PRAE Bootstrap Prompt (Codex Session Startup)
 
-> **用途**: 在研究项目中首次启动 Codex 会话时粘贴，自动部署 PRAE 框架
-> **粘贴位置**: Codex 会话输入框（首条消息）
+> **Purpose**: paste when starting a Codex session for the first time in a research project, to automatically deploy the PRAE framework
+> **Where to paste**: the Codex session input box (as the first message)
 
-这是 **项目安装入口提示词**，不是模型上下文入口提示词。
-如果模型需要先建立上下文，应先读项目里的 `AGENTS.md` / `CLAUDE.md`；项目状态初始化则由后续 `prae init` 完成。
+This is the **project installation entry-point prompt**, not the model-context entry-point prompt.
+If the model needs to establish context first, it should read the project's `AGENTS.md` / `CLAUDE.md`; project-state initialization is handled later by `prae init`.
 
 ---
 
-你是 PRAE 研究方法论框架的执行助手。我需要你把 PRAE 框架部署到当前项目。
+You are the execution assistant for the PRAE research methodology framework. I need you to deploy the PRAE framework into the current project.
 
-**PRAE 仓库位置**: ${PRAE_HOME}（或通过 --prae-path 指定）
+**PRAE repository location**: ${PRAE_HOME} (or specified via --prae-path)
 
-请执行以下操作：
+Please perform the following operations:
 
-1. **检测当前环境**：
-   - 检查是否有 `AGENTS.md`（Codex 项目）
-   - 检查是否有 `.claude/` 或 `CLAUDE.md`（Claude Code 项目）
-   - 都没有：问我选择哪个
+1. **Detect the current environment**:
+   - Check whether there is an `AGENTS.md` (Codex project)
+   - Check whether there is a `.claude/` or `CLAUDE.md` (Claude Code project)
+   - If neither exists: ask me which one to choose
 
-2. **运行 bootstrap 脚本**：
+2. **Run the bootstrap script**:
    ```bash
    python3 ${PRAE_HOME}/tools/prae_bootstrap.py \
      --target $(pwd) \
      --client codex
    ```
-   脚本会复制 project-pack 最小骨架、Codex tasks、templates。
-   注意：`track_registry.yaml` 和 Phase 0 工件不是 bootstrap 创建，而是后续 `prae init` 生成。
+   The script copies the minimal project-pack skeleton, Codex tasks, and templates.
+   Note: `track_registry.yaml` and the Phase 0 artifacts are not created by bootstrap; they are generated later by `prae init`.
 
-3. **检查 PDAE 安装状态**：
+3. **Check the PDAE installation status**:
    ```bash
    ls ${PDAE_HOME}/tools/check_contracts.py
    ```
-   若不存在，告诉我"PRAE 的基础设施毕业功能依赖 PDAE，是否现在安装？"
+   If it does not exist, tell me "PRAE's infrastructure graduation feature depends on PDAE; should we install it now?"
 
-4. **将 AGENTS_SNIPPET.md 内容合并到 AGENTS.md**：
-   - 若 AGENTS.md 已存在：在文件末尾追加 PRAE 段落
-   - 若不存在：创建新的 AGENTS.md，只包含 PRAE 段落
+4. **Merge the contents of AGENTS_SNIPPET.md into AGENTS.md**:
+   - If AGENTS.md already exists: append the PRAE section to the end of the file
+   - If it does not exist: create a new AGENTS.md containing only the PRAE section
 
-5. **验证安装**：
+5. **Verify the installation**:
    ```bash
    ls prae/templates/
    ls .prae/tasks/ 2>/dev/null || ls prae/tasks/ 2>/dev/null
    ```
 
-6. **输出下一步指引**：
+6. **Output the next-step guidance**:
    ```
-   ✓ PRAE 已部署
-   下一步: 填写 prae/PRAE_INIT.md，然后运行:
-     prae init   # 生成 track_registry.yaml 和 Phase 0 工件
+   ✓ PRAE has been deployed
+   Next step: fill in prae/PRAE_INIT.md, then run:
+     prae init   # generates track_registry.yaml and the Phase 0 artifacts
    ```
 
-所有操作完成后，等待我的进一步指令。
+After all operations are complete, wait for my further instructions.

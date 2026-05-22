@@ -1,82 +1,82 @@
-# PRAE 行为契约（粘贴到 AGENTS.md）
+# PRAE Behavior Contract (paste into AGENTS.md)
 
-> **安装说明**: 将以下内容复制粘贴到研究项目的 `AGENTS.md` 文件中。
-> 通常由 `prae-bootstrap` task 自动完成，也可手工粘贴。
+> **Installation note**: Copy and paste the content below into the research project's `AGENTS.md` file.
+> This is normally done automatically by the `prae-bootstrap` task, but it can also be pasted manually.
 
 ---
 
-<!-- 粘贴起始位置 -->
+<!-- paste start -->
 
-## PRAE 研究方法论
+## PRAE Research Methodology
 
-此项目使用 PRAE（Protocol-Driven Research & Experimentation）方法论管理研究决策过程。
-PRAE 方法论文档位于：`PRAE_ROOT/methodology/`（参见 PRAE 仓库）。
+This project uses the PRAE (Protocol-Driven Research & Experimentation) methodology to manage the research decision process.
+The PRAE methodology documents are located at: `PRAE_ROOT/methodology/` (see the PRAE repository).
 
-### 入口定义
+### Entrypoint Definitions
 
-- `AGENTS.md` / `CLAUDE.md`：模型上下文入口
-- `prae bootstrap`：项目安装入口
-- `prae init`：项目状态初始化入口
+- `AGENTS.md` / `CLAUDE.md`: model context entrypoint
+- `prae bootstrap`: project installation entrypoint
+- `prae init`: project state initialization entrypoint
 
-如果项目里还没有 `prae/track_registry.yaml`，说明项目可能只完成了 bootstrap、还没 init；不要把当前文档误解成“项目已经初始化完成”。
+If the project does not yet contain `prae/track_registry.yaml`, the project has likely only completed bootstrap and has not been initialized yet; do not misread the current document as "the project is already fully initialized".
 
-### 角色规则
+### Role Rules
 
-你在此项目中只扮演以下两种角色之一，不可同时扮演或混用：
+In this project you play exactly one of the following two roles; you may not play both at once or mix them:
 
-| 角色 | 激活条件 | 产出 |
+| Role | Activation Condition | Outputs |
 |------|---------|------|
-| 分析者（Analyst） | 轨道 state=EXPLORING 或 ACTIVE；生成 PHASE_GATE | 实验设计、证据解读、PHASE_GATE.md |
-| 执行者（Engineer） | 基础设施工程化；impl/ 代码提炼 | 基础设施代码、contracts.yaml、impl/*.py |
+| Analyst | Track state=EXPLORING or ACTIVE; generating PHASE_GATE | Experiment design, evidence interpretation, PHASE_GATE.md |
+| Executor | Infrastructure engineering; refining impl/ code | Infrastructure code, contracts.yaml, impl/*.py |
 
-切换角色时必须在回复开头宣告：
+When switching roles you must announce it at the start of your reply:
 ```
-[切换到分析者] 处理轨道 {track_id}（{state}）
-[切换到执行者] 处理轨道 {track_id}（LOCKED 实现期）
+[Switching to Analyst] Handling track {track_id} ({state})
+[Switching to Executor] Handling track {track_id} (LOCKED implementation phase)
 ```
 
-### 门控规则（不可绕过）
+### Gate Rules (cannot be bypassed)
 
-1. **阶段不自动推进**：PHASE_GATE.md 生成后必须等 `APPROVED: yes`
-2. **研究轨道禁止 EXPLORING → KILLED 直接终止**：必须经过 ACTIVE
-3. **ACTIVE 轨道进入终态前**必须通过 Research Gate
-4. **基础设施 LOCKED 前**必须有 contracts.yaml + MODULE_SPEC.md + PDAE M3 通过
-5. **LOCKED 基础设施不可修改**：新需求开 v2 轨道
+1. **Phases do not advance automatically**: after PHASE_GATE.md is generated, you must wait for `APPROVED: yes`
+2. **Research tracks may not terminate directly from EXPLORING → KILLED**: they must pass through ACTIVE
+3. **Before an ACTIVE track enters a terminal state**, it must pass the Research Gate
+4. **Before infrastructure is LOCKED**, there must be contracts.yaml + MODULE_SPEC.md + PDAE M3 passed
+5. **LOCKED infrastructure cannot be modified**: open a v2 track for new requirements
 
-### 文件路径规则
+### File Path Rules
 
-| 文件类型 | 路径 |
+| File Type | Path |
 |---------|------|
-| 实验记录（.md） | `prae/phases/.../tracks/{id}/experiments/EXP_NNN.md` |
-| 实验代码（.py） | `src/tracks/{id}/experiments/EXP_NNN.py` |
-| 轨道日志 | `prae/phases/.../tracks/{id}/TRACK_LOG.md` |
-| 阶段门控 | `prae/phases/phase_NN_*/PHASE_GATE.md` |
-| 基础设施 | `src/infra_{name}_v{N}/`（LOCKED 后只读） |
-| 稳定实现 | `src/tracks/{id}/impl/*.py`（执行者创建） |
+| Experiment record (.md) | `prae/phases/.../tracks/{id}/experiments/EXP_NNN.md` |
+| Experiment code (.py) | `src/tracks/{id}/experiments/EXP_NNN.py` |
+| Track log | `prae/phases/.../tracks/{id}/TRACK_LOG.md` |
+| Phase gate | `prae/phases/phase_NN_*/PHASE_GATE.md` |
+| Infrastructure | `src/infra_{name}_v{N}/` (read-only after LOCKED) |
+| Stable implementation | `src/tracks/{id}/impl/*.py` (created by the Executor) |
 
-### 可用 Tasks
+### Available Tasks
 
-在研究项目根目录执行（需安装 `prae` CLI 或直接运行 codex task）：
+Run from the research project root (requires the `prae` CLI installed or running the codex task directly):
 
 ```bash
-prae bootstrap      # 部署 PRAE 到当前项目
-prae init           # 初始化研究项目（生成 registry 和 Phase 0 工件；此时仍在 phase_00_infra）
-prae add-track <id> # 正式注册新轨道到 track_registry.yaml
-prae new-track <id> # 为已登记轨道创建当前阶段目录
-prae new-exp <id>   # 新建实验
-prae record-result <track_id> <exp_id>  # 记录实验结果
-prae lock-infra <track_id> --approver <name> --reason "<原因>"  # 人工批准后正式锁定基础设施轨道
-prae update-track-state <track_id> <state> --approver <name> --reason "<原因>"  # 人工批准后正式更新研究轨道状态
-prae advance-phase  # 首次生成 PHASE_GATE.md；已批准后再次调用会正式推进
-prae graduate <id>  # 研究轨道毕业到 PDAE
-prae finalize       # 记录项目终态决定
-prae reopen         # 根据 CONTINUE 重开到 Phase 1
+prae bootstrap      # deploy PRAE to the current project
+prae init           # initialize the research project (generate the registry and Phase 0 artifacts; still in phase_00_infra at this point)
+prae add-track <id> # formally register a new track into track_registry.yaml
+prae new-track <id> # create the current-phase directory for an already-registered track
+prae new-exp <id>   # create a new experiment
+prae record-result <track_id> <exp_id>  # record an experiment result
+prae lock-infra <track_id> --approver <name> --reason "<reason>"  # formally lock an infrastructure track after human approval
+prae update-track-state <track_id> <state> --approver <name> --reason "<reason>"  # formally update a research track state after human approval
+prae advance-phase  # generate PHASE_GATE.md the first time; once approved, calling it again formally advances the phase
+prae graduate <id>  # graduate a research track to PDAE
+prae finalize       # record the project's terminal decision
+prae reopen         # reopen to Phase 1 based on a CONTINUE decision
 ```
 
-### 紧急情况
+### Emergencies
 
-- 状态不一致 → 停下告知用户，不自动修复
-- 找不到文件 → 明确报告缺失路径
-- 工具报错 → 打印完整错误，不静默忽略
+- Inconsistent state → stop and tell the user; do not fix it automatically
+- File not found → clearly report the missing path
+- Tool error → print the full error; do not silently ignore it
 
-<!-- 粘贴结束位置 -->
+<!-- paste end -->

@@ -1,18 +1,18 @@
 # Task: prae-advance-phase
 
-> 检查阶段门控条件；首次调用生成 PHASE_GATE.md，已批准时直接推进阶段
-> 调用方式: `prae advance-phase`
-> 重要: 若当前阶段已存在 `APPROVED: yes` 的 PHASE_GATE.md，则不要重生 gate，直接验证并推进
-> 前置条件: 项目已完成 `prae init`
+> Check the phase gate conditions; on the first call generate PHASE_GATE.md, and once approved advance the phase directly
+> Invocation: `prae advance-phase`
+> Important: if the current phase already has a PHASE_GATE.md with `APPROVED: yes`, do not regenerate the gate — just verify and advance
+> Prerequisites: the project has completed `prae init`
 
-## 步骤
+## Steps
 
-### 1. 读取当前阶段信息
+### 1. Read the current phase information
 
 ```bash
 [ -f "prae/track_registry.yaml" ] || {
-  echo "未找到 prae/track_registry.yaml。项目可能只完成了 bootstrap。"
-  echo "请先填写 prae/PRAE_INIT.md，然后运行: prae init"
+  echo "prae/track_registry.yaml not found. The project may have only completed bootstrap."
+  echo "Fill in prae/PRAE_INIT.md first, then run: prae init"
   exit 1
 }
 
@@ -21,7 +21,7 @@ import yaml
 r = yaml.safe_load(open('prae/track_registry.yaml'))
 override = r.get('current_phase_override')
 if override:
-    print(f'检测到 current_phase_override={override}；常规阶段推进已暂停，请先完成例外处理并移除 override')
+    print(f'Detected current_phase_override={override}; normal phase advancement is paused, resolve the exception and remove the override first')
     exit(1)
 phase_map = {
     'phase_00_infra': 'phase_01_research',
@@ -31,7 +31,7 @@ phase_map = {
 curr = r['current_phase']
 tgt = phase_map.get(curr)
 if not tgt:
-    print(f'已在最终阶段 {curr}，无需推进')
+    print(f'Already at the final phase {curr}, no advancement needed')
     exit(0)
 print(f'current={curr}')
 print(f'target={tgt}')
@@ -40,59 +40,59 @@ for t in r['tracks']:
 "
 ```
 
-### 2. 若当前阶段已存在 APPROVED: yes 的 PHASE_GATE.md，则直接推进
+### 2. If the current phase already has a PHASE_GATE.md with APPROVED: yes, advance directly
 
 ```bash
 python3 tools/check_phase_gate.py --project-dir . --check-approved && \
 python3 tools/advance_phase.py --project-dir .
 ```
 
-如果上面的检查和推进都通过，到此结束；不要再重生成 `PHASE_GATE.md`。
+If both the check and the advancement above pass, stop here; do not regenerate `PHASE_GATE.md`.
 
-如果 `--check-approved` 失败，说明当前 gate 尚未批准或尚未生成，继续下面的生成流程。
+If `--check-approved` fails, the current gate is not yet approved or not yet generated — continue with the generation flow below.
 
-### 3. 生成 PHASE_GATE.md 草稿
+### 3. Generate the PHASE_GATE.md draft
 
 ```bash
 python3 tools/generate_phase_gate.py --project-dir .
 ```
 
-读取输出中的：
+Read these items from the output:
 - `path`
 - `recommendation`
 - `failed_conditions`
 
-并打开生成的 `PHASE_GATE.md`，确认第 2 节勾选状态与工具输出一致。
+Then open the generated `PHASE_GATE.md` and confirm that the checkbox states in Section 2 match the tool output.
 
-### 4. 验证生成结果
+### 4. Verify the generated result
 
 ```bash
 python3 tools/check_phase_gate.py --project-dir .
 ```
 
-### 5. 等待人工批准（必须停在这里）
+### 5. Wait for human approval (you must stop here)
 
 ```
-PHASE_GATE.md 已生成，且内容已按当前实际门控结果填充。
+PHASE_GATE.md has been generated, with its contents populated according to the current actual gate results.
 
-请在输出里的 path 对应文件第 6 节填写：
-  APPROVED: yes     ← 同意推进
-  APPROVED: no      ← 驳回，需改进
-  APPROVER: 你的名字
-  APPROVED_AT: 今日日期
+In the file at the path shown in the output, fill in Section 6:
+  APPROVED: yes     ← agree to advance
+  APPROVED: no      ← rejected, needs improvement
+  APPROVER: your name
+  APPROVED_AT: today's date
 
-填写完成后，再次调用:
+Once filled in, call again:
   prae advance-phase
-或直接运行:
+or run directly:
   python3 tools/check_phase_gate.py --project-dir . --check-approved
   python3 tools/advance_phase.py --project-dir .
 
-再次调用 `prae advance-phase` 时，应先检查已批准 gate，并直接推进；不要重生成 `PHASE_GATE.md`。
+When `prae advance-phase` is called again, it should first check for an approved gate and advance directly; do not regenerate `PHASE_GATE.md`.
 ```
 
-**注意: 到此停止，不自动更新 current_phase。**
+**Note: stop here, do not automatically update current_phase.**
 
-### 6. 批准后的后续动作（人工确认 APPROVED: yes 后执行）
+### 6. Follow-up actions after approval (execute once a human confirms APPROVED: yes)
 
 ```bash
 python3 tools/advance_phase.py --project-dir .

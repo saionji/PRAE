@@ -52,9 +52,9 @@ class TestGenerateConclusion:
         conclusion_path = Path(out["data"]["path"])
         content = conclusion_path.read_text(encoding="utf-8")
         assert "# CONCLUSION — fake-research" in content
-        assert "**研究轮次**: cycle_1" in content
-        assert "`research_strategy_momentum` | `待填写`" in content
-        assert "已 GRADUATED，但尚未登记 PDAE 项目路径" in content
+        assert "**Research Cycle**: cycle_1" in content
+        assert "`research_strategy_momentum` | `to be filled in`" in content
+        assert "is GRADUATED but has no registered PDAE project path yet" in content
         assert "APPROVED: pending" in content
         assert "DECISION: " in content
         assert "APPROVER: " in content
@@ -66,7 +66,7 @@ class TestGenerateConclusion:
         conclusion_path = fake_project / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
         conclusion_path.parent.mkdir(parents=True, exist_ok=True)
         conclusion_path.write_text(
-            "# CONCLUSION\n\n## 最终决定\n\nAPPROVED: yes\nDECISION: GRADUATED_TO_PDAE\nAPPROVER: saionji\nAPPROVED_AT: 2026-04-20\nCOMMENT: ready\n",
+            "# CONCLUSION\n\n## Final Decision\n\nAPPROVED: yes\nDECISION: GRADUATED_TO_PDAE\nAPPROVER: saionji\nAPPROVED_AT: 2026-04-20\nCOMMENT: ready\n",
             encoding="utf-8",
         )
 
@@ -82,7 +82,7 @@ class TestGenerateConclusion:
         conclusion_path = fake_project / "prae" / "phases" / "phase_03_conclusion" / "CONCLUSION.md"
         conclusion_path.parent.mkdir(parents=True, exist_ok=True)
         conclusion_path.write_text(
-            "# CONCLUSION\n\n## 最终决定\n\n**APPROVED**: yes\n\n**决定**（人工填写）：\n\n```\nGRADUATED_TO_PDAE\n```\n\n**批准人**：saionji\n**日期**：2026-04-20\n",
+            "# CONCLUSION\n\n## Final Decision\n\n**APPROVED**: yes\n\n**Decision** (human-filled):\n\n```\nGRADUATED_TO_PDAE\n```\n\n**Approver**: saionji\n**Date**: 2026-04-20\n",
             encoding="utf-8",
         )
 
@@ -129,5 +129,5 @@ class TestGenerateConclusion:
         rc, out = run_tool(str(fake_project))
         assert rc == 0
         content = Path(out["data"]["path"]).read_text(encoding="utf-8")
-        assert "**研究轮次**: cycle_2" in content
-        assert "GRADUATED — 信号稳定，移交 PDAE。" in content
+        assert "**Research Cycle**: cycle_2" in content
+        assert "GRADUATED — signal is stable, handed off to PDAE." in content

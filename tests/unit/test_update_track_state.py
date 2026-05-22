@@ -53,7 +53,7 @@ def prepare_track_project(
         if track["id"] == TRACK_ID:
             track["state"] = state
             track["experiments"] = 1
-            track["evidence_summary"] = "旧摘要"
+            track["evidence_summary"] = "old summary"
             track["concluded_at"] = None
             track["merged_into"] = None
 
@@ -63,10 +63,10 @@ def prepare_track_project(
             "type": "research",
             "state": "ACTIVE",
             "src": "src/tracks/research_strategy_reversal/",
-            "hypothesis": "反转因子在A股ETF上有效",
+            "hypothesis": "Reversal factor is effective on A-share ETFs",
             "depends_on": ["infra_data_v1"],
             "experiments": 1,
-            "evidence_summary": "候选主轨道",
+            "evidence_summary": "candidate lead track",
             "concluded_at": None,
             "merged_into": None,
         })
@@ -86,43 +86,43 @@ def prepare_track_project(
     track_dir.mkdir(parents=True, exist_ok=True)
     (track_dir / "TRACK_LOG.md").write_text(
         "\n".join([
-            f"# 轨道日志：{TRACK_ID}",
+            f"# Track Log: {TRACK_ID}",
             "",
-            f"**轨道 ID**: `{TRACK_ID}`",
-            "**类型**: research",
-            f"**当前阶段**: {PHASE}",
-            "**研究轮次**: cycle_1",
-            "**创建日期**: 2026-04-20",
+            f"**Track ID**: `{TRACK_ID}`",
+            "**Type**: research",
+            f"**Current Phase**: {PHASE}",
+            "**Research Cycle**: cycle_1",
+            "**Created**: 2026-04-20",
             "",
             "---",
             "",
             "## State",
             "",
-            f"**当前状态**: {state}",
-            "**依赖的轨道**:",
+            f"**Current State**: {state}",
+            "**Depends On**:",
             "- `infra_data_v1`",
             "",
             "---",
             "",
             "## Experiments",
             "",
-            "| EXP ID | 日期 | 目的 | 结论 | 链接 |",
+            "| EXP ID | Date | Purpose | Conclusion | Link |",
             "|--------|------|------|------|------|",
-            "| EXP_001 | 2026-04-20 | 动量因子测试 | 支持 | [EXP_001.md](experiments/EXP_001.md) |",
+            "| EXP_001 | 2026-04-20 | Momentum factor test | Supports | [EXP_001.md](experiments/EXP_001.md) |",
             "",
             "---",
             "",
             "## Evidence Summary",
             "",
-            "- 2026-04-20 EXP_001: 正向信号。",
+            "- 2026-04-20 EXP_001: positive signal.",
             "",
             "---",
             "",
             "## Decision Log",
             "",
-            "| 日期 | 变更 | 建议者 | 批准者 | 原因 |",
+            "| Date | Change | Advisor | Approver | Reason |",
             "|------|------|--------|--------|------|",
-            f"| 2026-04-20 | 创建（{state}) | AI | — | 测试初始化 |",
+            f"| 2026-04-20 | Created ({state}) | AI | — | Test initialization |",
             "",
         ]),
         encoding="utf-8",
@@ -131,18 +131,18 @@ def prepare_track_project(
     exp_dir = track_dir / "experiments"
     exp_dir.mkdir(parents=True, exist_ok=True)
     exp_md_content = (
-        "# EXP_001\n\n## Goal\n测试动量因子\n\n## Method\n"
-        "- 数据源: infra_data_v1.load_daily_bars\n"
-        "- 时间窗: 2020-01-01 至 2023-12-31\n"
-        "- 随机种子: seed=42\n"
-        "- 对照组: 无对照组\n\n"
+        "# EXP_001\n\n## Goal\nTest the momentum factor\n\n## Method\n"
+        "- Data Source: infra_data_v1.load_daily_bars\n"
+        "- Time Window: 2020-01-01 to 2023-12-31\n"
+        "- Random Seed: seed=42\n"
+        "- Control Group: no control group\n\n"
         "## Preflight Check\n"
-        "**最小冒烟检查**: 30s 内跑完，并打印 sharpe\n\n"
-        "**输出契约**: stdout 至少包含 sharpe\n\n"
-        "**本次不做**: 不抽象到 impl/\n\n"
-        "## Expected Signal\n夏普>1.0\n\n"
-        "## Result\n夏普: 1.2\n\n"
-        "## Conclusion\n**结论**: 支持假设\n"
+        "**Minimal Smoke Check**: finishes within 30s and prints sharpe\n\n"
+        "**Output Contract**: stdout contains at least sharpe\n\n"
+        "**Out of Scope This Time**: do not abstract into impl/\n\n"
+        "## Expected Signal\nSharpe > 1.0\n\n"
+        "## Result\nSharpe: 1.2\n\n"
+        "## Conclusion\n**Conclusion**: supports the hypothesis\n"
     )
     if not with_valid_research_gate:
         exp_md_content = exp_md_content.replace("## Preflight Check\n", "")
@@ -173,8 +173,8 @@ class TestUpdateTrackState:
                 "--approver", "saionji",
                 "--approved-at", "2026-04-20",
                 "--exp-id", "EXP_001",
-                "--reason", "EXP_001 显示正向信号",
-                "--summary", "EXP_001: 夏普1.2，支持 ACTIVE",
+                "--reason", "EXP_001 shows a positive signal",
+                "--summary", "EXP_001: Sharpe 1.2, supports ACTIVE",
             ],
         )
 
@@ -184,15 +184,15 @@ class TestUpdateTrackState:
         registry = yaml.safe_load((fake_project / "prae" / "track_registry.yaml").read_text(encoding="utf-8"))
         track = next(t for t in registry["tracks"] if t["id"] == TRACK_ID)
         assert track["state"] == "ACTIVE"
-        assert track["evidence_summary"] == "EXP_001: 夏普1.2，支持 ACTIVE"
+        assert track["evidence_summary"] == "EXP_001: Sharpe 1.2, supports ACTIVE"
         assert track["concluded_at"] is None
         assert track["merged_into"] is None
 
         log_content = (
             fake_project / "prae" / "phases" / PHASE / "tracks" / TRACK_ID / "TRACK_LOG.md"
         ).read_text(encoding="utf-8")
-        assert "**当前状态**: ACTIVE" in log_content
-        assert "| 2026-04-20 | EXPLORING → ACTIVE | AI | saionji | EXP_001: EXP_001 显示正向信号 |" in log_content
+        assert "**Current State**: ACTIVE" in log_content
+        assert "| 2026-04-20 | EXPLORING → ACTIVE | AI | saionji | EXP_001: EXP_001 shows a positive signal |" in log_content
 
     def test_exploring_to_killed_is_rejected(self, fake_project):
         prepare_track_project(fake_project, state="EXPLORING", lock_infra=True)
@@ -203,7 +203,7 @@ class TestUpdateTrackState:
                 "--track-id", TRACK_ID,
                 "--to-state", "KILLED",
                 "--approver", "saionji",
-                "--reason", "负向信号",
+                "--reason", "negative signal",
             ],
         )
 
@@ -223,7 +223,7 @@ class TestUpdateTrackState:
                 "--track-id", TRACK_ID,
                 "--to-state", "MERGED",
                 "--approver", "saionji",
-                "--reason", "与主轨道重合",
+                "--reason", "overlaps with the lead track",
             ],
         )
 
@@ -245,7 +245,7 @@ class TestUpdateTrackState:
                 "--to-state", "MERGED",
                 "--approver", "saionji",
                 "--approved-at", "2026-04-20",
-                "--reason", "与反转轨道证据互补，合并推进",
+                "--reason", "evidence complements the reversal track, merging forward",
                 "--merged-into", "research_strategy_reversal",
             ],
         )
@@ -268,7 +268,7 @@ class TestUpdateTrackState:
                 "--track-id", TRACK_ID,
                 "--to-state", "GRADUATED",
                 "--approver", "saionji",
-                "--reason", "验证完成",
+                "--reason", "validation complete",
             ],
         )
 
@@ -289,7 +289,7 @@ class TestUpdateTrackState:
                 "--track-id", TRACK_ID,
                 "--to-state", "ACTIVE",
                 "--approver", "saionji",
-                "--reason", "正向信号出现",
+                "--reason", "positive signal appeared",
             ],
         )
 

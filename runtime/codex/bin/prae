@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# prae — PRAE 统一 CLI 入口（Codex 版本）
+# prae — PRAE unified CLI entrypoint (Codex version)
 #
-# 安装说明见 bin/README.md
-# 用法: prae <subcommand> [args...]
+# See bin/README.md for installation instructions
+# Usage: prae <subcommand> [args...]
 #
 # Subcommands:
-#   bootstrap                     部署 PRAE 到当前项目
-#   init                          初始化研究项目（生成 registry 和 Phase 0 工件）
-#   add-track <track_id>          正式注册新轨道到 registry
-#   new-track <track_id>          为已登记轨道创建当前阶段目录
-#   new-exp <track_id>            新建实验
-#   record-result <track_id> <exp_id>  记录实验结果
-#   lock-infra <track_id>         正式锁定基础设施轨道
-#   update-track-state <track_id> <state>  正式更新研究轨道状态
-#   advance-phase                 首次生成阶段门控报告；已批准时正式推进阶段
-#   graduate <track_id>           研究轨道毕业到 PDAE
-#   finalize                      记录项目终态决定
-#   reopen                        根据 CONTINUE 决定重开到 Phase 1
+#   bootstrap                     deploy PRAE to the current project
+#   init                          initialize the research project (generate the registry and Phase 0 artifacts)
+#   add-track <track_id>          formally register a new track into the registry
+#   new-track <track_id>          create the current-phase directory for an already-registered track
+#   new-exp <track_id>            create a new experiment
+#   record-result <track_id> <exp_id>  record an experiment result
+#   lock-infra <track_id>         formally lock an infrastructure track
+#   update-track-state <track_id> <state>  formally update a research track state
+#   advance-phase                 generate the phase gate report the first time; once approved, formally advance the phase
+#   graduate <track_id>           graduate a research track to PDAE
+#   finalize                      record the project's terminal decision
+#   reopen                        reopen to Phase 1 based on a CONTINUE decision
 
 set -euo pipefail
 
@@ -35,37 +35,37 @@ case "${SUBCOMMAND}" in
     exec codex exec --task "${TASKS_DIR}/prae-init.md" -- "$@"
     ;;
   add-track)
-    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae add-track <track_id> --type <research|infrastructure> [...]"; exit 1; }
+    [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae add-track <track_id> --type <research|infrastructure> [...]"; exit 1; }
     exec codex exec --task "${TASKS_DIR}/prae-add-track.md" -- "$@"
     ;;
   new-track)
-    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae new-track <track_id>"; exit 1; }
+    [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae new-track <track_id>"; exit 1; }
     exec codex exec --task "${TASKS_DIR}/prae-new-track.md" -- "$@"
     ;;
   new-exp)
-    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae new-exp <track_id>"; exit 1; }
+    [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae new-exp <track_id>"; exit 1; }
     exec codex exec --task "${TASKS_DIR}/prae-new-exp.md" -- "$@"
     ;;
   record-result)
     [ -n "${1:-}" ] && [ -n "${2:-}" ] || {
-      echo "错误: 请提供 track_id 和 exp_id"
-      echo "用法: prae record-result <track_id> <exp_id>"
+      echo "Error: please provide a track_id and an exp_id"
+      echo "Usage: prae record-result <track_id> <exp_id>"
       exit 1
     }
     exec codex exec --task "${TASKS_DIR}/prae-record-result.md" -- "$@"
     ;;
   lock-infra)
     [ -n "${1:-}" ] || {
-      echo "错误: 请提供基础设施 track_id"
-      echo "用法: prae lock-infra <track_id> --approver <name> --reason <reason> [--contracts <path>] [--module-spec <path>]"
+      echo "Error: please provide an infrastructure track_id"
+      echo "Usage: prae lock-infra <track_id> --approver <name> --reason <reason> [--contracts <path>] [--module-spec <path>]"
       exit 1
     }
     exec codex exec --task "${TASKS_DIR}/prae-lock-infra.md" -- "$@"
     ;;
   update-track-state)
     [ -n "${1:-}" ] && [ -n "${2:-}" ] || {
-      echo "错误: 请提供 track_id 和 to_state"
-      echo "用法: prae update-track-state <track_id> <ACTIVE|KILLED|MERGED|GRADUATED> --approver <name> --reason <reason>"
+      echo "Error: please provide a track_id and a to_state"
+      echo "Usage: prae update-track-state <track_id> <ACTIVE|KILLED|MERGED|GRADUATED> --approver <name> --reason <reason>"
       exit 1
     }
     exec codex exec --task "${TASKS_DIR}/prae-update-track-state.md" -- "$@"
@@ -74,7 +74,7 @@ case "${SUBCOMMAND}" in
     exec codex exec --task "${TASKS_DIR}/prae-advance-phase.md" -- "$@"
     ;;
   graduate)
-    [ -n "${1:-}" ] || { echo "错误: 请提供 track_id"; echo "用法: prae graduate <track_id>"; exit 1; }
+    [ -n "${1:-}" ] || { echo "Error: please provide a track_id"; echo "Usage: prae graduate <track_id>"; exit 1; }
     exec codex exec --task "${TASKS_DIR}/prae-graduate.md" -- "$@"
     ;;
   finalize)
@@ -85,55 +85,55 @@ case "${SUBCOMMAND}" in
     ;;
   help|--help|-h)
     cat << 'HELP'
-prae — PRAE 研究方法论 CLI（Codex 版本）
+prae — PRAE Research Methodology CLI (Codex version)
 
-用法:
-  prae bootstrap                      部署 PRAE 到当前项目（首次使用）
-  prae init                           初始化研究项目（填写 PRAE_INIT.md 后运行，生成 registry 和 Phase 0 工件）
-  prae add-track <track_id>           正式注册新轨道到 track_registry.yaml
-  prae new-track <track_id>           为已登记轨道创建当前阶段目录和初始日志
-  prae new-exp <track_id>             新建实验记录和代码骨架
-  prae record-result <id> <exp_id>    记录实验结果到 TRACK_LOG.md
-  prae lock-infra <id>                在人工批准后正式将基础设施轨道更新为 LOCKED
-  prae update-track-state <id> <state>  在人工批准后正式更新研究轨道状态
-  prae advance-phase                  首次生成阶段门控分析；已批准时校验 gate 并正式推进
-  prae graduate <track_id>            研究轨道毕业到 PDAE 工程项目
-  prae finalize                       记录项目终态决定
-  prae reopen                         根据 CONTINUE 决定重开到 Phase 1
+Usage:
+  prae bootstrap                      deploy PRAE to the current project (first use)
+  prae init                           initialize the research project (run after filling in PRAE_INIT.md; generates the registry and Phase 0 artifacts)
+  prae add-track <track_id>           formally register a new track into track_registry.yaml
+  prae new-track <track_id>           create the current-phase directory and initial log for an already-registered track
+  prae new-exp <track_id>             create a new experiment record and code skeleton
+  prae record-result <id> <exp_id>    record an experiment result into TRACK_LOG.md
+  prae lock-infra <id>                formally update an infrastructure track to LOCKED after human approval
+  prae update-track-state <id> <state>  formally update a research track state after human approval
+  prae advance-phase                  generate the phase gate analysis the first time; once approved, verify the gate and formally advance
+  prae graduate <track_id>            graduate a research track to a PDAE engineering project
+  prae finalize                       record the project's terminal decision
+  prae reopen                         reopen to Phase 1 based on a CONTINUE decision
 
-示例:
+Examples:
   prae bootstrap
-  # 填写 prae/PRAE_INIT.md 后
+  # after filling in prae/PRAE_INIT.md
   prae init
-  # 如需新增尚未登记的轨道，先注册
-  prae add-track research_strategy_reversal --type research --hypothesis "反转因子在A股ETF上有效" --depends-on infra_data_v1
-  # Phase 0: 基础设施选型 / PDAE M1-M3 / 锁定
+  # to add a track that has not yet been registered, register it first
+  prae add-track research_strategy_reversal --type research --hypothesis "The reversal factor works on A-share ETFs" --depends-on infra_data_v1
+  # Phase 0: infrastructure selection / PDAE M1-M3 / lock
   prae new-track infra_data_v1
-  prae new-exp infra_data_v1 --title "DuckDB 选型实验"
+  prae new-exp infra_data_v1 --title "DuckDB selection experiment"
   prae record-result infra_data_v1 EXP_001
-  prae lock-infra infra_data_v1 --approver saionji --reason "PDAE M3 通过"
+  prae lock-infra infra_data_v1 --approver saionji --reason "PDAE M3 passed"
   prae advance-phase
-  # 人工在 PHASE_GATE.md 填写 APPROVED: yes 后
+  # after a human writes APPROVED: yes in PHASE_GATE.md
   prae advance-phase
-  # Phase 1: 研究轨道探索
+  # Phase 1: research track exploration
   prae new-track research_strategy_momentum
   prae new-exp research_strategy_momentum
   prae record-result research_strategy_momentum EXP_003
-  prae update-track-state research_strategy_momentum ACTIVE --approver saionji --reason "EXP_003 正向信号"
+  prae update-track-state research_strategy_momentum ACTIVE --approver saionji --reason "EXP_003 positive signal"
   prae advance-phase
-  # 人工在 PHASE_GATE.md 填写 APPROVED: yes 后
+  # after a human writes APPROVED: yes in PHASE_GATE.md
   prae advance-phase
   prae graduate research_strategy_momentum
   prae finalize
   prae reopen
 
-文档: PRAE_ROOT/methodology/PRAE_QUICKSTART.md
+Documentation: PRAE_ROOT/methodology/PRAE_QUICKSTART.md
 HELP
     exit 0
     ;;
   *)
-    echo "未知子命令: ${SUBCOMMAND}"
-    echo "运行 prae help 查看帮助"
+    echo "Unknown subcommand: ${SUBCOMMAND}"
+    echo "Run 'prae help' for usage"
     exit 1
     ;;
 esac

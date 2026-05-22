@@ -1,52 +1,52 @@
-# track_registry.yaml — 轨道状态总表（唯一真相来源）
-# 模板来源: PRAE/runtime/abstract/track_registry.template.yaml
-# 规格参考: methodology/PRAE_ARTIFACTS.md §2.3
+# track_registry.yaml — master track-state table (single source of truth)
+# Template source: PRAE/runtime/abstract/track_registry.template.yaml
+# Spec reference: methodology/PRAE_ARTIFACTS.md §2.3
 
-project: "{{project_name}}"          # 项目名称，与目录名一致
-current_cycle: 1                      # 当前研究轮次（每次 CONTINUE 重开后递增）
-current_phase: phase_00_infra         # 当前阶段（由阶段门控批准后更新）
-updated: "{{YYYY-MM-DD}}"            # 最后更新日期
-# 以下项目级字段按需填写（Phase 3 终态或 CONTINUE 时由工具写入）
+project: "{{project_name}}"          # project name, matching the directory name
+current_cycle: 1                      # current research cycle (incremented each time a CONTINUE reopens the project)
+current_phase: phase_00_infra         # current phase (updated after the phase gate is approved)
+updated: "{{YYYY-MM-DD}}"            # last update date
+# The following project-level fields are filled in as needed (written by the tools at the Phase 3 final state or on CONTINUE)
 # project_decision: ARCHIVED | GRADUATED_TO_PDAE | CONTINUE
 # project_approver: "{{user_id}}"
 # project_decided_at: "{{YYYY-MM-DD}}"
-# project_reopened_at: "{{YYYY-MM-DD}}"   # 仅 CONTINUE 重开后填写
-# project_finalized_at: "{{YYYY-MM-DD}}"  # 仅终态决定填写
-# archived_at: "{{YYYY-MM-DD}}"           # 仅 ARCHIVED 填写
+# project_reopened_at: "{{YYYY-MM-DD}}"   # filled in only after a CONTINUE reopen
+# project_finalized_at: "{{YYYY-MM-DD}}"  # filled in only for a final-state decision
+# archived_at: "{{YYYY-MM-DD}}"           # filled in only for ARCHIVED
 
 # ===========================================================================
-# tracks 列表：每条轨道一个条目
-# state 合法值（见 methodology/PRAE_CORE_MODEL.md §2）：
-#   基础设施: EXPLORING → LOCKED
-#   研究:     EXPLORING → ACTIVE → KILLED / MERGED / GRADUATED
+# tracks list: one entry per track
+# Valid state values (see methodology/PRAE_CORE_MODEL.md §2):
+#   infrastructure: EXPLORING → LOCKED
+#   research:       EXPLORING → ACTIVE → KILLED / MERGED / GRADUATED
 # ===========================================================================
 
 tracks:
 
   # -------------------------------------------------------------------------
-  # 基础设施轨道示例
+  # Infrastructure track example
   # -------------------------------------------------------------------------
-  - id: infra_{{name}}_v1             # 命名规则: infra_{name}_v{N}
+  - id: infra_{{name}}_v1             # naming rule: infra_{name}_v{N}
     type: infrastructure
-    state: EXPLORING                   # 初始状态
+    state: EXPLORING                   # initial state
     src: src/infra_{{name}}_v1/
-    # 以下字段在 LOCKED 后填写（由执行者在 PDAE M3 通过后写入）:
+    # The following fields are filled in after LOCKED (written by the Executor once PDAE M3 passes):
     module_spec: ~                     # src/infra_{{name}}_v1/MODULE_SPEC.md
     contracts: ~                       # src/infra_{{name}}_v1/contracts.yaml
     locked_at: ~                       # YYYY-MM-DD
 
   # -------------------------------------------------------------------------
-  # 研究轨道示例
+  # Research track example
   # -------------------------------------------------------------------------
-  - id: research_{{topic}}_{{variant}} # 命名规则: research_{topic}_{variant}
+  - id: research_{{topic}}_{{variant}} # naming rule: research_{topic}_{variant}
     type: research
-    state: EXPLORING                   # 初始状态
+    state: EXPLORING                   # initial state
     src: src/tracks/research_{{topic}}_{{variant}}/
-    hypothesis: "{{一句话假设，可证伪}}"
+    hypothesis: "{{one-sentence falsifiable hypothesis}}"
     depends_on:
-      - infra_{{name}}_v1             # 依赖的基础设施轨道 ID 列表
-    experiments: 0                    # 已跑实验数（AI 在每次 EXP 后自动递增）
-    evidence_summary: ~               # 每次实验后追加一句话摘要（AI 维护）
-    # 以下字段在轨道结束时填写:
+      - infra_{{name}}_v1             # list of infrastructure track IDs this track depends on
+    experiments: 0                    # number of experiments run (AI auto-increments after each EXP)
+    evidence_summary: ~               # append a one-sentence summary after each experiment (maintained by the AI)
+    # The following fields are filled in when the track ends:
     concluded_at: ~                   # YYYY-MM-DD
-    merged_into: ~                    # 仅当 state=MERGED 时填写目标轨道 ID
+    merged_into: ~                    # fill in the target track ID only when state=MERGED

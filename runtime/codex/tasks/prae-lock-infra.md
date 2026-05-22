@@ -1,15 +1,15 @@
 # Task: prae-lock-infra
 
-> 在人工批准后正式将基础设施轨道从 `EXPLORING` 更新为 `LOCKED`
-> 调用方式: `prae lock-infra <track_id> --approver <name> --reason <reason> [--contracts <path>] [--module-spec <path>] [--approved-at YYYY-MM-DD]`
-> 前置条件: 项目已完成 `prae init`，当前位于 `phase_00_infra`，且对应基础设施轨道已完成 PDAE M3 / Contracts Gate
+> After human approval, formally update an infrastructure track from `EXPLORING` to `LOCKED`
+> Invocation: `prae lock-infra <track_id> --approver <name> --reason <reason> [--contracts <path>] [--module-spec <path>] [--approved-at YYYY-MM-DD]`
+> Prerequisites: the project has completed `prae init`, is currently in `phase_00_infra`, and the corresponding infrastructure track has passed PDAE M3 / the Contracts Gate
 
-## 步骤
+## Steps
 
-### 1. 解析参数
+### 1. Parse arguments
 
 ```bash
-TRACK_ID="${1:?'用法: prae lock-infra <track_id> --approver <name> --reason <reason>'}"
+TRACK_ID="${1:?'Usage: prae lock-infra <track_id> --approver <name> --reason <reason>'}"
 shift
 
 APPROVER=""
@@ -46,27 +46,27 @@ while [ $# -gt 0 ]; do
       shift 2
       ;;
     *)
-      echo "未知参数: $1"
+      echo "Unknown argument: $1"
       exit 1
       ;;
   esac
 done
 
-[ -n "${APPROVER}" ] || { echo "错误: 缺少 --approver"; exit 1; }
-[ -n "${REASON}" ] || { echo "错误: 缺少 --reason"; exit 1; }
+[ -n "${APPROVER}" ] || { echo "Error: missing --approver"; exit 1; }
+[ -n "${REASON}" ] || { echo "Error: missing --reason"; exit 1; }
 ```
 
-### 2. 验证项目已初始化
+### 2. Verify the project has been initialized
 
 ```bash
 [ -f "prae/track_registry.yaml" ] || {
-  echo "未找到 prae/track_registry.yaml。项目可能只完成了 bootstrap。"
-  echo "请先填写 prae/PRAE_INIT.md，然后运行: prae init"
+  echo "prae/track_registry.yaml not found. The project may have only completed bootstrap."
+  echo "Fill in prae/PRAE_INIT.md first, then run: prae init"
   exit 1
 }
 ```
 
-### 3. 调用正式工具
+### 3. Invoke the official tool
 
 ```bash
 CMD=(
@@ -85,17 +85,17 @@ CMD=(
 "${CMD[@]}"
 ```
 
-### 4. 结果解释
+### 4. Interpreting the result
 
-成功后会同时完成：
-- 将基础设施轨道 `state` 更新为 `LOCKED`
-- 写入 `locked_at`
-- 自动登记 `contracts` / `module_spec` 路径（优先使用显式参数，否则按 `src/{track_id}/...` 推断）
-- 在当前阶段 `TRACK_LOG.md` 的 `Decision Log` 追加 `EXPLORING → LOCKED`
+On success, the following are all done at once:
+- The infrastructure track's `state` is updated to `LOCKED`
+- `locked_at` is written
+- The `contracts` / `module_spec` paths are registered automatically (explicit arguments take precedence; otherwise inferred as `src/{track_id}/...`)
+- An `EXPLORING → LOCKED` entry is appended to the `Decision Log` in the current phase's `TRACK_LOG.md`
 
-若失败，优先看输出中的：
-- `当前阶段允许锁定基础设施轨道`
-- `基础设施轨道状态迁移合法`
-- `contracts 文件存在`
-- `MODULE_SPEC 文件存在`
-- `Contracts Gate 通过`
+On failure, look first at these items in the output:
+- `the current phase allows locking infrastructure tracks`
+- `infrastructure-track state transition is legal`
+- `contracts file exists`
+- `MODULE_SPEC file exists`
+- `Contracts Gate passed`

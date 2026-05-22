@@ -1,27 +1,27 @@
-# 轨道日志：infra_data_v1
+# Track Log: infra_data_v1
 
-**轨道 ID**: `infra_data_v1`
-**类型**: infrastructure
-**当前阶段**: phase_00_infra
-**创建日期**: 2026-04-19
+**Track ID**: `infra_data_v1`
+**Type**: infrastructure
+**Current Phase**: phase_00_infra
+**Created**: 2026-04-19
 
-## 选型目标
+## Selection Goal
 
-提供A股日频行情数据接入能力，支持按标的和日期范围查询K线数据。
+Provide daily-frequency equity market data ingestion, supporting K-line queries by symbol and date range.
 
 ## State
 
-**当前状态**: EXPLORING
+**Current State**: EXPLORING
 
 ## Experiments
 
-| EXP ID | 日期 | 目的 | 结论 | 链接 |
+| EXP ID | Date | Purpose | Conclusion | Link |
 |--------|------|------|------|------|
 
 ## Evidence Summary
 
 ## Decision Log
 
-| 日期 | 变更 | 建议者 | 批准者 | 原因 |
+| Date | Change | Advisor | Approver | Reason |
 |------|------|--------|--------|------|
-| 2026-04-19 | 创建（EXPLORING） | AI | — | 项目启动 |
+| 2026-04-19 | Created (EXPLORING) | AI | — | Project kickoff |

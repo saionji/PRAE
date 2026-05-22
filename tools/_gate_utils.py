@@ -19,6 +19,6 @@ def gate_payload(summary_prefix: str, checks: list[dict], *, data: dict | None =
     return {
         "passed": passed,
         "checks": checks,
-        "summary": f"{summary_prefix}: {'通过' if passed else f'失败 ({failed_count} 项)'}",
+        "summary": f"{summary_prefix}: {'passed' if passed else f'failed ({failed_count} items)'}",
         "data": data or {},
     }

@@ -1,35 +1,35 @@
 # Task: prae-graduate
 
-> 将 GRADUATED 研究轨道移交到 PDAE 工程化项目
-> 调用方式: `prae graduate <track_id>`
-> 前置条件: Phase 3 已开始，track state=GRADUATED，PDAE 已安装
+> Hand off a GRADUATED research track to a PDAE engineering project
+> Invocation: `prae graduate <track_id>`
+> Precondition: Phase 3 has started, track state=GRADUATED, PDAE is installed
 
-## 步骤
+## Steps
 
-### 1. 在 PDAE 仓库完成工程项目创建
+### 1. Create the engineering project in the PDAE repository
 
 ```bash
-TRACK_ID="${1:?'用法: prae graduate <track_id>'}"
+TRACK_ID="${1:?'Usage: prae graduate <track_id>'}"
 
 ls ${PDAE_HOME}/PDAE_QUICKSTART.md &>/dev/null || {
-  echo "错误: PDAE 仓库不可访问 (${PDAE_HOME})"
+  echo "Error: PDAE repository is not accessible (${PDAE_HOME})"
   exit 1
 }
 
 cd ${PDAE_HOME}
 source .venv/bin/activate
 
-# 参阅 PDAE_QUICKSTART.md 的 "新建项目" 章节
-# 将 src/tracks/${TRACK_ID}/ 的研究代码作为 scout_m1 的事实输入
-# 跑 PDAE M1-M3 流程，拿到最终项目路径
+# See the "New Project" section of PDAE_QUICKSTART.md
+# Use the research code in src/tracks/${TRACK_ID}/ as the factual input for scout_m1
+# Run the PDAE M1-M3 flow to obtain the final project path
 ```
 
-记录 PDAE 项目路径：`PDAE_PROJECT_PATH=<创建后的路径>`
+Record the PDAE project path: `PDAE_PROJECT_PATH=<path after creation>`
 
-### 2. 回到 PRAE 项目登记毕业记录
+### 2. Return to the PRAE project and register the graduation record
 
 ```bash
-PDAE_PROJECT_PATH="${PDAE_PROJECT_PATH:?'请设置 PDAE_PROJECT_PATH 环境变量'}"
+PDAE_PROJECT_PATH="${PDAE_PROJECT_PATH:?'Please set the PDAE_PROJECT_PATH environment variable'}"
 
 python3 tools/graduate_track.py \
   --project-dir . \
@@ -37,7 +37,7 @@ python3 tools/graduate_track.py \
   --pdae-project-path "${PDAE_PROJECT_PATH}"
 ```
 
-### 3. 刷新项目结论（如需要）
+### 3. Refresh the project conclusion (if needed)
 
 ```bash
 python3 tools/generate_conclusion.py --project-dir .

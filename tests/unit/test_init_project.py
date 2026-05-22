@@ -38,29 +38,29 @@ def setup_prae_init(target: Path) -> None:
 
     (prae_dir / "PRAE_INIT.md").write_text("""# PRAE Init
 
-## 问题陈述
+## Problem Statement
 
-**研究问题**: 测试项目
+**Research Question**: Test project
 
-**成功标准**: 测试
+**Success Criteria**: Test
 
-## 组件分类 → 基础设施轨道
+## Component Classification → Infrastructure Tracks
 
-| 轨道 ID | 描述 | 依赖的外部系统 | 备注 |
+| Track ID | Description | External Systems | Notes |
 |---------|------|---------------|------|
-| `infra_data_v1` | 数据接入 | — | — |
+| `infra_data_v1` | Data ingestion | — | — |
 
-## 组件分类 → 研究轨道
+## Component Classification → Research Tracks
 
-| 轨道 ID | 假设（一句话） | 依赖的基础设施 | 初始优先级 |
+| Track ID | Hypothesis (one line) | Infrastructure Dependencies | Initial Priority |
 |---------|--------------|---------------|------------|
-| `research_strategy_momentum` | 动量因子有效 | `infra_data_v1` | 高 |
+| `research_strategy_momentum` | Momentum factor is effective | `infra_data_v1` | High |
 
-## Phase 0 成功标准
+## Phase 0 Success Criteria
 
-| 基础设施轨道 ID | LOCKED 判断标准 | 当前状态 |
+| Infrastructure Track ID | LOCKED Criteria | Current State |
 |----------------|----------------|---------|
-| `infra_data_v1` | 接口稳定 | EXPLORING |
+| `infra_data_v1` | Interface stable | EXPLORING |
 """)
 
 
@@ -112,11 +112,11 @@ class TestInitProject:
         brief = tmp_path / "prae" / "phases" / "phase_00_infra" / "PHASE_BRIEF.md"
         content = brief.read_text(encoding="utf-8")
         assert "{{" not in content
-        assert "**阶段**: phase_00_infra" in content
-        assert "**研究轮次**: cycle_1" in content
+        assert "**Phase**: phase_00_infra" in content
+        assert "**Research Cycle**: cycle_1" in content
         assert "infra_data_v1" in content
-        assert "数据接入" in content
-        assert "LOCKED 标准：接口稳定" in content
+        assert "Data ingestion" in content
+        assert "LOCKED criteria: Interface stable" in content
 
     def test_renders_infra_track_log_without_placeholders(self, tmp_path):
         setup_prae_init(tmp_path)
@@ -128,8 +128,8 @@ class TestInitProject:
         )
         content = log_path.read_text(encoding="utf-8")
         assert "{{" not in content
-        assert "**类型**: infrastructure" in content
-        assert "**当前阶段**: phase_00_infra" in content
-        assert "**研究轮次**: cycle_1" in content
-        assert "基础设施目标：数据接入" in content
-        assert "LOCKED 判断标准：接口稳定" in content
+        assert "**Type**: infrastructure" in content
+        assert "**Current Phase**: phase_00_infra" in content
+        assert "**Research Cycle**: cycle_1" in content
+        assert "Infrastructure goal: Data ingestion" in content
+        assert "LOCKED criteria: Interface stable" in content

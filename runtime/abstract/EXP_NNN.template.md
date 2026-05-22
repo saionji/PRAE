@@ -1,83 +1,83 @@
-# EXP_{{NNN}}：{{实验标题}}
+# EXP_{{NNN}}: {{experiment_title}}
 
-<!-- 模板来源: PRAE/runtime/abstract/EXP_NNN.template.md -->
-<!-- 规格参考: methodology/PRAE_ARTIFACTS.md §2.7 -->
-<!-- 路径规则: prae/phases/phase_NN_*/tracks/{track_id}/experiments/EXP_NNN.md -->
-<!-- 对应代码: src/tracks/{track_id}/experiments/EXP_NNN.py -->
-<!-- 创建者: AI 分析者；Result 和 Conclusion 在实验跑完后填写，此后不再修改 -->
+<!-- Template source: PRAE/runtime/abstract/EXP_NNN.template.md -->
+<!-- Spec reference: methodology/PRAE_ARTIFACTS.md §2.7 -->
+<!-- Path rule: prae/phases/phase_NN_*/tracks/{track_id}/experiments/EXP_NNN.md -->
+<!-- Corresponding code: src/tracks/{track_id}/experiments/EXP_NNN.py -->
+<!-- Creator: AI Analyst; fill in Result and Conclusion after the experiment runs, then do not modify them further -->
 
-**实验 ID**: EXP_{{NNN}}
-**轨道 ID**: `{{track_id}}`
-**日期**: {{YYYY-MM-DD}}
-**状态**: 进行中 / 已完成  <!-- 删除不适用的 -->
+**Experiment ID**: EXP_{{NNN}}
+**Track ID**: `{{track_id}}`
+**Date**: {{YYYY-MM-DD}}
+**State**: In Progress / Completed  <!-- delete whichever does not apply -->
 
 ---
 
 ## Goal
 
-{{一句话目标：这次实验要回答的核心问题}}
+{{One-sentence goal: the core question this experiment answers}}
 
 ---
 
 ## Method
 
-- **数据源**: `{{infra_track_id}}.{{api_function}}`（契约声明的公开接口）
-- **标的 / 数据集**: {{具体数据集描述，例如"沪深300成分股，截至2024-01-01列表"}}
-- **时间窗**: {{YYYY-MM-DD}} 至 {{YYYY-MM-DD}}
-- **随机种子**: `seed={{N}}`（或"无随机性"）
-- **关键超参数**:
+- **Data Source**: `{{infra_track_id}}.{{api_function}}` (the public interface declared by the contract)
+- **Target / Dataset**: {{Concrete dataset description, e.g. "CSI 300 constituents, list as of 2024-01-01"}}
+- **Time Window**: {{YYYY-MM-DD}} to {{YYYY-MM-DD}}
+- **Random Seed**: `seed={{N}}` (or "no randomness")
+- **Key Hyperparameters**:
   - `{{param_name}}`: {{value}}
   - `{{param_name}}`: {{value}}
-- **对照组**: {{对照组设置，或"无对照组"}}
-- **代码路径**: `src/tracks/{{track_id}}/experiments/EXP_{{NNN}}.py`
+- **Control Group**: {{Control group setup, or "no control group"}}
+- **Code Path**: `src/tracks/{{track_id}}/experiments/EXP_{{NNN}}.py`
 
 ---
 
 ## Preflight Check
 
-> 这是实验版“轻量 PDAE”步骤：先把最小可运行检查和输出契约写清，再开始实现。
+> This is the experiment-variant "lightweight PDAE" step: write the minimal runnable check and the output contract clearly first, then start implementing.
 
-**最小冒烟检查**：{{例如"脚本需在 30s 内跑完，并打印夏普、最大回撤、样本数"}}
+**Minimal Smoke Check**: {{e.g. "the script must finish within 30s and print Sharpe, max drawdown, and sample count"}}
 
-**输出契约**：{{例如"stdout 至少包含 sharpe/max_drawdown；并写出 results/EXP_{{NNN}}.json"}}
+**Output Contract**: {{e.g. "stdout contains at least sharpe/max_drawdown; also writes results/EXP_{{NNN}}.json"}}
 
-**本次不做**：{{例如"不抽象成 impl/，不优化性能，不处理多市场泛化"}}
+**Out of Scope This Time**: {{e.g. "do not abstract into impl/, do not optimize performance, do not handle multi-market generalization"}}
 
 ---
 
 ## Expected Signal
 
-**成功判据**（验证假设）：{{例如"回测夏普 ≥ 1.0 且最大回撤 ≤ 25%"}}
+**Success Criterion** (confirms the hypothesis): {{e.g. "backtest Sharpe ≥ 1.0 and max drawdown ≤ 25%"}}
 
-**失败判据**（证伪假设）：{{例如"夏普 < 0 或最大回撤 > 40%"}}
+**Failure Criterion** (refutes the hypothesis): {{e.g. "Sharpe < 0 or max drawdown > 40%"}}
 
-**中性信号**：{{例如"夏普 0-1，继续优化"}}
+**Neutral Signal**: {{e.g. "Sharpe 0-1, keep optimizing"}}
 
 ---
 
 ## Result
 
-> 在实验跑完后填写，此后不再修改。
+> Fill this in after the experiment runs, then do not modify it further.
 
-**关键数值**:
-- {{指标名}}: {{数值}}
-- {{指标名}}: {{数值}}
+**Key Values**:
+- {{metric name}}: {{value}}
+- {{metric name}}: {{value}}
 
-**输出位置**: `{{图表或数据文件路径，若有}}`
+**Output Location**: `{{path to chart or data file, if any}}`
 
-**原始输出**（粘贴关键 stdout / stderr）：
+**Raw Output** (paste the key stdout / stderr):
 ```
-{{粘贴实验关键输出}}
+{{paste the experiment's key output}}
 ```
 
 ---
 
 ## Conclusion
 
-**结论**: 支持 / 证伪 / 部分支持 假设
+**Conclusion**: confirms / refutes / partially confirms the hypothesis
 
-**理由**: {{1-3 句说明为什么得出上述结论}}
+**Rationale**: {{1-3 sentences explaining why you reached the above conclusion}}
 
-**对轨道状态的影响建议**:
-- 建议 state 变更：{{EXPLORING → ACTIVE / 保持 EXPLORING / ACTIVE → KILLED / 等}} （或"无变更"）
-- 下一步建议：{{下一个实验的方向，或终结轨道}}
+**Recommended Impact on Track State**:
+- Recommended state change: {{EXPLORING → ACTIVE / keep EXPLORING / ACTIVE → KILLED / etc.}} (or "no change")
+- Next-step recommendation: {{direction for the next experiment, or terminate the track}}

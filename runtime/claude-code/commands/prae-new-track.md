@@ -1,17 +1,17 @@
 # /prae-new-track
 
-> **用途**: 为当前阶段一条已登记轨道创建目录和初始 `TRACK_LOG.md`
-> **参数**: `<track_id>`
+> **Purpose**: Create the directory and an initial `TRACK_LOG.md` for a track already registered in the current phase
+> **Arguments**: `<track_id>`
 
-## 执行步骤
+## Execution Steps
 
-### 1. 解析参数
+### 1. Parse arguments
 
 ```bash
-TRACK_ID="${1:?'用法: /prae-new-track <track_id>'}"
+TRACK_ID="${1:?'Usage: /prae-new-track <track_id>'}"
 ```
 
-### 2. 调用正式工具
+### 2. Invoke the formal tool
 
 ```bash
 python3 tools/new_track.py \

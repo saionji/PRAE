@@ -6,8 +6,8 @@ import re
 from pathlib import Path
 
 
-DECISION_LOG_INTRO = "> 记录状态变更：何时变、谁建议、谁批准。格式：日期 + 旧状态 → 新状态 + 原因。"
-DECISION_LOG_HEADER = "| 日期 | 变更 | 建议者 | 批准者 | 原因 |"
+DECISION_LOG_INTRO = "> Record state changes: when it changed, who recommended it, who approved it. Format: date + old state → new state + reason."
+DECISION_LOG_HEADER = "| Date | Change | Recommended by | Approved by | Reason |"
 DECISION_LOG_SEPARATOR = "|------|------|--------|--------|------|"
 
 
@@ -17,7 +17,7 @@ def today_str() -> str:
 
 def render_depends_lines(depends_on: list[str] | None) -> str:
     items = depends_on or []
-    return "\n".join(f"- `{dep}`" for dep in items) if items else "- 无"
+    return "\n".join(f"- `{dep}`" for dep in items) if items else "- None"
 
 
 def render_research_track_log(
@@ -29,48 +29,48 @@ def render_research_track_log(
 ) -> str:
     today = today_str()
     depends_lines = render_depends_lines(track.get("depends_on"))
-    hypothesis = track.get("hypothesis") or "待补充"
+    hypothesis = track.get("hypothesis") or "To be filled in"
     return "\n".join([
-        f"# 轨道日志：{track['id']}",
+        f"# Track Log: {track['id']}",
         "",
-        f"**轨道 ID**: `{track['id']}`",
-        "**类型**: research",
-        f"**当前阶段**: {current_phase}",
-        f"**研究轮次**: {cycle_label}",
-        f"**创建日期**: {today}",
+        f"**Track ID**: `{track['id']}`",
+        "**Type**: research",
+        f"**Current Phase**: {current_phase}",
+        f"**Research Cycle**: {cycle_label}",
+        f"**Created**: {today}",
         "",
         "---",
         "",
-        "## Hypothesis（仅研究轨道填写）",
+        "## Hypothesis (research tracks only)",
         "",
         hypothesis,
         "",
-        "**失败判据**（什么情况下 KILL 这条轨道）:",
-        "待补充：出现明确证伪信号、收益风险比不达标或无法复现时终止。",
+        "**Failure Criterion** (under what conditions to KILL this track):",
+        "To be filled in: terminate when a clear falsifying signal appears, the reward-to-risk ratio is unacceptable, or results cannot be reproduced.",
         "",
         "---",
         "",
         "## State",
         "",
-        f"**当前状态**: {track.get('state', 'EXPLORING')}",
-        "**依赖的轨道**:",
+        f"**Current State**: {track.get('state', 'EXPLORING')}",
+        "**Depends On**:",
         depends_lines,
         "",
         "---",
         "",
         "## Experiments",
         "",
-        "| EXP ID | 日期 | 目的 | 结论 | 链接 |",
+        "| EXP ID | Date | Purpose | Conclusion | Link |",
         "|--------|------|------|------|------|",
-        "| — | — | 尚无实验记录 | — | — |",
+        "| — | — | No experiment records yet | — | — |",
         "",
         "---",
         "",
         "## Evidence Summary",
         "",
-        "> 每次实验后追加一段，格式：日期 + 关键发现 + 对假设的影响。不删历史。",
+        "> Append a paragraph after each experiment, format: date + key findings + impact on the hypothesis. Do not delete history.",
         "",
-        "- 暂无实验记录。",
+        "- No experiment records yet.",
         "",
         "---",
         "",
@@ -80,7 +80,7 @@ def render_research_track_log(
         "",
         DECISION_LOG_HEADER,
         DECISION_LOG_SEPARATOR,
-        f"| {today} | 创建（{track.get('state', 'EXPLORING')}) | AI | — | {created_reason} |",
+        f"| {today} | Created ({track.get('state', 'EXPLORING')}) | AI | — | {created_reason} |",
         "",
     ])
 
@@ -95,26 +95,26 @@ def render_infra_track_log(
     lock_criteria: str | None = None,
 ) -> str:
     today = today_str()
-    description = description or track.get("description") or track.get("goal") or "待补充"
+    description = description or track.get("description") or track.get("goal") or "To be filled in"
     if lock_criteria is None:
         target_lines = [description]
     else:
         target_lines = [
-            f"- 基础设施目标：{description}",
-            f"- LOCKED 判断标准：{lock_criteria}",
+            f"- Infrastructure goal: {description}",
+            f"- LOCKED criteria: {lock_criteria}",
         ]
     return "\n".join([
-        f"# 轨道日志：{track['id']}",
+        f"# Track Log: {track['id']}",
         "",
-        f"**轨道 ID**: `{track['id']}`",
-        "**类型**: infrastructure",
-        f"**当前阶段**: {current_phase}",
-        f"**研究轮次**: {cycle_label}",
-        f"**创建日期**: {today}",
+        f"**Track ID**: `{track['id']}`",
+        "**Type**: infrastructure",
+        f"**Current Phase**: {current_phase}",
+        f"**Research Cycle**: {cycle_label}",
+        f"**Created**: {today}",
         "",
         "---",
         "",
-        "## 选型目标（仅基础设施轨道填写）",
+        "## Selection Goal (infrastructure tracks only)",
         "",
         *target_lines,
         "",
@@ -122,25 +122,25 @@ def render_infra_track_log(
         "",
         "## State",
         "",
-        f"**当前状态**: {track.get('state', 'EXPLORING')}",
-        "**依赖的轨道**:",
-        "- 无",
+        f"**Current State**: {track.get('state', 'EXPLORING')}",
+        "**Depends On**:",
+        "- None",
         "",
         "---",
         "",
         "## Experiments",
         "",
-        "| EXP ID | 日期 | 目的 | 结论 | 链接 |",
+        "| EXP ID | Date | Purpose | Conclusion | Link |",
         "|--------|------|------|------|------|",
-        "| — | — | 尚无选型或验证记录 | — | — |",
+        "| — | — | No selection or validation records yet | — | — |",
         "",
         "---",
         "",
         "## Evidence Summary",
         "",
-        "> 每次选型验证或实现推进后追加一段，格式：日期 + 关键发现 + 对 LOCKED 决策的影响。",
+        "> Append a paragraph after each selection validation or implementation milestone, format: date + key findings + impact on the LOCKED decision.",
         "",
-        "- 暂无选型记录。",
+        "- No selection records yet.",
         "",
         "---",
         "",
@@ -150,7 +150,7 @@ def render_infra_track_log(
         "",
         DECISION_LOG_HEADER,
         DECISION_LOG_SEPARATOR,
-        f"| {today} | 创建（{track.get('state', 'EXPLORING')}) | AI | — | {created_reason} |",
+        f"| {today} | Created ({track.get('state', 'EXPLORING')}) | AI | — | {created_reason} |",
         "",
     ])
 
@@ -205,15 +205,15 @@ def render_exp_markdown(template: str, exp_num: str, track_id: str, title: str) 
     content = template
     replacements = {
         "{{NNN}}": exp_num,
-        "{{实验标题}}": title,
+        "{{experiment_title}}": title,
         "{{track_id}}": track_id,
         "{{YYYY-MM-DD}}": today_str(),
     }
     for old, new in replacements.items():
         content = content.replace(old, new)
     return re.sub(
-        r"^\*\*状态\*\*:.*$",
-        "**状态**: 进行中",
+        r"^\*\*State\*\*:.*$",
+        "**State**: In Progress",
         content,
         count=1,
         flags=re.MULTILINE,
@@ -224,20 +224,20 @@ def render_exp_python(exp_id: str, title: str, track_id: str, exp_md_path: Path)
     return "\n".join([
         '"""',
         f"{exp_id}: {title}",
-        f"轨道: {track_id}",
-        f"记录: {exp_md_path.as_posix()}",
+        f"Track: {track_id}",
+        f"Record: {exp_md_path.as_posix()}",
         "",
-        "约束:",
-        "- 只使用 contracts.yaml 声明的公开接口",
-        "- 此文件不能被其他代码 import",
-        "- 修改逻辑时创建新的 EXP_NNN.py，不在本文件上改",
-        "- 先满足 EXP_NNN.md 的 Preflight Check，再考虑额外抽象",
+        "Constraints:",
+        "- Only use the public interfaces declared in contracts.yaml",
+        "- This file must not be imported by other code",
+        "- When changing logic, create a new EXP_NNN.py; do not edit this file",
+        "- First satisfy the Preflight Check in EXP_NNN.md, then consider additional abstraction",
         '"""',
         "",
         "def main():",
-        f"    # TODO 1: 先完成 {exp_id}.md 的 Method / Preflight Check / Expected Signal",
-        "    # TODO 2: 先实现最小可运行路径，产出 Preflight 里承诺的输出",
-        "    # TODO 3: 跑通后再决定是否需要更复杂的实验逻辑",
+        f"    # TODO 1: First complete the Method / Preflight Check / Expected Signal in {exp_id}.md",
+        "    # TODO 2: First implement the minimal runnable path, producing the output promised in Preflight",
+        "    # TODO 3: Once it runs end-to-end, decide whether more complex experiment logic is needed",
         "    pass",
         "",
         'if __name__ == "__main__":',

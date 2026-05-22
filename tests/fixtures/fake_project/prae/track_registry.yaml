@@ -15,7 +15,7 @@ tracks:
     type: research
     state: EXPLORING
     src: src/tracks/research_strategy_momentum/
-    hypothesis: "动量因子在A股日频数据上有显著正向收益"
+    hypothesis: "The momentum factor yields significant positive returns on daily-frequency equity data"
     depends_on:
       - infra_data_v1
     experiments: 0

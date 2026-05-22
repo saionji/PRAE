@@ -1,25 +1,25 @@
-# PRAE 项目初始化文档
+# PRAE Project Initialization Document
 
-## 问题陈述
+## Problem Statement
 
-**研究问题**: 动量策略在A股市场的有效性
+**Research Question**: Effectiveness of momentum strategies in equity markets
 
-**成功标准**: 回测夏普比率 ≥ 1.0，最大回撤 ≤ 30%
+**Success Criteria**: Backtest Sharpe ratio >= 1.0, max drawdown <= 30%
 
-## 组件分类 → 基础设施轨道
+## Component Classification → Infrastructure Tracks
 
-| 轨道 ID | 描述 | 依赖的外部系统 | 备注 |
+| Track ID | Description | External Systems | Notes |
 |---------|------|---------------|------|
-| `infra_data_v1` | A股日频行情数据接入 | Wind API | — |
+| `infra_data_v1` | Daily-frequency equity market data ingestion | Market data API | — |
 
-## 组件分类 → 研究轨道
+## Component Classification → Research Tracks
 
-| 轨道 ID | 假设（一句话） | 依赖的基础设施 | 初始优先级 |
+| Track ID | Hypothesis (one line) | Infrastructure Dependency | Initial Priority |
 |---------|--------------|---------------|------------|
-| `research_strategy_momentum` | 动量因子在A股日频数据上有显著正向收益 | `infra_data_v1` | 高 |
+| `research_strategy_momentum` | The momentum factor yields significant positive returns on daily-frequency equity data | `infra_data_v1` | High |
 
-## Phase 0 成功标准
+## Phase 0 Success Criteria
 
-| 基础设施轨道 ID | LOCKED 判断标准 | 当前状态 |
+| Infrastructure Track ID | LOCKED Criterion | Current State |
 |----------------|----------------|---------|
-| `infra_data_v1` | 日频数据可稳定加载，接口契约定义完成 | EXPLORING |
+| `infra_data_v1` | Daily data loads reliably and the interface contract is fully defined | EXPLORING |

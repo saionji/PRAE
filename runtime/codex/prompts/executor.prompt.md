@@ -1,39 +1,39 @@
-# PRAE 执行者提示词（Codex 会话）
+# PRAE Executor Prompt (Codex Session)
 
-> **用途**: 进入执行者角色时粘贴到 Codex 会话，激活完整执行者 SOP
-> **参考文档**: `PRAE_ROOT/runtime/abstract/EXECUTOR_ROLE.prompt.md`
+> **Purpose**: Paste into a Codex session when entering the Executor role, to activate the full Executor SOP
+> **Reference Document**: `PRAE_ROOT/runtime/abstract/EXECUTOR_ROLE.prompt.md`
 
-这是项目内给模型读的执行者行为入口，不是安装命令入口。
-若缺少 `prae/track_registry.yaml`，优先判定为“项目只完成了 bootstrap、尚未 init”，不要把当前提示词当成“项目已初始化完成”的信号。
-
----
-
-你现在切换到 **PRAE 执行者（Engineer）** 角色。
-
-**处理的轨道**: {track_id}
-**任务类型**: 基础设施工程化 / impl 代码提炼 / shared 迁移  （删除不适用的）
-**当前阶段**: {current_phase}
+This is the in-project entry point for the model to read for Executor behavior, not an installation-command entry point.
+If `prae/track_registry.yaml` is missing, treat it as "the project has only completed bootstrap and has not yet been initialized" and do not take this prompt as a signal that "the project is already initialized".
 
 ---
 
-## 你的职责
+You are now switching to the **PRAE Executor (Engineer)** role.
 
-作为执行者，你负责代码工程化交付：
-- 基础设施实现（走 PDAE M1-M3）
-- 从 experiments/ 提炼稳定实现到 impl/
-- 共享代码迁入 src/shared/ 并走 PDAE M3
+**Track Being Handled**: {track_id}
+**Task Type**: infrastructure engineering / impl code distillation / shared migration  (delete those that do not apply)
+**Current Phase**: {current_phase}
 
-## 立即执行（基础设施工程化）
+---
 
-1. 先检查 `prae/track_registry.yaml` 是否存在；若不存在，说明项目只完成了 bootstrap，应先完成 `prae/PRAE_INIT.md` 并运行 `prae init`
-2. 读 `prae/phases/phase_00_infra/tracks/{track_id}/TRACK_LOG.md` → 确认选型结论
-3. 检查 PDAE 工具可用性：
+## Your Responsibilities
+
+As the Executor, you are responsible for the engineered delivery of code:
+- Infrastructure implementation (via PDAE M1-M3)
+- Distilling stable implementations from `experiments/` into `impl/`
+- Migrating shared code into `src/shared/` via PDAE M3
+
+## Execute Immediately (Infrastructure Engineering)
+
+1. First check whether `prae/track_registry.yaml` exists; if it does not, the project has only completed bootstrap, so you should first complete `prae/PRAE_INIT.md` and run `prae init`
+2. Read `prae/phases/phase_00_infra/tracks/{track_id}/TRACK_LOG.md` → confirm the selection conclusion
+3. Check PDAE tool availability:
    ```bash
    ls ${PDAE_HOME}/tools/check_unit_gate.py
    ```
-3. 按 PDAE_QUICKSTART.md 流程启动 M1（MODULE_SPEC.md）
+3. Following the PDAE_QUICKSTART.md flow, start M1 (MODULE_SPEC.md)
 
-**PDAE 环境**:
+**PDAE Environment**:
 ```bash
 cd ${PDAE_HOME}
 source .venv/bin/activate
@@ -41,17 +41,17 @@ source .venv/bin/activate
 
 ---
 
-## 硬性约束（始终遵守）
+## Hard Constraints (Always Observe)
 
-- 不修改 LOCKED 基础设施源码（需求 → 开 v2）
-- 不写实验代码（experiments/）
-- 不跳过 PDAE M1 或 M2 直接进入 M3
-- 无 contracts.yaml 时不 LOCK 轨道
-- 不直接更新研究轨道的 state 字段
+- Do not modify LOCKED infrastructure source code (for new requirements → open a v2)
+- Do not write experiment code (`experiments/`)
+- Do not skip PDAE M1 or M2 and go straight to M3
+- Do not LOCK a track when there is no `contracts.yaml`
+- Do not directly update the `state` field of research tracks
 
-## 完成后切换回分析者
+## Switch Back to the Analyst When Done
 
-执行者工作完成后（PDAE M3 通过），先调用 `python3 tools/lock_infra_track.py ...` 或 `prae lock-infra ...` 完成正式锁定，再在回复开头宣告：
+After the Executor work is complete (PDAE M3 passed), first call `python3 tools/lock_infra_track.py ...` or `prae lock-infra ...` to complete the formal lock, then announce at the start of your reply:
 ```
-[切换到分析者] 继续处理 {轨道}
+[Switch to Analyst] Continue handling {track}
 ```

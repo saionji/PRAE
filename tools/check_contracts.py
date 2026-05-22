@@ -2,19 +2,20 @@
 # SOURCE: PDAE ${PDAE_HOME}/tools/check_contracts.py (v5.8.0, 2026-04-19)
 # Do not modify; re-copy from PDAE to update.
 """
-check_contracts.py — PDAE v5.8.0 契约检查脚本
+check_contracts.py — PDAE v5.8.0 contract checker
 
-从 contracts.yaml 读取约束规则，对代码进行确定性检查。
-非 AI 检查 AI — 用确定性脚本守护约束。
+Reads constraint rules from contracts.yaml and runs deterministic checks
+against the code. Non-AI checking AI — guard constraints with a
+deterministic script.
 
-退出码:
-  0 = 所有检查通过
-  1 = IMMUTABLE 违规 (阻塞合并)
-  2 = CRITICAL 违规 (阻塞合并)
-  3 = NEED_REVIEW 变更 (不阻塞，需聚焦复核)
-  4 = contracts.yaml 格式错误
+Exit codes:
+  0 = all checks passed
+  1 = IMMUTABLE violation (blocks merge)
+  2 = CRITICAL violation (blocks merge)
+  3 = NEED_REVIEW change (does not block, needs focused review)
+  4 = contracts.yaml format error
 
-用法:
+Usage:
   python3 tools/check_contracts.py --contracts contracts.yaml --src src/
   python3 tools/check_contracts.py --contracts contracts.yaml --src src/ --level immutable
   python3 tools/check_contracts.py --contracts contracts.yaml --src src/ --id IMM-001
@@ -34,33 +35,33 @@ from pathlib import Path
 try:
     import yaml
 except ImportError:
-    print("[ERROR] pyyaml 未安装。请运行: pip install pyyaml")
+    print("[ERROR] pyyaml is not installed. Please run: pip install pyyaml")
     sys.exit(4)
 
 
 # ========================================
-# ANSI 颜色
+# ANSI colors
 # ========================================
 class Color:
-    PASS = "\033[92m"   # 绿色
-    FAIL = "\033[91m"   # 红色
-    WARN = "\033[93m"   # 黄色
+    PASS = "\033[92m"   # green
+    FAIL = "\033[91m"   # red
+    WARN = "\033[93m"   # yellow
     RESET = "\033[0m"
     BOLD = "\033[1m"
 
 
 def colored(text: str, color: str) -> str:
-    """如果终端支持颜色则着色，否则返回原文"""
+    """Colorize if the terminal supports color, otherwise return the original text"""
     if sys.stdout.isatty():
         return f"{color}{text}{Color.RESET}"
     return text
 
 
 # ========================================
-# 文件匹配
+# File matching
 # ========================================
 def find_files(patterns: list[str], src_dir: str, exclude: list[str] | None = None) -> list[str]:
-    """根据 glob 模式查找文件"""
+    """Find files by glob pattern"""
     matched = set()
     for pattern in patterns:
         full_pattern = os.path.join(src_dir, pattern)
@@ -77,17 +78,17 @@ def find_files(patterns: list[str], src_dir: str, exclude: list[str] | None = No
 
 
 def read_file(filepath: str) -> str:
-    """读取文件内容，处理编码异常"""
+    """Read file content, handling encoding errors"""
     try:
         with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             return f.read()
     except (OSError, IOError) as e:
-        print(f"  [WARN] 无法读取 {filepath}: {e}")
+        print(f"  [WARN] Unable to read {filepath}: {e}")
         return ""
 
 
 # ========================================
-# 检查器
+# Checkers
 # ========================================
 class CheckResult:
     def __init__(self, rule_id: str, name: str, passed: bool, message: str, level: str):
@@ -99,7 +100,7 @@ class CheckResult:
 
 
 def check_grep_literal(rule: dict, src_dir: str) -> CheckResult:
-    """grep_literal: 简单文本匹配"""
+    """grep_literal: simple text matching"""
     rule_id = rule["id"]
     name = rule.get("name", rule_id)
     pattern = rule["pattern"]
@@ -119,15 +120,15 @@ def check_grep_literal(rule: dict, src_dir: str) -> CheckResult:
                 break
 
     if found:
-        return CheckResult(rule_id, name, True, "匹配成功", rule.get("_level", "immutable"))
+        return CheckResult(rule_id, name, True, "match found", rule.get("_level", "immutable"))
     else:
         return CheckResult(rule_id, name, False,
-                           f"未找到 '{pattern}'" + (f" 或 '{expected}'" if expected else ""),
+                           f"'{pattern}' not found" + (f" or '{expected}'" if expected else ""),
                            rule.get("_level", "immutable"))
 
 
 def check_regex_match(rule: dict, src_dir: str) -> CheckResult:
-    """regex_match: 正则表达式匹配"""
+    """regex_match: regular expression matching"""
     rule_id = rule["id"]
     name = rule.get("name", rule_id)
     pattern = rule["pattern"]
@@ -138,7 +139,7 @@ def check_regex_match(rule: dict, src_dir: str) -> CheckResult:
     try:
         regex = re.compile(pattern)
     except re.error as e:
-        return CheckResult(rule_id, name, False, f"正则表达式错误: {e}",
+        return CheckResult(rule_id, name, False, f"regular expression error: {e}",
                            rule.get("_level", "immutable"))
 
     for filepath in files:
@@ -149,23 +150,23 @@ def check_regex_match(rule: dict, src_dir: str) -> CheckResult:
 
     if must_match:
         passed = found
-        msg = "匹配成功" if found else f"未找到匹配 '{pattern}'"
+        msg = "match found" if found else f"no match found for '{pattern}'"
     else:
         passed = not found
-        msg = "无禁止模式" if not found else f"发现禁止模式 '{pattern}'"
+        msg = "no forbidden pattern" if not found else f"forbidden pattern found '{pattern}'"
 
     return CheckResult(rule_id, name, passed, msg, rule.get("_level", "immutable"))
 
 
 def check_import_guard(rule: dict, src_dir: str) -> CheckResult:
-    """import_guard: ACL 边界守护"""
+    """import_guard: ACL boundary guard"""
     rule_id = rule["id"]
     name = rule.get("name", rule_id)
     forbidden = rule.get("forbidden_imports", [])
     allowed_in = rule.get("allowed_in", [])
     files = find_files(rule.get("files", ["**/*"]), src_dir)
 
-    # 排除 allowed_in 的文件
+    # Exclude files listed in allowed_in
     if allowed_in:
         allowed_files = set()
         for pattern in allowed_in:
@@ -183,44 +184,44 @@ def check_import_guard(rule: dict, src_dir: str) -> CheckResult:
                     violations.append(f"  {rel_path}:{line_num}: {line.strip()}")
 
     if violations:
-        detail = "\n".join(violations[:5])  # 最多显示5个
+        detail = "\n".join(violations[:5])  # show at most 5
         return CheckResult(rule_id, name, False,
-                           f"发现 {len(violations)} 处违规:\n{detail}",
+                           f"found {len(violations)} violations:\n{detail}",
                            rule.get("_level", "critical"))
     else:
-        return CheckResult(rule_id, name, True, "ACL边界完整",
+        return CheckResult(rule_id, name, True, "ACL boundary intact",
                            rule.get("_level", "critical"))
 
 
 def check_function_body_hash(rule: dict, src_dir: str) -> CheckResult:
-    """function_body_hash_match: 函数体 hash 比对"""
+    """function_body_hash_match: function body hash comparison"""
     rule_id = rule["id"]
     name = rule.get("name", rule_id)
     baseline_hash = rule.get("baseline_hash", "")
     files = find_files(rule.get("files", ["**/*"]), src_dir)
 
-    # 简化实现: 对整个文件计算 hash
+    # Simplified implementation: compute hash over the whole file
     for filepath in files:
         content = read_file(filepath)
         current_hash = "sha256:" + hashlib.sha256(content.encode()).hexdigest()[:12]
 
         if baseline_hash and current_hash != baseline_hash:
             return CheckResult(rule_id, name, False,
-                               f"hash 已变更 (baseline: {baseline_hash}, current: {current_hash})",
+                               f"hash changed (baseline: {baseline_hash}, current: {current_hash})",
                                "need_review")
 
-    return CheckResult(rule_id, name, True, "未变更", "need_review")
+    return CheckResult(rule_id, name, True, "unchanged", "need_review")
 
 
 def check_ast_import(rule: dict, src_dir: str) -> CheckResult:
-    """ast_import_check: 通过 Python AST 检查实际 import 语句，完全忽略注释和字符串"""
+    """ast_import_check: check actual import statements via Python AST, fully ignoring comments and strings"""
     rule_id = rule["id"]
     name = rule.get("name", rule_id)
     forbidden = rule.get("forbidden_import", "")
     if not forbidden:
         return CheckResult(
             rule_id, name, False,
-            "ast_import_check 缺少 forbidden_import 字段（标量字符串）",
+            "ast_import_check is missing the forbidden_import field (scalar string)",
             rule.get("_level", "immutable"),
         )
 
@@ -238,7 +239,7 @@ def check_ast_import(rule: dict, src_dir: str) -> CheckResult:
         try:
             tree = ast.parse(content, filename=filepath)
         except SyntaxError:
-            print(f"  [WARN] 无法解析 {filepath}（语法错误），跳过 AST 检查")
+            print(f"  [WARN] Unable to parse {filepath} (syntax error), skipping AST check")
             continue
 
         for node in ast.walk(tree):
@@ -258,15 +259,15 @@ def check_ast_import(rule: dict, src_dir: str) -> CheckResult:
         detail = "\n".join(violations[:5])
         return CheckResult(
             rule_id, name, False,
-            f"发现 {len(violations)} 处违规 import:\n{detail}",
+            f"found {len(violations)} violating imports:\n{detail}",
             rule.get("_level", "immutable"),
         )
-    return CheckResult(rule_id, name, True, "AST 级别无违规 import",
+    return CheckResult(rule_id, name, True, "no violating imports at AST level",
                        rule.get("_level", "immutable"))
 
 
 def _get_call_name(node: ast.Call) -> str | None:
-    """从 AST Call 节点提取调用名称，支持 obj.method 形式"""
+    """Extract the call name from an AST Call node, supporting the obj.method form"""
     if isinstance(node.func, ast.Name):
         return node.func.id
     if isinstance(node.func, ast.Attribute):
@@ -282,7 +283,7 @@ def _get_call_name(node: ast.Call) -> str | None:
 
 
 def _get_nested_value(data: object, dot_path: str) -> object:
-    """按 dot-notation 路径 (a.b.c) 访问嵌套字典，路径不存在返回 None"""
+    """Access a nested dict by a dot-notation path (a.b.c); return None if the path does not exist"""
     keys = dot_path.split(".")
     current = data
     for key in keys:
@@ -293,17 +294,17 @@ def _get_nested_value(data: object, dot_path: str) -> object:
 
 
 def check_ast_function_call(rule: dict, src_dir: str) -> CheckResult:
-    """ast_function_call: 通过 Python AST 检查函数调用是否存在或缺失"""
+    """ast_function_call: check whether a function call is present or missing via Python AST"""
     rule_id = rule["id"]
     name = rule.get("name", rule_id)
     function_name = rule.get("function_name", "")
     if not function_name:
         return CheckResult(
             rule_id, name, False,
-            "ast_function_call 缺少 function_name 字段",
+            "ast_function_call is missing the function_name field",
             rule.get("_level", "critical"),
         )
-    must_call = rule.get("must_call", True)  # True=必须存在，False=禁止调用
+    must_call = rule.get("must_call", True)  # True=must exist, False=call forbidden
     files = find_files(rule.get("files", ["**/*.py"]), src_dir)
 
     found: list[str] = []
@@ -312,7 +313,7 @@ def check_ast_function_call(rule: dict, src_dir: str) -> CheckResult:
         try:
             tree = ast.parse(content, filename=filepath)
         except SyntaxError:
-            print(f"  [WARN] 无法解析 {filepath}（语法错误），跳过 AST 检查")
+            print(f"  [WARN] Unable to parse {filepath} (syntax error), skipping AST check")
             continue
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
@@ -325,27 +326,27 @@ def check_ast_function_call(rule: dict, src_dir: str) -> CheckResult:
 
     if must_call:
         passed = len(found) > 0
-        msg = f"找到 {len(found)} 处调用" if passed else f"未找到函数调用 '{function_name}'"
+        msg = f"found {len(found)} calls" if passed else f"function call '{function_name}' not found"
     else:
         passed = len(found) == 0
         if passed:
-            msg = f"无禁止调用 '{function_name}'"
+            msg = f"no forbidden call '{function_name}'"
         else:
             detail = "\n".join(found[:5])
-            msg = f"发现 {len(found)} 处禁止调用:\n{detail}"
+            msg = f"found {len(found)} forbidden calls:\n{detail}"
 
     return CheckResult(rule_id, name, passed, msg, rule.get("_level", "critical"))
 
 
 def check_schema_match(rule: dict, src_dir: str) -> CheckResult:
-    """schema_match: 检查 YAML/JSON 文件是否包含所有必需字段（dot-notation 路径）"""
+    """schema_match: check whether a YAML/JSON file contains all required fields (dot-notation paths)"""
     rule_id = rule["id"]
     name = rule.get("name", rule_id)
     required_keys: list[str] = rule.get("required_keys", [])
     if not required_keys:
         return CheckResult(
             rule_id, name, False,
-            "schema_match 缺少 required_keys 字段（字符串列表）",
+            "schema_match is missing the required_keys field (list of strings)",
             rule.get("_level", "critical"),
         )
     files = find_files(rule.get("files", ["**/*.yaml", "**/*.json"]), src_dir)
@@ -362,25 +363,25 @@ def check_schema_match(rule: dict, src_dir: str) -> CheckResult:
                 data = yaml.safe_load(content)
         except (yaml.YAMLError, json.JSONDecodeError) as exc:
             rel = os.path.relpath(filepath, src_dir)
-            violations.append(f"  {rel}: 解析失败 ({exc})")
+            violations.append(f"  {rel}: parse failed ({exc})")
             continue
 
         for key_path in required_keys:
             if _get_nested_value(data, key_path) is None:
                 rel = os.path.relpath(filepath, src_dir)
-                violations.append(f"  {rel}: 缺少字段 '{key_path}'")
+                violations.append(f"  {rel}: missing field '{key_path}'")
 
     if violations:
         detail = "\n".join(violations[:5])
         return CheckResult(
             rule_id, name, False,
-            f"schema 不匹配:\n{detail}",
+            f"schema mismatch:\n{detail}",
             rule.get("_level", "critical"),
         )
-    return CheckResult(rule_id, name, True, "schema 匹配", rule.get("_level", "critical"))
+    return CheckResult(rule_id, name, True, "schema matches", rule.get("_level", "critical"))
 
 
-# 检查器映射表
+# Checker mapping table
 CHECKERS = {
     "grep_literal": check_grep_literal,
     "regex_match": check_regex_match,
@@ -393,7 +394,7 @@ CHECKERS = {
 
 
 # ========================================
-# 公开 API — 可被外部 import 调用
+# Public API — importable by external callers
 # ========================================
 
 
@@ -482,32 +483,32 @@ def run_check(
 
 
 # ========================================
-# 主流程
+# Main flow
 # ========================================
 def load_contracts(filepath: str) -> dict:
-    """加载 contracts.yaml"""
+    """Load contracts.yaml"""
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
         if not isinstance(data, dict):
-            print(f"[ERROR] {filepath} 格式错误: 期望顶层为字典")
+            print(f"[ERROR] {filepath} format error: expected top level to be a dict")
             sys.exit(4)
         return data
     except yaml.YAMLError as e:
-        print(f"[ERROR] {filepath} YAML解析错误: {e}")
+        print(f"[ERROR] {filepath} YAML parse error: {e}")
         sys.exit(4)
     except FileNotFoundError:
-        print(f"[ERROR] 文件不存在: {filepath}")
+        print(f"[ERROR] file does not exist: {filepath}")
         sys.exit(4)
 
 
 def run_checks(contracts: dict, src_dir: str,
                level_filter: set | None = None,
                id_filter: str | None = None) -> list[CheckResult]:
-    """执行所有检查"""
+    """Run all checks"""
     results = []
 
-    # 定义级别和对应的 contracts.yaml 节
+    # Define levels and their corresponding contracts.yaml sections
     level_map = {
         "immutable": ("immutable", "immutable"),
         "critical": ("critical_rules", "critical"),
@@ -536,8 +537,8 @@ def run_checks(contracts: dict, src_dir: str,
                 result = checker(rule, src_dir)
                 results.append(result)
             else:
-                # 未知检查类型，回退为 grep_literal
-                print(f"  [WARN] 未知检查类型 '{check_type}'，回退为 grep_literal")
+                # Unknown check type, fall back to grep_literal
+                print(f"  [WARN] unknown check type '{check_type}', falling back to grep_literal")
                 result = check_grep_literal(rule, src_dir)
                 results.append(result)
 
@@ -545,7 +546,7 @@ def run_checks(contracts: dict, src_dir: str,
 
 
 def print_results(results: list[CheckResult]) -> int:
-    """打印结果并返回退出码"""
+    """Print results and return the exit code"""
     pass_count = 0
     fail_count = 0
     warn_count = 0
@@ -607,12 +608,12 @@ def main():
         description="PDAE v5.8.0 contract checker",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-退出码:
-  0 = 所有检查通过
-  1 = IMMUTABLE 违规 (阻塞合并)
-  2 = CRITICAL 违规 (阻塞合并)
-  3 = NEED_REVIEW 变更 (不阻塞)
-  4 = contracts.yaml 格式错误
+Exit codes:
+  0 = all checks passed
+  1 = IMMUTABLE violation (blocks merge)
+  2 = CRITICAL violation (blocks merge)
+  3 = NEED_REVIEW change (does not block)
+  4 = contracts.yaml format error
         """
     )
     parser.add_argument("--contracts", "-c", required=True,
@@ -626,31 +627,31 @@ def main():
 
     args = parser.parse_args()
 
-    # 解析级别过滤
+    # Parse level filter
     level_filter = None
     if args.level:
         level_filter = set(args.level.split(","))
 
-    # 检查源目录
+    # Check source directory
     if not os.path.isdir(args.src):
-        print(f"[ERROR] 源目录不存在: {args.src}")
+        print(f"[ERROR] source directory does not exist: {args.src}")
         sys.exit(4)
 
-    # 加载 contracts
+    # Load contracts
     contracts = load_contracts(args.contracts)
 
     print(f"  Source: {contracts.get('source', 'unknown')}")
     print(f"  Generated: {contracts.get('generated_at', 'unknown')}")
     print(f"  Src dir: {args.src}")
 
-    # 执行检查
+    # Run checks
     results = run_checks(contracts, args.src, level_filter, args.id)
 
     if not results:
-        print("\n  [INFO] 没有匹配的检查规则")
+        print("\n  [INFO] no matching check rules")
         sys.exit(0)
 
-    # 打印结果
+    # Print results
     exit_code = print_results(results)
     sys.exit(exit_code)
 

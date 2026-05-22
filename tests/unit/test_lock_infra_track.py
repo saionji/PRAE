@@ -42,7 +42,7 @@ class TestLockInfraTrack:
                 "--track-id", TRACK_ID,
                 "--approver", "saionji",
                 "--approved-at", "2026-04-20",
-                "--reason", "PDAE M3 通过",
+                "--reason", "PDAE M3 passed",
             ],
         )
 
@@ -65,8 +65,8 @@ class TestLockInfraTrack:
             / TRACK_ID
             / "TRACK_LOG.md"
         ).read_text(encoding="utf-8")
-        assert "**当前状态**: LOCKED" in log_content
-        assert "| 2026-04-20 | EXPLORING → LOCKED | AI | saionji | PDAE M3 通过 |" in log_content
+        assert "**Current State**: LOCKED" in log_content
+        assert "| 2026-04-20 | EXPLORING → LOCKED | AI | saionji | PDAE M3 passed |" in log_content
 
     def test_lock_infra_rejects_non_phase_0(self, fake_project):
         prepare_infra_artifacts(fake_project)
@@ -84,7 +84,7 @@ class TestLockInfraTrack:
             [
                 "--track-id", TRACK_ID,
                 "--approver", "saionji",
-                "--reason", "PDAE M3 通过",
+                "--reason", "PDAE M3 passed",
             ],
         )
 
@@ -97,7 +97,7 @@ class TestLockInfraTrack:
             [
                 "--track-id", TRACK_ID,
                 "--approver", "saionji",
-                "--reason", "PDAE M3 通过",
+                "--reason", "PDAE M3 passed",
             ],
         )
 

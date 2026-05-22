@@ -54,25 +54,25 @@ def make_research_project(base: Path, *, lock_infra: bool = False) -> Path:
     track_dir = base / "prae" / "phases" / PHASE / "tracks" / TRACK_ID
     track_dir.mkdir(parents=True, exist_ok=True)
     (track_dir / "TRACK_LOG.md").write_text(
-        "# TRACK_LOG\n\n**研究轮次**: cycle_1\n\n## Experiments\n\n| EXP_001 | 2026-04-20 | 测试动量因子 | 支持 | [EXP_001.md](experiments/EXP_001.md) |\n"
-        "\n## Evidence Summary\n\n- EXP_001: 测试\n"
+        "# TRACK_LOG\n\n**Research Cycle**: cycle_1\n\n## Experiments\n\n| EXP_001 | 2026-04-20 | Test momentum factor | Supports | [EXP_001.md](experiments/EXP_001.md) |\n"
+        "\n## Evidence Summary\n\n- EXP_001: test\n"
     )
 
     # Create EXP_001.md
     exp_dir = track_dir / "experiments"
     exp_dir.mkdir(parents=True, exist_ok=True)
     (exp_dir / "EXP_001.md").write_text(
-        "# EXP_001\n\n## Goal\n测试动量因子\n\n## Method\n"
-        "- 数据源: infra_data_v1.load_daily_bars\n"
-        "- 时间窗: 2020-01-01 至 2023-12-31\n"
-        "- 随机种子: seed=42\n"
-        "- 动量窗口: 20日\n\n"
-        "- 对照组: 无对照组\n\n"
+        "# EXP_001\n\n## Goal\nTest momentum factor\n\n## Method\n"
+        "- Data Source: infra_data_v1.load_daily_bars\n"
+        "- Time Window: 2020-01-01 to 2023-12-31\n"
+        "- Random Seed: seed=42\n"
+        "- momentum window: 20 days\n\n"
+        "- Control Group: no control group\n\n"
         "## Preflight Check\n"
-        "**最小冒烟检查**: 30s 内跑完，并打印 sharpe\n\n"
-        "**输出契约**: stdout 至少包含 sharpe\n\n"
-        "**本次不做**: 不抽象到 impl/\n\n"
-        "## Expected Signal\n夏普>1.0\n\n## Result\n夏普: 1.2\n\n## Conclusion\n**结论**: 支持假设\n"
+        "**Minimal Smoke Check**: finishes within 30s and prints sharpe\n\n"
+        "**Output Contract**: stdout contains at least sharpe\n\n"
+        "**Out of Scope This Time**: do not abstract into impl/\n\n"
+        "## Expected Signal\nsharpe>1.0\n\n## Result\nsharpe: 1.2\n\n## Conclusion\n**Conclusion**: supports the hypothesis\n"
     )
 
     # Create EXP_001.py
@@ -125,16 +125,16 @@ class TestResearchGate:
         make_research_project(fake_project)
         exp_dir = fake_project / "prae" / "phases" / PHASE / "tracks" / TRACK_ID / "experiments"
         (exp_dir / "EXP_002.md").write_text(
-            "# EXP_002\n\n## Goal\n第二次实验\n\n## Method\n"
-            "- 数据源: infra_data_v1.load_daily_bars\n"
-            "- 时间窗: 2021-01-01 至 2023-12-31\n"
-            "- 随机种子: seed=42\n"
-            "- 对照组: 无对照组\n\n"
+            "# EXP_002\n\n## Goal\nSecond experiment\n\n## Method\n"
+            "- Data Source: infra_data_v1.load_daily_bars\n"
+            "- Time Window: 2021-01-01 to 2023-12-31\n"
+            "- Random Seed: seed=42\n"
+            "- Control Group: no control group\n\n"
             "## Preflight Check\n"
-            "**最小冒烟检查**: 30s 内跑完，并打印 sharpe\n\n"
-            "**输出契约**: stdout 至少包含 sharpe\n\n"
-            "**本次不做**: 不抽象到 impl/\n\n"
-            "## Expected Signal\n夏普>1.0\n\n## Result\n夏普: 1.1\n\n## Conclusion\n**结论**: 支持假设\n"
+            "**Minimal Smoke Check**: finishes within 30s and prints sharpe\n\n"
+            "**Output Contract**: stdout contains at least sharpe\n\n"
+            "**Out of Scope This Time**: do not abstract into impl/\n\n"
+            "## Expected Signal\nsharpe>1.0\n\n## Result\nsharpe: 1.1\n\n## Conclusion\n**Conclusion**: supports the hypothesis\n"
         )
         py_dir = fake_project / "src" / "tracks" / TRACK_ID / "experiments"
         (py_dir / "EXP_002.py").write_text("def main():\n    print('EXP_002')\n\nif __name__ == '__main__':\n    main()\n")
@@ -175,7 +175,7 @@ class TestResearchGate:
         make_research_project(fake_project)
         log_path = fake_project / "prae" / "phases" / PHASE / "tracks" / TRACK_ID / "TRACK_LOG.md"
         log_path.write_text(
-            "# TRACK_LOG\n\n**研究轮次**: cycle_1\n\n## Experiments\n\n| ID | Date | Goal | Conclusion | Link |\n"
+            "# TRACK_LOG\n\n**Research Cycle**: cycle_1\n\n## Experiments\n\n| ID | Date | Goal | Conclusion | Link |\n"
             "|---|---|---|---|---|\n"  # header only, no EXP_ rows
         )
         rc, out = run_tool(str(fake_project))
@@ -186,9 +186,9 @@ class TestResearchGate:
         make_research_project(fake_project)
         log_path = fake_project / "prae" / "phases" / PHASE / "tracks" / TRACK_ID / "TRACK_LOG.md"
         log_path.write_text(
-            "# TRACK_LOG\n\n**研究轮次**: cycle_2\n\n## Experiments\n\n"
-            "| EXP_001 | 2026-04-20 | 测试动量因子 | 支持 | [EXP_001.md](experiments/EXP_001.md) |\n"
-            "\n## Evidence Summary\n\n- EXP_001: 测试\n",
+            "# TRACK_LOG\n\n**Research Cycle**: cycle_2\n\n## Experiments\n\n"
+            "| EXP_001 | 2026-04-20 | Test momentum factor | Supports | [EXP_001.md](experiments/EXP_001.md) |\n"
+            "\n## Evidence Summary\n\n- EXP_001: test\n",
             encoding="utf-8",
         )
         rc, out = run_tool(str(fake_project))
@@ -201,13 +201,13 @@ class TestResearchGate:
         exp_md = (fake_project / "prae" / "phases" / PHASE / "tracks" /
                   TRACK_ID / "experiments" / "EXP_001.md")
         exp_md.write_text(
-            "# EXP_001\n\n## Goal\n测试动量因子\n\n## Method\n"
-            "- 动量窗口: 20日\n\n"  # missing seed, time range, data source
+            "# EXP_001\n\n## Goal\nTest momentum factor\n\n## Method\n"
+            "- window: 20\n\n"  # missing seed, time range, data source
             "## Preflight Check\n"
-            "**最小冒烟检查**: 30s 内跑完，并打印 sharpe\n\n"
-            "**输出契约**: stdout 至少包含 sharpe\n\n"
-            "## Expected Signal\n夏普>1.0\n\n"
-            "## Result\n夏普: 1.2\n\n## Conclusion\n**结论**: 支持假设\n"
+            "**Minimal Smoke Check**: finishes within 30s and prints sharpe\n\n"
+            "**Output Contract**: stdout contains at least sharpe\n\n"
+            "## Expected Signal\nsharpe>1.0\n\n"
+            "## Result\nsharpe: 1.2\n\n## Conclusion\n**Conclusion**: supports the hypothesis\n"
         )
         rc, out = run_tool(str(fake_project))
         assert rc == 1
@@ -218,13 +218,13 @@ class TestResearchGate:
         exp_md = (fake_project / "prae" / "phases" / PHASE / "tracks" /
                   TRACK_ID / "experiments" / "EXP_001.md")
         exp_md.write_text(
-            "# EXP_001\n\n## Goal\n测试动量因子\n\n## Method\n"
-            "- 数据源: infra_data_v1.load_daily_bars\n"
-            "- 时间窗: 2020-01-01 至 2023-12-31\n"
-            "- 随机种子: seed=42\n"
-            "- 对照组: 无对照组\n\n"
-            "## Expected Signal\n夏普>1.0\n\n"
-            "## Result\n夏普: 1.2\n\n## Conclusion\n**结论**: 支持假设\n"
+            "# EXP_001\n\n## Goal\nTest momentum factor\n\n## Method\n"
+            "- Data Source: infra_data_v1.load_daily_bars\n"
+            "- Time Window: 2020-01-01 to 2023-12-31\n"
+            "- Random Seed: seed=42\n"
+            "- Control Group: no control group\n\n"
+            "## Expected Signal\nsharpe>1.0\n\n"
+            "## Result\nsharpe: 1.2\n\n## Conclusion\n**Conclusion**: supports the hypothesis\n"
         )
         rc, out = run_tool(str(fake_project))
         assert rc == 1
@@ -235,16 +235,16 @@ class TestResearchGate:
         exp_md = (fake_project / "prae" / "phases" / PHASE / "tracks" /
                   TRACK_ID / "experiments" / "EXP_001.md")
         exp_md.write_text(
-            "# EXP_001\n\n## Goal\n测试动量因子\n\n## Method\n"
-            "- 数据源: infra_data_v1.load_daily_bars\n"
-            "- 时间窗: 2020-01-01 至 2023-12-31\n"
-            "- 随机种子: seed=42\n"
-            "- 对照组: 无对照组\n\n"
+            "# EXP_001\n\n## Goal\nTest momentum factor\n\n## Method\n"
+            "- Data Source: infra_data_v1.load_daily_bars\n"
+            "- Time Window: 2020-01-01 to 2023-12-31\n"
+            "- Random Seed: seed=42\n"
+            "- Control Group: no control group\n\n"
             "## Preflight Check\n"
-            "**最小冒烟检查**: 30s 内跑完，并打印 sharpe\n\n"
-            "**输出契约**: stdout 至少包含 sharpe\n\n"
-            "**本次不做**: 不抽象到 impl/\n\n"
-            "## Result\n夏普: 1.2\n\n## Conclusion\n**结论**: 支持假设\n"
+            "**Minimal Smoke Check**: finishes within 30s and prints sharpe\n\n"
+            "**Output Contract**: stdout contains at least sharpe\n\n"
+            "**Out of Scope This Time**: do not abstract into impl/\n\n"
+            "## Result\nsharpe: 1.2\n\n## Conclusion\n**Conclusion**: supports the hypothesis\n"
         )
         rc, out = run_tool(str(fake_project))
         assert rc == 1

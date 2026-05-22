@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-advance_phase.py — 在 PHASE_GATE.md 获得人工批准后推进到下一阶段
+advance_phase.py — advance to the next phase after PHASE_GATE.md gets human approval
 
-退出码:
-  0  推进成功
-  1  批准未完成或推进条件未满足
-  2  文件缺失、格式错误或已处于最终阶段
+Exit codes:
+  0  advanced successfully
+  1  approval incomplete or advancement conditions not met
+  2  file missing, format error, or already at the final phase
 
-用法:
+Usage:
   python3 tools/advance_phase.py --project-dir <path>
 """
 from __future__ import annotations
@@ -45,12 +45,12 @@ def render_research_track_log(track: dict, target_phase: str, cycle_label: str =
         track,
         target_phase,
         cycle_label=cycle_label,
-        created_reason="阶段推进后初始化",
+        created_reason="initialized after phase advancement",
     )
 
 
 def ensure_terminal_metadata(registry: dict, current_phase: str) -> int:
-    """兼容性兜底：补齐历史数据里缺失的 concluded_at。正式路径应由 update_track_state.py 写入。"""
+    """Compatibility fallback: backfill concluded_at missing from legacy data. The formal path should be written by update_track_state.py."""
     if current_phase not in {"phase_01_research", "phase_02_validation"}:
         return 0
 
@@ -111,11 +111,11 @@ def advance_phase(project_dir: Path) -> dict:
     registry = load_registry(str(project_dir))
     override = get_phase_override(registry)
     if override:
-        error("检测到 current_phase_override 正在生效；常规 advance-phase 已暂停，请先完成例外处理并移除 override")
+        error("current_phase_override detected as active; the normal advance-phase is suspended, please complete the exception handling and remove the override first")
 
     current_phase = get_recorded_phase(registry, "")
     if current_phase not in PHASE_TRANSITIONS:
-        error(f"当前阶段 {current_phase} 无法继续推进（可能已在最终阶段）")
+        error(f"current phase {current_phase} cannot advance further (may already be at the final phase)")
 
     try:
         approval = evaluate_approval(str(project_dir), registry)
@@ -126,7 +126,7 @@ def advance_phase(project_dir: Path) -> dict:
     if not approval["passed"]:
         return {
             "passed": False,
-            "summary": "推进失败：PHASE_GATE.md 尚未满足批准要求",
+            "summary": "advancement failed: PHASE_GATE.md does not yet meet the approval requirements",
             "checks": checks,
             "data": {
                 "current_phase": current_phase,
@@ -139,21 +139,21 @@ def advance_phase(project_dir: Path) -> dict:
     selected_tracks = selected_tracks_for_target(target_phase, registry)
 
     terminal_updates = ensure_terminal_metadata(registry, current_phase)
-    checks.append(check_item("兼容性：终态轨道缺失 concluded_at 时已补齐", True, f"updated={terminal_updates}"))
+    checks.append(check_item("compatibility: backfilled concluded_at for terminal-state tracks that were missing it", True, f"updated={terminal_updates}"))
 
     registry["current_phase"] = target_phase
     registry["updated"] = str(datetime.date.today())
     registry_path = save_registry(project_dir, registry)
-    checks.append(check_item("track_registry.yaml 已更新 current_phase", True, str(registry_path)))
+    checks.append(check_item("track_registry.yaml updated current_phase", True, str(registry_path)))
 
     brief_path, brief_created = create_phase_brief(project_dir, target_phase, registry, selected_tracks)
-    checks.append(check_item("目标阶段 PHASE_BRIEF.md 已就绪", True,
+    checks.append(check_item("target phase PHASE_BRIEF.md ready", True,
                              f"{brief_path} ({'created' if brief_created else 'kept'})"))
 
     created_logs, copied_logs, existing_logs = initialize_target_track_logs(
         project_dir, current_phase, target_phase, selected_tracks
     )
-    checks.append(check_item("目标阶段 TRACK_LOG.md 已就绪", True,
+    checks.append(check_item("target phase TRACK_LOG.md ready", True,
                              f"created={created_logs} copied={copied_logs} existing={existing_logs}"))
 
     conclusion_path = ""
@@ -161,14 +161,14 @@ def advance_phase(project_dir: Path) -> dict:
         try:
             conclusion_payload = write_conclusion(project_dir)
             conclusion_path = conclusion_payload["data"]["path"]
-            checks.append(check_item("CONCLUSION.md 已生成", True, conclusion_path))
+            checks.append(check_item("CONCLUSION.md generated", True, conclusion_path))
         except ConclusionError as exc:
-            checks.append(check_item("CONCLUSION.md 已生成", False, str(exc)))
+            checks.append(check_item("CONCLUSION.md generated", False, str(exc)))
 
     passed = all(c["passed"] for c in checks)
     return {
         "passed": passed,
-        "summary": f"已推进到 {target_phase}",
+        "summary": f"advanced to {target_phase}",
         "checks": checks,
         "data": {
             "from_phase": current_phase,

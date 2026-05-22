@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-record_result.py — 将实验结果正式同步到 TRACK_LOG.md 和 track_registry.yaml
+record_result.py — Formally sync experiment results into TRACK_LOG.md and track_registry.yaml
 
-退出码:
-  0  记录成功
-  1  记录条件未满足
-  2  文件缺失或格式错误
+Exit codes:
+  0  Recorded successfully
+  1  Recording conditions not met
+  2  File missing or malformed
 
-用法:
+Usage:
   python3 tools/record_result.py \
     --project-dir <path> \
     --track-id <track_id> \
@@ -38,7 +38,7 @@ from update_track_state import sanitize_table_cell
 
 
 class RecordResultError(RuntimeError):
-    """实验结果记录输入错误。"""
+    """Input error for experiment result recording."""
 
 
 def load_registry(project_dir: str) -> dict:
@@ -48,40 +48,40 @@ def load_registry(project_dir: str) -> dict:
 def extract_goal(content: str) -> str:
     match = re.search(r"## Goal\n+(.*?)(?=\n##|\Z)", content, re.DOTALL)
     if not match:
-        return "(见实验记录)"
+        return "(see experiment record)"
     lines = [line.strip() for line in match.group(1).splitlines() if line.strip()]
     if not lines:
-        return "(见实验记录)"
+        return "(see experiment record)"
     return lines[0]
 
 
 def extract_conclusion(content: str) -> str:
-    match = re.search(r"\*\*结论\*\*[:：]\s*(.+)", content)
+    match = re.search(r"\*\*Conclusion\*\*[:：]\s*(.+)", content)
     if match:
         return match.group(1).strip()
 
     section = re.search(r"## Conclusion\n+(.*?)(?=\n##|\Z)", content, re.DOTALL)
     if not section:
-        return "(见实验记录)"
+        return "(see experiment record)"
     lines = [line.strip() for line in section.group(1).splitlines() if line.strip()]
-    return lines[0] if lines else "(见实验记录)"
+    return lines[0] if lines else "(see experiment record)"
 
 
 def ensure_exp_completed(content: str) -> list[str]:
     issues: list[str] = []
-    if "{{粘贴实验关键输出}}" in content:
-        issues.append("Result 节未填写")
-    if "支持 / 证伪 / 部分支持 假设" in content:
-        issues.append("Conclusion 节未明确")
+    if "{{paste key experiment output}}" in content:
+        issues.append("Result section not filled in")
+    if "supports / falsifies / partially supports the hypothesis" in content:
+        issues.append("Conclusion section not clarified")
     if "## Result" not in content:
-        issues.append("缺少 ## Result")
+        issues.append("Missing ## Result")
     if "## Conclusion" not in content:
-        issues.append("缺少 ## Conclusion")
+        issues.append("Missing ## Conclusion")
     return issues
 
 
 def extract_state_suggestion(content: str) -> str | None:
-    match = re.search(r"建议 state 变更[:：]\s*(.+)", content)
+    match = re.search(r"Recommended state change[:：]\s*(.+)", content)
     return match.group(1).strip() if match else None
 
 
@@ -96,7 +96,7 @@ def upsert_experiment_row(content: str, exp_id: str, row: str) -> str:
 
     table_match = re.search(r"(## Experiments\n.*?\n\|[-|]+\|\n)", content, re.DOTALL)
     if not table_match:
-        raise RecordResultError("TRACK_LOG.md 缺少 Experiments 表格")
+        raise RecordResultError("TRACK_LOG.md is missing the Experiments table")
     insert_at = table_match.end(1)
     return content[:insert_at] + row + "\n" + content[insert_at:]
 
@@ -104,7 +104,7 @@ def upsert_experiment_row(content: str, exp_id: str, row: str) -> str:
 def upsert_evidence_summary(content: str, exp_id: str, summary_line: str) -> str:
     section_match = re.search(r"(## Evidence Summary\n.*?)(\n---|\Z)", content, re.DOTALL)
     if not section_match:
-        raise RecordResultError("TRACK_LOG.md 缺少 Evidence Summary 节")
+        raise RecordResultError("TRACK_LOG.md is missing the Evidence Summary section")
 
     section_body = section_match.group(1)
     line_pattern = re.compile(rf"^- \*\*.*?{re.escape(exp_id)}\*\*.*$", re.MULTILINE)
@@ -112,7 +112,7 @@ def upsert_evidence_summary(content: str, exp_id: str, summary_line: str) -> str
         new_body = line_pattern.sub(summary_line, section_body, count=1)
     else:
         new_body = section_body
-        new_body = re.sub(r"^- 暂无(?:实验|选型)记录。\s*$", "", new_body, flags=re.MULTILINE).rstrip()
+        new_body = re.sub(r"^- No (?:experiment|selection) records yet\.\s*$", "", new_body, flags=re.MULTILINE).rstrip()
         new_body = new_body + "\n" + summary_line + "\n"
 
     return content[:section_match.start(1)] + new_body + content[section_match.end(1):]
@@ -122,7 +122,7 @@ def record_result(project_dir: Path, track_id: str, exp_id: str) -> dict:
     registry = load_registry(str(project_dir))
     track = find_track(registry, track_id)
     if track is None:
-        raise RecordResultError(f"轨道 {track_id} 不在 track_registry.yaml 中")
+        raise RecordResultError(f"Track {track_id} is not in track_registry.yaml")
     current_phase = get_current_phase(registry)
 
     exp_md = (
@@ -131,13 +131,13 @@ def record_result(project_dir: Path, track_id: str, exp_id: str) -> dict:
     log_path = project_dir / "prae" / "phases" / current_phase / "tracks" / track_id / "TRACK_LOG.md"
 
     checks: list[dict] = [
-        check_item("实验记录存在", exp_md.exists(), str(exp_md)),
-        check_item("TRACK_LOG.md 存在", log_path.exists(), str(log_path)),
+        check_item("Experiment record exists", exp_md.exists(), str(exp_md)),
+        check_item("TRACK_LOG.md exists", log_path.exists(), str(log_path)),
     ]
     if not exp_md.exists() or not log_path.exists():
         return {
             "passed": False,
-            "summary": f"实验结果记录失败: 缺少必要文件 ({track_id} / {exp_id})",
+            "summary": f"Experiment result recording failed: required file missing ({track_id} / {exp_id})",
             "checks": checks,
             "data": {"track_id": track_id, "exp_id": exp_id, "recorded": False},
         }
@@ -147,24 +147,24 @@ def record_result(project_dir: Path, track_id: str, exp_id: str) -> dict:
         validate_phase_track_match(
             current_phase,
             track,
-            action_label="记录实验结果",
-            blocked_phase03_detail="phase_03_conclusion 不允许继续记录实验，请先 finalize 或 reopen",
+            action_label="record experiment result",
+            blocked_phase03_detail="phase_03_conclusion does not allow further experiment recording; finalize or reopen first",
             detail=describe_phase_context(registry),
         )
     )
     issues = ensure_exp_completed(exp_content)
     checks.append(check_item(
-        "EXP_NNN.md 已完成 Result / Conclusion",
+        "EXP_NNN.md has completed Result / Conclusion",
         not issues,
         "; ".join(issues),
     ))
     if issues or not all(item["passed"] for item in checks):
-        failure_reason = "；".join(
+        failure_reason = "; ".join(
             item["name"] for item in checks if not item["passed"]
-        ) or f"{exp_id} 尚未填写完整"
+        ) or f"{exp_id} is not yet fully filled in"
         return {
             "passed": False,
-            "summary": f"实验结果记录失败: {failure_reason}",
+            "summary": f"Experiment result recording failed: {failure_reason}",
             "checks": checks,
             "data": {"track_id": track_id, "exp_id": exp_id, "recorded": False},
         }
@@ -176,39 +176,39 @@ def record_result(project_dir: Path, track_id: str, exp_id: str) -> dict:
 
     log_content = log_path.read_text(encoding="utf-8")
     row = f"| {exp_id} | {today} | {goal[:50]} | {conclusion} | [{exp_id}.md](experiments/{exp_id}.md) |"
-    summary_line = f"- **{today} {exp_id}**：{goal[:60]}。结论：{conclusion}。"
+    summary_line = f"- **{today} {exp_id}**: {goal[:60]}. Conclusion: {conclusion}."
 
     log_content = upsert_experiment_row(log_content, exp_id, row)
     log_content = upsert_evidence_summary(log_content, exp_id, summary_line)
     if suggestion:
         decision_row = (
-            f"| {today} | 建议 {sanitize_table_cell(suggestion)} | AI | 待批准 | "
-            f"{sanitize_table_cell(f'{exp_id} 结果已记录，待人工批准')} |"
+            f"| {today} | Recommend {sanitize_table_cell(suggestion)} | AI | Pending approval | "
+            f"{sanitize_table_cell(f'{exp_id} result recorded, pending human approval')} |"
         )
         log_content = upsert_decision_log_row(
             log_content,
             decision_row,
             row_pattern=re.compile(rf"^\|.*{re.escape(exp_id)}.*$", re.MULTILINE),
         )
-        checks.append(check_item("Decision Log 已记录待批准建议", True, suggestion))
+        checks.append(check_item("Decision Log recorded pending-approval recommendation", True, suggestion))
     else:
-        checks.append(check_item("Decision Log 已记录待批准建议", True, "本次无状态变更建议"))
+        checks.append(check_item("Decision Log recorded pending-approval recommendation", True, "No state-change recommendation this time"))
     log_path.write_text(log_content, encoding="utf-8")
-    checks.append(check_item("TRACK_LOG.md 已同步实验结果", True, str(log_path)))
+    checks.append(check_item("TRACK_LOG.md synced experiment result", True, str(log_path)))
 
     if track.get("type") == "research":
         track["evidence_summary"] = f"{exp_id}: {conclusion}"
-        checks.append(check_item("研究轨道 evidence_summary 已更新", True, track["evidence_summary"]))
+        checks.append(check_item("Research track evidence_summary updated", True, track["evidence_summary"]))
     else:
-        checks.append(check_item("基础设施轨道无需更新 evidence_summary", True, track.get("type", "unknown")))
+        checks.append(check_item("Infrastructure track does not need evidence_summary update", True, track.get("type", "unknown")))
 
     registry["updated"] = today
     registry_path = save_registry(project_dir, registry)
-    checks.append(check_item("track_registry.yaml 已更新", True, str(registry_path)))
+    checks.append(check_item("track_registry.yaml updated", True, str(registry_path)))
 
     return {
         "passed": True,
-        "summary": f"实验结果已记录: {track_id} / {exp_id}",
+        "summary": f"Experiment result recorded: {track_id} / {exp_id}",
         "checks": checks,
         "data": {
             "track_id": track_id,

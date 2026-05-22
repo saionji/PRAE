@@ -1,16 +1,16 @@
 # Task: prae-update-track-state
 
-> 在人工批准后正式更新研究轨道状态，并同步 `track_registry.yaml` 与 `TRACK_LOG.md`
-> 调用方式: `prae update-track-state <track_id> <ACTIVE|KILLED|MERGED|GRADUATED> --approver <name> --reason <reason> [--exp-id EXP_001] [--merged-into <track_id>] [--summary <text>] [--approved-at YYYY-MM-DD]`
-> 前置条件: 项目已完成 `prae init`，且用户已明确批准这次状态变更
+> Formally update a research track's state after human approval, and sync both `track_registry.yaml` and `TRACK_LOG.md`
+> Invocation: `prae update-track-state <track_id> <ACTIVE|KILLED|MERGED|GRADUATED> --approver <name> --reason <reason> [--exp-id EXP_001] [--merged-into <track_id>] [--summary <text>] [--approved-at YYYY-MM-DD]`
+> Prerequisites: the project has completed `prae init`, and the user has explicitly approved this state change
 
-## 步骤
+## Steps
 
-### 1. 解析参数
+### 1. Parse arguments
 
 ```bash
-TRACK_ID="${1:?'用法: prae update-track-state <track_id> <to_state> --approver <name> --reason <reason>'}"
-TO_STATE="${2:?'用法: prae update-track-state <track_id> <to_state> --approver <name> --reason <reason>'}"
+TRACK_ID="${1:?'Usage: prae update-track-state <track_id> <to_state> --approver <name> --reason <reason>'}"
+TO_STATE="${2:?'Usage: prae update-track-state <track_id> <to_state> --approver <name> --reason <reason>'}"
 shift 2
 
 APPROVER=""
@@ -52,27 +52,27 @@ while [ $# -gt 0 ]; do
       shift 2
       ;;
     *)
-      echo "未知参数: $1"
+      echo "Unknown argument: $1"
       exit 1
       ;;
   esac
 done
 
-[ -n "${APPROVER}" ] || { echo "错误: 缺少 --approver"; exit 1; }
-[ -n "${REASON}" ] || { echo "错误: 缺少 --reason"; exit 1; }
+[ -n "${APPROVER}" ] || { echo "Error: missing --approver"; exit 1; }
+[ -n "${REASON}" ] || { echo "Error: missing --reason"; exit 1; }
 ```
 
-### 2. 验证项目已完成初始化
+### 2. Verify the project has been initialized
 
 ```bash
 [ -f "prae/track_registry.yaml" ] || {
-  echo "未找到 prae/track_registry.yaml。项目可能只完成了 bootstrap。"
-  echo "请先填写 prae/PRAE_INIT.md，然后运行: prae init"
+  echo "prae/track_registry.yaml not found. The project may have only completed bootstrap."
+  echo "Fill in prae/PRAE_INIT.md first, then run: prae init"
   exit 1
 }
 ```
 
-### 3. 调用正式工具
+### 3. Invoke the official tool
 
 ```bash
 CMD=(
@@ -93,16 +93,16 @@ CMD=(
 "${CMD[@]}"
 ```
 
-### 4. 结果解释
+### 4. Interpreting the result
 
-执行成功后：
-- `track_registry.yaml` 会更新 `state`
-- 终态会自动填写 `concluded_at`
-- `MERGED` 会自动填写 `merged_into`
-- 当前阶段 `TRACK_LOG.md` 会更新 `**当前状态**` 并追加 `Decision Log`
+On success:
+- `track_registry.yaml` updates `state`
+- A terminal state automatically fills in `concluded_at`
+- `MERGED` automatically fills in `merged_into`
+- The current phase's `TRACK_LOG.md` updates `**Current State**` and appends a `Decision Log` entry
 
-若失败，优先看输出中的：
-- `状态迁移合法`
-- `依赖的基础设施轨道已 LOCKED`
+On failure, look first at these items in the output:
+- `state transition is legal`
+- `the infrastructure track depended on is already LOCKED`
 - `Research Gate / ...`
-- `MERGED 目标轨道合法`
+- `MERGED target track is legal`

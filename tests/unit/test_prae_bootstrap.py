@@ -74,15 +74,15 @@ class TestPraeBootstrap:
         (tmp_path / "AGENTS.md").write_text("# Original\n\nExisting content.\n")
         run_tool(str(tmp_path), "codex")
         agents_md = (tmp_path / "AGENTS.md").read_text()
-        assert "PRAE 研究方法论" in agents_md
+        assert "PRAE Research Methodology" in agents_md
         assert "Original" in agents_md  # original content preserved
 
     def test_codex_no_duplicate_snippet(self, tmp_path):
-        (tmp_path / "AGENTS.md").write_text("# PRAE 研究方法论\n\nAlready installed.\n")
+        (tmp_path / "AGENTS.md").write_text("# PRAE Research Methodology\n\nAlready installed.\n")
         run_tool(str(tmp_path), "codex")
         agents_md = (tmp_path / "AGENTS.md").read_text()
         # Should not duplicate the header
-        assert agents_md.count("PRAE 研究方法论") == 1
+        assert agents_md.count("PRAE Research Methodology") == 1
 
     def test_templates_deployed(self, tmp_path):
         (tmp_path / ".claude").mkdir()

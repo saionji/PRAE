@@ -1,50 +1,50 @@
-# Phase {{NN}}_{{name}} 阶段简报
+# Phase {{NN}}_{{name}} Brief
 
-<!-- 模板来源: PRAE/runtime/abstract/PHASE_BRIEF.template.md -->
-<!-- 规格参考: methodology/PRAE_ARTIFACTS.md §2.4 -->
-<!-- 创建者: AI 分析者，在上一阶段 PHASE_GATE 批准后立即创建 -->
+<!-- Template source: PRAE/runtime/abstract/PHASE_BRIEF.template.md -->
+<!-- Spec reference: methodology/PRAE_ARTIFACTS.md §2.4 -->
+<!-- Creator: AI Analyst, created immediately after the previous phase's PHASE_GATE is approved -->
 
-**阶段**: phase_{{NN}}_{{name}}
-**研究轮次**: cycle_{{N}}
-**创建日期**: {{YYYY-MM-DD}}
-**创建者**: AI（分析者角色）
-
----
-
-## 阶段目标
-
-{{1-3 句话说明本阶段要达成什么，例如"完成所有基础设施轨道的选型和工程化，为研究期做好底座"}}
+**Phase**: phase_{{NN}}_{{name}}
+**Research Cycle**: cycle_{{N}}
+**Created**: {{YYYY-MM-DD}}
+**Creator**: AI (Analyst role)
 
 ---
 
-## 成功标准
+## Phase Goal
 
-> 满足以下所有条件时，可以由 AI 生成 PHASE_GATE.md 提请人工批准进入下一阶段。
-
-- [ ] {{成功条件 1，可量化或可明确检查}}
-- [ ] {{成功条件 2}}
-- [ ] {{成功条件 N}}
+{{1-3 sentences describing what this phase must achieve, e.g. "complete the selection and engineering of all infrastructure tracks, building the foundation for the research period"}}
 
 ---
 
-## 本阶段在场的轨道
+## Success Criteria
 
-| 轨道 ID | 类型 | 初始状态 | 阶段目标状态 | 备注 |
-|---------|------|---------|-------------|------|
-| `{{track_id}}` | infrastructure / research | EXPLORING | LOCKED / ACTIVE | {{可选}} |
+> When all of the following conditions are met, the AI may generate PHASE_GATE.md to request human approval to enter the next phase.
 
----
-
-## 关键时间节点（可选）
-
-| 里程碑 | 目标日期 | 说明 |
-|--------|---------|------|
-| {{里程碑名称}} | {{YYYY-MM-DD}} | {{可选说明}} |
+- [ ] {{Success condition 1, quantifiable or explicitly checkable}}
+- [ ] {{Success condition 2}}
+- [ ] {{Success condition N}}
 
 ---
 
-## 关联文件
+## Tracks Present in This Phase
 
-- `prae/track_registry.yaml` — 轨道状态总表
-- `prae/phases/phase_{{NN}}_{{name}}/PHASE_GATE.md` — 本阶段结束时生成（尚未创建）
-- `prae/PRAE_INIT.md` — 项目初始化文档（问题陈述和组件分类）
+| Track ID | Type | Initial State | Target State for Phase | Notes |
+|----------|------|----------------|------------------------|-------|
+| `{{track_id}}` | infrastructure / research | EXPLORING | LOCKED / ACTIVE | {{optional}} |
+
+---
+
+## Key Time Milestones (Optional)
+
+| Milestone | Target Date | Description |
+|-----------|-------------|-------------|
+| {{milestone name}} | {{YYYY-MM-DD}} | {{optional description}} |
+
+---
+
+## Related Files
+
+- `prae/track_registry.yaml` — the master table of track states
+- `prae/phases/phase_{{NN}}_{{name}}/PHASE_GATE.md` — generated when this phase ends (not yet created)
+- `prae/PRAE_INIT.md` — the project initialization document (problem statement and component classification)

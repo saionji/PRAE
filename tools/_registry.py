@@ -23,23 +23,23 @@ KNOWN_PHASES = set(PHASE_ALLOWED_TRACK_TYPES) | {"phase_03_conclusion"}
 def load_registry(project_dir: str | Path, *, error_cls: type[Exception] = RegistryError) -> dict:
     registry_path = Path(project_dir) / "prae" / "track_registry.yaml"
     if not registry_path.exists():
-        raise error_cls(f"未找到 track_registry.yaml: {registry_path}")
+        raise error_cls(f"track_registry.yaml not found: {registry_path}")
 
     try:
         with open(registry_path, encoding="utf-8") as f:
             registry = yaml.safe_load(f)
     except yaml.YAMLError as exc:
-        raise error_cls(f"track_registry.yaml 格式错误: {exc}") from exc
+        raise error_cls(f"track_registry.yaml format error: {exc}") from exc
 
     if not isinstance(registry, dict):
-        raise error_cls("track_registry.yaml 顶层必须是 mapping")
+        raise error_cls("track_registry.yaml top level must be a mapping")
 
     override = registry.get("current_phase_override")
     if override not in (None, ""):
         if not isinstance(override, str):
-            raise error_cls("current_phase_override 必须是字符串")
+            raise error_cls("current_phase_override must be a string")
         if override not in KNOWN_PHASES:
-            raise error_cls(f"current_phase_override 不合法: {override}")
+            raise error_cls(f"current_phase_override is invalid: {override}")
     return registry
 
 
@@ -89,10 +89,10 @@ def require_track(
 ) -> dict:
     track = find_track(registry, track_id)
     if track is None:
-        raise error_cls(f"轨道 {track_id} 不在 track_registry.yaml 中")
+        raise error_cls(f"track {track_id} is not in track_registry.yaml")
     if expected_type and track.get("type") != expected_type:
         raise error_cls(
-            f"轨道 {track_id} 类型为 {track.get('type')}，仅适用于 {expected_type}"
+            f"track {track_id} has type {track.get('type')}, only applicable to {expected_type}"
         )
     return track
 
@@ -110,14 +110,14 @@ def validate_phase_track_match(
     detail = detail or f"current_phase={current_phase}, track_type={track_type}, allowed={sorted(allowed) if allowed else []}"
     if current_phase == "phase_03_conclusion":
         return check_item(
-            f"当前阶段允许{action_label}",
+            f"Current phase permits {action_label}",
             False,
             blocked_phase03_detail,
         )
     if allowed is None:
-        return check_item(f"当前阶段允许{action_label}", True, f"{current_phase} 未配置额外限制")
+        return check_item(f"Current phase permits {action_label}", True, f"{current_phase} has no extra restrictions configured")
     return check_item(
-        f"当前阶段允许{action_label}",
+        f"Current phase permits {action_label}",
         track_type in allowed,
         detail,
     )

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-init_project.py — 初始化新 PRAE 研究项目的目录结构和 track_registry.yaml
+init_project.py — initialize the directory structure and track_registry.yaml for a new PRAE research project
 
-退出码:
-  0  初始化成功
-  1  初始化失败（文件已存在冲突等）
-  2  参数或文件缺失错误
+Exit codes:
+  0  initialization succeeded
+  1  initialization failed (file-already-exists conflict, etc.)
+  2  argument or missing-file error
 
-用法:
+Usage:
   python3 tools/init_project.py --name <project_name> --output-dir <path>
 """
 from __future__ import annotations
@@ -37,7 +37,7 @@ def should_render(path: Path) -> bool:
 
 
 def parse_prae_init(prae_init_path: str) -> dict:
-    """从 PRAE_INIT.md 解析基础设施轨道和研究轨道列表。"""
+    """Parse the infrastructure-track and research-track lists from PRAE_INIT.md."""
     with open(prae_init_path, encoding="utf-8") as f:
         content = f.read()
 
@@ -46,7 +46,7 @@ def parse_prae_init(prae_init_path: str) -> dict:
     phase0_criteria: dict[str, str] = {}
 
     phase0_section = re.search(
-        r"## Phase 0 成功标准\n(.*?)(?=\n## |\Z)", content, re.DOTALL)
+        r"## Phase 0 Success Criteria\n(.*?)(?=\n## |\Z)", content, re.DOTALL)
     if phase0_section:
         for line in phase0_section.group(1).splitlines():
             parts = [part.strip() for part in line.strip().strip("|").split("|")]
@@ -57,9 +57,9 @@ def parse_prae_init(prae_init_path: str) -> dict:
                 continue
             phase0_criteria[track_id] = parts[1]
 
-    # 解析基础设施轨道表格
+    # Parse the infrastructure-track table
     infra_section = re.search(
-        r"## 组件分类 → 基础设施轨道\n(.*?)(?=\n## |\Z)", content, re.DOTALL)
+        r"## Component Classification → Infrastructure Tracks\n(.*?)(?=\n## |\Z)", content, re.DOTALL)
     if infra_section:
         for line in infra_section.group(1).splitlines():
             m = re.match(r"\|\s*`?(infra_\S+?)`?\s*\|(.+?)\|", line)
@@ -70,15 +70,15 @@ def parse_prae_init(prae_init_path: str) -> dict:
                     "lock_criteria": phase0_criteria.get(m.group(1).strip(), "(no description yet)"),
                 })
 
-    # 解析研究轨道表格
+    # Parse the research-track table
     research_section = re.search(
-        r"## 组件分类 → 研究轨道\n(.*?)(?=\n## |\Z)", content, re.DOTALL)
+        r"## Component Classification → Research Tracks\n(.*?)(?=\n## |\Z)", content, re.DOTALL)
     if research_section:
         for line in research_section.group(1).splitlines():
             m = re.match(r"\|\s*`?(research_\S+?)`?\s*\|(.+?)\|(.+?)\|", line)
             if m:
                 depends_raw = m.group(3).strip().strip("`").replace(" ", "")
-                # F-008 fix: split on Western OR Chinese comma OR 顿号 so authors writing
+                # F-008 fix: split on Western OR Chinese comma OR ideographic comma so authors writing
                 # `infra_X`、`infra_Y` (idiomatic Chinese) get parsed the same as `infra_X, infra_Y`.
                 depends_list = [d.strip() for d in re.split(r"[,，、]", depends_raw) if d.strip() and d.strip() != "—"]
                 research_tracks.append({
@@ -91,7 +91,7 @@ def parse_prae_init(prae_init_path: str) -> dict:
 
 
 def build_registry(project_name: str, tracks_data: dict) -> dict:
-    """构建 track_registry.yaml 的内容。"""
+    """Build the contents of track_registry.yaml."""
     today = str(datetime.date.today())
     tracks = []
 
@@ -135,7 +135,7 @@ def render_infra_track_log(track: dict, registry: dict) -> str:
         track,
         "phase_00_infra",
         cycle_label=cycle_label,
-        created_reason="项目启动",
+        created_reason="Project kickoff",
         description=track.get("description") or "(no description yet)",
         lock_criteria=track.get("lock_criteria") or "(no description yet)",
     )
@@ -149,51 +149,51 @@ def init_project(project_name: str, output_dir: str) -> None:
 
     checks: list[dict] = []
 
-    # 1. 检查模板目录（依赖 prae bootstrap 先部署）
+    # 1. Check the templates directory (depends on prae bootstrap being deployed first)
     has_templates = templates_src.is_dir()
-    checks.append(check_item("prae/templates/ 存在", has_templates,
-                              "请先运行 prae bootstrap 部署模板（或 python3 tools/prae_bootstrap.py）"))
+    checks.append(check_item("prae/templates/ exists", has_templates,
+                              "Run prae bootstrap first to deploy templates (or python3 tools/prae_bootstrap.py)"))
     if not has_templates:
-        result(False, checks, "初始化失败：prae/templates/ 不存在，请先运行 prae bootstrap")
+        result(False, checks, "Initialization failed: prae/templates/ does not exist, run prae bootstrap first")
         return
 
-    # 2. 检查 PRAE_INIT.md
+    # 2. Check PRAE_INIT.md
     has_init = prae_init.exists()
-    checks.append(check_item("prae/PRAE_INIT.md 存在", has_init, str(prae_init)))
+    checks.append(check_item("prae/PRAE_INIT.md exists", has_init, str(prae_init)))
     if not has_init:
-        result(False, checks, "初始化失败：PRAE_INIT.md 不存在，请填写后再运行")
+        result(False, checks, "Initialization failed: PRAE_INIT.md does not exist, fill it in before running")
         return
 
-    # 2. 解析轨道列表
+    # 2. Parse the track list
     try:
         tracks_data = parse_prae_init(str(prae_init))
     except Exception as e:
-        error(f"解析 PRAE_INIT.md 失败: {e}")
+        error(f"Failed to parse PRAE_INIT.md: {e}")
 
     has_infra = len(tracks_data["infra"]) >= 1
-    checks.append(check_item("PRAE_INIT.md 有基础设施轨道", has_infra,
-                               "未解析到 infra_ 开头的轨道，请检查表格格式"))
+    checks.append(check_item("PRAE_INIT.md has infrastructure tracks", has_infra,
+                               "No track starting with infra_ was parsed, check the table format"))
 
-    # 3. 初始化 track_registry.yaml
+    # 3. Initialize track_registry.yaml
     registry_path = prae_dir / "track_registry.yaml"
     registry = build_registry(project_name, tracks_data)
     prae_dir.mkdir(parents=True, exist_ok=True)
     with open(registry_path, "w", encoding="utf-8") as f:
         yaml.dump(registry, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
-    checks.append(check_item("track_registry.yaml 已创建", True))
+    checks.append(check_item("track_registry.yaml created", True))
 
-    # 4. 创建 Phase 0 目录
+    # 4. Create the Phase 0 directory
     phase0_dir = prae_dir / "phases" / "phase_00_infra"
     phase0_dir.mkdir(parents=True, exist_ok=True)
-    checks.append(check_item("prae/phases/phase_00_infra/ 已创建", True))
+    checks.append(check_item("prae/phases/phase_00_infra/ created", True))
 
-    # 5. 渲染 PHASE_BRIEF.md
+    # 5. Render PHASE_BRIEF.md
     phase_brief_dst = phase0_dir / "PHASE_BRIEF.md"
     if should_render(phase_brief_dst):
         phase_brief_dst.write_text(render_phase0_brief(registry, tracks_data["infra"]), encoding="utf-8")
-    checks.append(check_item("PHASE_BRIEF.md 已创建", phase_brief_dst.exists()))
+    checks.append(check_item("PHASE_BRIEF.md created", phase_brief_dst.exists()))
 
-    # 6. 为每条基础设施轨道创建目录和 TRACK_LOG.md
+    # 6. Create a directory and TRACK_LOG.md for each infrastructure track
     for t in tracks_data["infra"]:
         tid = t["id"]
         track_dir = phase0_dir / "tracks" / tid
@@ -205,25 +205,25 @@ def init_project(project_name: str, output_dir: str) -> None:
         log_dst = track_dir / "TRACK_LOG.md"
         if should_render(log_dst):
             log_dst.write_text(render_infra_track_log(t, registry), encoding="utf-8")
-        checks.append(check_item(f"{tid}: 目录和 TRACK_LOG.md 已创建", log_dst.exists()))
+        checks.append(check_item(f"{tid}: directory and TRACK_LOG.md created", log_dst.exists()))
 
-    # 7. 创建 src/shared/ 和 src/tracks/
+    # 7. Create src/shared/ and src/tracks/
     (output_path / "src" / "shared").mkdir(parents=True, exist_ok=True)
     (output_path / "src" / "tracks").mkdir(parents=True, exist_ok=True)
-    checks.append(check_item("src/shared/ 和 src/tracks/ 已创建", True))
+    checks.append(check_item("src/shared/ and src/tracks/ created", True))
 
-    # 8. 为每条研究轨道创建 src/ 子目录
+    # 8. Create a src/ subdirectory for each research track
     for t in tracks_data["research"]:
         tid = t["id"]
         src_track = output_path / "src" / "tracks" / tid
         (src_track / "experiments").mkdir(parents=True, exist_ok=True)
         (src_track / "impl").mkdir(parents=True, exist_ok=True)
     if tracks_data["research"]:
-        checks.append(check_item("src/tracks/{research_tracks}/ 已创建", True))
+        checks.append(check_item("src/tracks/{research_tracks}/ created", True))
 
     all_passed = all(c["passed"] for c in checks)
     result(all_passed, checks,
-           f"初始化{'成功' if all_passed else '部分失败'}：{project_name}",
+           f"Initialization {'succeeded' if all_passed else 'partially failed'}: {project_name}",
            data={
                "project": project_name,
                "infra_tracks": len(tracks_data["infra"]),

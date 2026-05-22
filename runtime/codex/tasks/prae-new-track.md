@@ -1,18 +1,18 @@
 # Task: prae-new-track
 
-> 为已在 `track_registry.yaml` 中登记的轨道创建当前阶段目录和初始 `TRACK_LOG.md`
-> 调用方式: `prae new-track <track_id>`
-> 参数: `$1 = track_id`
+> Create the current-phase directory and an initial `TRACK_LOG.md` for a track already registered in `track_registry.yaml`
+> Invocation: `prae new-track <track_id>`
+> Parameters: `$1 = track_id`
 
-## 步骤
+## Steps
 
-### 1. 解析参数
+### 1. Parse arguments
 
 ```bash
-TRACK_ID="${1:?'用法: prae new-track <track_id>'}"
+TRACK_ID="${1:?'Usage: prae new-track <track_id>'}"
 ```
 
-### 2. 调用正式工具
+### 2. Call the official tool
 
 ```bash
 python3 tools/new_track.py \

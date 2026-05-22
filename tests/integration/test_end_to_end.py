@@ -46,29 +46,29 @@ def research_project(tmp_path: Path) -> Path:
     # Write a real PRAE_INIT.md
     (project / "prae" / "PRAE_INIT.md").write_text("""# PRAE Init
 
-## 问题陈述
+## Problem Statement
 
-**研究问题**: A股ETF动量套利策略有效性研究
+**Research Question**: Effectiveness study of A-share ETF momentum arbitrage strategy
 
-**成功标准**: 夏普 ≥ 1.0，最大回撤 ≤ 25%
+**Success Criteria**: Sharpe >= 1.0, max drawdown <= 25%
 
-## 组件分类 → 基础设施轨道
+## Component Classification → Infrastructure Tracks
 
-| 轨道 ID | 描述 | 依赖的外部系统 | 备注 |
+| Track ID | Description | External Systems | Notes |
 |---------|------|---------------|------|
-| `infra_data_v1` | A股日频行情数据 | Wind | — |
+| `infra_data_v1` | A-share daily market data | Wind | — |
 
-## 组件分类 → 研究轨道
+## Component Classification → Research Tracks
 
-| 轨道 ID | 假设（一句话） | 依赖的基础设施 | 初始优先级 |
+| Track ID | Hypothesis (one line) | Infrastructure Dependencies | Initial Priority |
 |---------|--------------|---------------|------------|
-| `research_strategy_momentum` | 动量因子在A股ETF上有正向超额收益 | `infra_data_v1` | 高 |
+| `research_strategy_momentum` | Momentum factor yields positive excess return on A-share ETFs | `infra_data_v1` | High |
 
-## Phase 0 成功标准
+## Phase 0 Success Criteria
 
-| 基础设施轨道 ID | LOCKED 判断标准 | 当前状态 |
+| Infrastructure Track ID | LOCKED Criteria | Current State |
 |----------------|----------------|---------|
-| `infra_data_v1` | 接口稳定，contracts.yaml 定义完成 | EXPLORING |
+| `infra_data_v1` | Interface stable, contracts.yaml definition complete | EXPLORING |
 """)
 
     return project
@@ -118,7 +118,7 @@ class TestEndToEnd:
         brief = research_project / "prae" / "phases" / "phase_00_infra" / "PHASE_BRIEF.md"
         brief_content = brief.read_text(encoding="utf-8")
         assert "{{" not in brief_content
-        assert "**研究轮次**: cycle_1" in brief_content
+        assert "**Research Cycle**: cycle_1" in brief_content
 
         log_path = (
             research_project / "prae" / "phases" / "phase_00_infra"
@@ -126,7 +126,7 @@ class TestEndToEnd:
         )
         log_content = log_path.read_text(encoding="utf-8")
         assert "{{" not in log_content
-        assert "**研究轮次**: cycle_1" in log_content
+        assert "**Research Cycle**: cycle_1" in log_content
 
     def test_step3_track_status_exploring(self, research_project):
         """After init, track status check passes with EXPLORING tracks."""
@@ -158,7 +158,7 @@ class TestEndToEnd:
             "--track-id", "infra_data_v1",
             "--approver", "saionji",
             "--approved-at", "2026-04-20",
-            "--reason", "PDAE M3 通过",
+            "--reason", "PDAE M3 passed",
         ])
         assert rc == 0, out
 
@@ -188,21 +188,21 @@ class TestEndToEnd:
         exp_dir = track_dir / "experiments"
         exp_dir.mkdir()
         (exp_dir / "EXP_001.md").write_text(
-            "# EXP_001\n\n## Goal\n动量因子测试\n\n## Method\n"
-            "- 数据源: infra_data_v1.load_daily_bars\n"
-            "- 时间窗: 2020-01-01 至 2023-12-31\n"
-            "- 随机种子: seed=42\n"
-            "- 对照组: 无对照组\n\n"
+            "# EXP_001\n\n## Goal\nMomentum factor test\n\n## Method\n"
+            "- Data Source: infra_data_v1.load_daily_bars\n"
+            "- Time Window: 2020-01-01 to 2023-12-31\n"
+            "- Random Seed: seed=42\n"
+            "- Control Group: no control group\n\n"
             "## Preflight Check\n"
-            "**最小冒烟检查**: 30s 内跑完，并打印 sharpe\n\n"
-            "**输出契约**: stdout 至少包含 sharpe\n\n"
-            "**本次不做**: 不抽象到 impl/\n\n"
-            "## Expected Signal\n夏普>1.0\n\n## Result\n夏普: 1.2\n\n"
-            "## Conclusion\n**结论**: 支持假设\n\n建议 state 变更: ACTIVE → GRADUATED\n"
+            "**Minimal Smoke Check**: completes within 30s and prints sharpe\n\n"
+            "**Output Contract**: stdout contains at least sharpe\n\n"
+            "**Out of Scope This Time**: do not abstract into impl/\n\n"
+            "## Expected Signal\nSharpe > 1.0\n\n## Result\nSharpe: 1.2\n\n"
+            "## Conclusion\n**Conclusion**: supports the hypothesis\n\nRecommended state change: ACTIVE → GRADUATED\n"
         )
         (track_dir / "TRACK_LOG.md").write_text(
-            "# TRACK_LOG\n\n**研究轮次**: cycle_1\n\n## Experiments\n\n| EXP ID | 日期 | 目的 | 结论 | 链接 |\n|--------|------|------|------|------|\n| — | — | 尚无实验记录 | — | — |\n"
-            "\n---\n\n## Evidence Summary\n\n- 暂无实验记录。\n"
+            "# TRACK_LOG\n\n**Research Cycle**: cycle_1\n\n## Experiments\n\n| EXP ID | Date | Purpose | Conclusion | Link |\n|--------|------|------|------|------|\n| — | — | No experiment records yet | — | — |\n"
+            "\n---\n\n## Evidence Summary\n\n- No experiment records yet.\n"
         )
         py_dir = research_project / "src" / "tracks" / "research_strategy_momentum" / "experiments"
         py_dir.mkdir(parents=True, exist_ok=True)
@@ -236,7 +236,7 @@ class TestEndToEnd:
             "--track-id", "infra_data_v1",
             "--approver", "saionji",
             "--approved-at", "2026-04-20",
-            "--reason", "PDAE M3 通过",
+            "--reason", "PDAE M3 passed",
         ])
         assert rc_lock == 0, out_lock
 
