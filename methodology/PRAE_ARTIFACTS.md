@@ -96,7 +96,7 @@ PRAE 工件分两大类：
 
 **示例**：
 ```yaml
-project: sonar-detection
+project: object-detection
 current_cycle: 1
 current_phase: phase_01_research
 updated: 2026-04-22
