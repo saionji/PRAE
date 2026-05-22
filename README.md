@@ -1,6 +1,6 @@
 # PRAE — Protocol-Driven Research & Experimentation
 
-> I run real projects across quantitative trading, marine systems, flight log automation, and DEX research — all managed with this toolchain. PRAE is the methodology + tools I extracted. Open-sourced because the discipline of public docs makes it better.
+> I run several real research and engineering projects, all managed with this toolchain. PRAE is the methodology + tools I extracted from that work. Open-sourced because the discipline of public docs makes it better.
 
 **Status**: `v0.1.0-alpha` · single maintainer · in production use by the author · documentation is in English.
 
