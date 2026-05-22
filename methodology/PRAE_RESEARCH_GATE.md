@@ -1,86 +1,86 @@
 # PRAE Research Gate
 
-> **用途**: 研究轨道最低质量门控的详细规则与修复指南
-> **读者**: LLM（你）
-> **状态**: Active（PRAE v1.0）
-> **最后更新**: 2026-04-20
+> **Purpose**: Detailed rules and remediation guide for the minimum quality gate of research tracks
+> **Audience**: LLM (you)
+> **Status**: Active (PRAE v1.0)
+> **Last updated**: 2026-04-20
 
 ---
 
-## 1. 为什么有 Research Gate
+## 1. Why the Research Gate exists
 
-研究代码和工程代码有本质差异：
-- 工程代码求"正确"，研究代码求"可复现和可解读"
-- 工程代码要覆盖率、评审，研究代码只要日志、参数和冒烟测试
-- 工程代码不容许契约违规，研究代码绝对不容许泄露到基础设施
+Research code and engineering code differ fundamentally:
+- Engineering code aims for "correctness"; research code aims for "reproducibility and interpretability"
+- Engineering code requires coverage and review; research code requires only records, parameters, and a smoke test
+- Engineering code tolerates no contract violations; research code absolutely tolerates no leakage into infrastructure
 
-Research Gate 是**最低底线**，不追求工程质量，只要求：
-- 证据可追溯（实验记录全）
-- 能跑通一次（冒烟测试）
-- 不污染基础设施（contracts 不违规）
-- 不破坏复现性（experiments/ 下不被 import）
+The Research Gate is the **minimum baseline**. It does not pursue engineering quality; it only requires:
+- Traceable evidence (complete experiment records)
+- The ability to run through once (smoke test)
+- No infrastructure contamination (no contract violations)
+- No breakage of reproducibility (nothing under `experiments/` is imported)
 
-**工具**：`tools/check_research_gate.py`。
+**Tool**: `tools/check_research_gate.py`.
 
-**推荐编码顺序**：对实验代码采用“轻量 PDAE”流程，而不是完整 PDAE M1-M3：
-1. 先写 `Goal / Method`
-2. 先写 `Preflight Check`（最小冒烟检查 + 输出契约）
-3. 先写 `Expected Signal`
-4. 再实现 `EXP_NNN.py`
-5. 跑完后按验收结果填写 `Result / Conclusion`
+**Recommended coding order**: For experiment code, adopt a "lightweight PDAE" process rather than the full PDAE M1-M3:
+1. First write `Goal / Method`
+2. First write `Preflight Check` (minimal smoke check + output contract)
+3. First write `Expected Signal`
+4. Then implement `EXP_NNN.py`
+5. After running, fill in `Result / Conclusion` based on the acceptance outcome
 
-这样做的目标是减少返工，而不是把实验脚本工程化。
+The goal of this is to reduce rework, not to turn experiment scripts into engineered code.
 
 ---
 
-## 2. 五条规则详解
+## 2. The five rules in detail
 
-### 规则 1：TRACK_LOG.md 有本次实验记录
+### Rule 1: TRACK_LOG.md has a record of this experiment
 
-**要求**：每次跑实验后，必须在对应轨道的 `TRACK_LOG.md` 的"已知证据"或"实验列表"部分新增一条，至少包含：
+**Requirement**: After every experiment run, you must add an entry to the "Known evidence" or "Experiment list" section of the corresponding track's `TRACK_LOG.md`, containing at least:
 
-- 当前项目轮次：`**研究轮次**: cycle_N`，且必须与 `track_registry.yaml.current_cycle` 一致
-- 目标（这次想回答什么）
-- 方法（简述，不是完整步骤）
-- 结果（关键数值或结论）
-- 结论（支持 / 证伪 / 部分支持假设）
-- 链接到完整 `EXP_NNN.md`
+- The current project cycle: `**Research cycle**: cycle_N`, which must match `track_registry.yaml.current_cycle`
+- Goal (what this experiment is meant to answer)
+- Method (brief description, not the complete steps)
+- Result (key numbers or conclusions)
+- Conclusion (supports / refutes / partially supports the hypothesis)
+- Link to the full `EXP_NNN.md`
 
-**为什么**：`TRACK_LOG.md` 是轨道级叙事，让人 5 分钟内能看清这条轨道做过什么、到了哪里。不更新等于没做过。
+**Why**: `TRACK_LOG.md` is the track-level narrative, letting a person see within 5 minutes what this track has done and where it stands. Not updating it is equivalent to never having done the work.
 
-**通过示例**：
+**Passing example**:
 ```markdown
-## 已知证据
+## Known evidence
 
-- EXP_003 (2026-04-25): 在 A 股日频数据测试纯动量因子，回测夏普 1.2，但换手率 400%。
-  结论：信号有效但成本过高。→ [EXP_003.md](experiments/EXP_003.md)
-- EXP_004 (2026-04-28): 对信号加 5 日平滑后，夏普降到 0.9，换手率降到 120%。
-  结论：平滑降低信号强度但仍保留正收益。→ [EXP_004.md](experiments/EXP_004.md)
+- EXP_003 (2026-04-25): Tested a pure momentum factor on A-share daily data, backtest Sharpe 1.2, but turnover 400%.
+  Conclusion: signal is effective but cost is too high. → [EXP_003.md](experiments/EXP_003.md)
+- EXP_004 (2026-04-28): After applying a 5-day smoothing to the signal, Sharpe dropped to 0.9, turnover dropped to 120%.
+  Conclusion: smoothing reduces signal strength but still retains a positive return. → [EXP_004.md](experiments/EXP_004.md)
 ```
 
-**违反示例**：
+**Violating example**:
 ```markdown
-## 已知证据
+## Known evidence
 
-- 跑了一些动量实验，看起来还行。
+- Ran some momentum experiments, looks okay.
 ```
-（缺目标、方法、数值结论，无法追溯到具体实验）
+(Missing goal, method, and numerical conclusion; cannot be traced to a specific experiment)
 
-**修复**：回到 `TRACK_LOG.md`，按通过示例的结构为每次实验补齐，并修正 `**研究轮次**: cycle_N`。若原始实验参数已经丢失，在条目里明确标注"参数未记录，需重跑"。
+**Remediation**: Go back to `TRACK_LOG.md` and complete an entry for each experiment following the structure of the passing example, and correct `**Research cycle**: cycle_N`. If the original experiment parameters have been lost, clearly mark in the entry "parameters not recorded, needs re-run".
 
 ---
 
-### 规则 2：至少一个冒烟测试（能跑通、输出格式正确）
+### Rule 2: At least one smoke test (runs through, output format correct)
 
-**要求**：每条研究轨道的 `src/tracks/{track_id}/experiments/` 下必须至少存在一个脚本（通常是 `EXP_001.py` 或对应实验入口），满足：
+**Requirement**: Under each research track's `src/tracks/{track_id}/experiments/`, there must exist at least one script (usually `EXP_001.py` or the corresponding experiment entry point) that satisfies:
 
-- 能在空白环境下跑完不报错
-- 输出一个可被人类检查的结果（数值、图、表、JSON 均可）
-- 如果有随机性，产出可复现（见规则 3）
+- Runs through in a clean environment without errors
+- Produces a result a human can inspect (numbers, charts, tables, JSON all acceptable)
+- If there is randomness, the output is reproducible (see Rule 3)
 
-**为什么**：防止"只有纸面计划、没有可执行实验"的轨道混进来占着资源。研究轨道必须实际跑过至少一次。
+**Why**: This prevents a track that "only has a paper plan and no executable experiment" from sneaking in and occupying resources. A research track must have actually run at least once.
 
-**通过示例**：
+**Passing example**:
 ```python
 # src/tracks/research_strategy_momentum/experiments/EXP_001.py
 import pandas as pd
@@ -96,191 +96,191 @@ if __name__ == "__main__":
     main()
 ```
 
-**违反示例**：只有 `TRACK_LOG.md` 写了"计划对比动量和反转"，但 `experiments/` 目录为空。
+**Violating example**: `TRACK_LOG.md` only states "plan to compare momentum and reversal", but the `experiments/` directory is empty.
 
-**修复**：至少写一个最小可运行脚本，跑一次，把输出保存。不是要你做完整实验，只要证明"这条轨道是可执行的"。
-
----
-
-### 规则 3：实验参数和最小检查已记录（随机种子、超参数、数据时间范围、Preflight）
-
-**要求**：每个 `EXP_NNN.md` 的 `## Method` 章节必须列出：
-
-- 随机种子（`seed=42`，或明确声明"无随机性"）
-- 所有关键超参数（学习率、窗口长度、阈值、模型大小等）
-- 数据来源和时间范围（"A 股日频，2020-01-01 至 2023-12-31"）
-- 对照组设置（若有）
-
-并且 `## Preflight Check` 章节必须列出：
-- 最小冒烟检查（至少跑通并输出什么）
-- 输出契约（stdout / 文件 / 图表的最低要求）
-
-**为什么**：没有这些信息，实验不可复现。后续重跑时结果不同，无法判断是修改了代码还是参数漂移。
-
-**通过示例**：
-```markdown
-## Method
-
-- 数据源: infra_data_v1.load_daily_bars
-- 标的: 沪深300成分股（截至 2024-01-01 的列表）
-- 时间窗: 2018-01-01 至 2023-12-31
-- 随机种子: seed=42（用于 sklearn 交叉验证）
-- 动量窗口: 20 日
-- 持仓周期: 5 日
-- 换手成本: 3bps/单边
-- 对照组: 完全随机选股（seed=42 同一种子）
-```
-
-**违反示例**：
-```markdown
-## Method
-
-用过去一年数据测了动量策略，选了最近的 20 日窗口。
-```
-（缺种子、无具体日期、没说数据源、未声明对照组）
-
-**修复**：回到原始代码补全参数和 `Preflight Check`。如果当时没设种子，标注"2026-04-25 前运行未设随机种子，结果仅供参考，需重跑"。
+**Remediation**: Write at least one minimal runnable script, run it once, and save the output. This is not asking you to do a full experiment — only to prove that "this track is executable".
 
 ---
 
-### 规则 4：check_contracts 通过（不违反基础设施契约）
+### Rule 3: Experiment parameters and minimal checks are recorded (random seed, hyperparameters, data time range, Preflight)
 
-**要求**：在提交前运行：
+**Requirement**: The `## Method` section of each `EXP_NNN.md` must list:
+
+- Random seed (`seed=42`, or an explicit declaration of "no randomness")
+- All key hyperparameters (learning rate, window length, threshold, model size, etc.)
+- Data source and time range ("A-share daily, 2020-01-01 to 2023-12-31")
+- Control group setup (if any)
+
+And the `## Preflight Check` section must list:
+- The minimal smoke check (at least running through and producing what output)
+- The output contract (minimum requirements for stdout / files / charts)
+
+**Why**: Without this information, the experiment is not reproducible. When re-run later, if the result differs, you cannot tell whether the code was modified or the parameters drifted.
+
+**Passing example**:
+```markdown
+## Method
+
+- Data source: infra_data_v1.load_daily_bars
+- Universe: CSI 300 constituent stocks (the list as of 2024-01-01)
+- Time window: 2018-01-01 to 2023-12-31
+- Random seed: seed=42 (used for sklearn cross-validation)
+- Momentum window: 20 days
+- Holding period: 5 days
+- Turnover cost: 3bps/single side
+- Control group: fully random stock selection (seed=42, the same seed)
+```
+
+**Violating example**:
+```markdown
+## Method
+
+Tested a momentum strategy on the past year of data, picked a recent 20-day window.
+```
+(Missing seed, no specific dates, no data source stated, no control group declared)
+
+**Remediation**: Go back to the original code and complete the parameters and `Preflight Check`. If no seed was set at the time, mark "runs before 2026-04-25 did not set a random seed, results are for reference only, needs re-run".
+
+---
+
+### Rule 4: check_contracts passes (no infrastructure contract violation)
+
+**Requirement**: Before submitting, run:
 ```bash
 python3 tools/check_contracts.py \
   --contracts src/infra_data_v1/contracts.yaml --src src/
 ```
-返回码 0，无违规。
+Return code 0, no violations.
 
-**为什么**：研究轨道若直接 import 基础设施轨道的内部符号，会：
-- 破坏基础设施的封装边界
-- 让基础设施无法安全升级到 v2
-- 污染整个项目的可维护性
+**Why**: If a research track directly imports an infrastructure track's internal symbols, it will:
+- Break the infrastructure's encapsulation boundary
+- Make the infrastructure unable to safely upgrade to v2
+- Contaminate the maintainability of the entire project
 
-所有研究代码只能通过基础设施的**公开契约**访问其能力。
+All research code may only access infrastructure capabilities through the infrastructure's **public contract**.
 
-**通过示例**：
+**Passing example**:
 ```python
 # src/tracks/research_strategy_momentum/impl/signal.py
-from src.infra_data_v1.api import load_daily_bars  # 公开接口，contracts.yaml 声明
+from src.infra_data_v1.api import load_daily_bars  # public interface, declared in contracts.yaml
 ```
 
-**违反示例**：
+**Violating example**:
 ```python
 # src/tracks/research_strategy_momentum/impl/signal.py
-from src.infra_data_v1.internal._cache import _read_parquet  # 私有内部符号
+from src.infra_data_v1.internal._cache import _read_parquet  # private internal symbol
 ```
-`check_contracts.py` 会报错：`violation: src.infra_data_v1.internal._cache is not exported`。
+`check_contracts.py` will report an error: `violation: src.infra_data_v1.internal._cache is not exported`.
 
-**修复**：
-- 替换为 contracts.yaml 允许的公开接口
-- 如果公开接口不够用，与基础设施维护者沟通，按 v2 规则扩展公开契约（禁止修改 v1）
+**Remediation**:
+- Replace with a public interface allowed by contracts.yaml
+- If the public interface is insufficient, communicate with the infrastructure maintainer and extend the public contract under v2 rules (modifying v1 is forbidden)
 
 ---
 
-### 规则 5：实验脚本在 experiments/ 下（不被其他代码 import）
+### Rule 5: Experiment scripts stay under experiments/ (not imported by other code)
 
-**要求**：`src/tracks/{track_id}/experiments/` 下的任何 `.py` 文件都**不能被**其他代码 import。它们是"丢弃型"脚本，记录结果后就不应再被复用。
+**Requirement**: Any `.py` file under `src/tracks/{track_id}/experiments/` **must not be** imported by other code. They are "throwaway" scripts; once the result is recorded, they should no longer be reused.
 
-**为什么**：
-- `experiments/` 脚本的参数常常硬编码，不经过接口抽象
-- 复用它们会导致重要实现藏在实验脚本里，无法进入门控体系
-- 复现性依赖于"跑这个脚本当时的环境"，一旦被 import，上游变更会静默影响下游
+**Why**:
+- `experiments/` scripts often hardcode parameters without interface abstraction
+- Reusing them causes important implementation to hide inside experiment scripts, unable to enter the gating system
+- Reproducibility depends on "the environment at the time this script was run"; once imported, upstream changes will silently affect downstream
 
-**工具如何检查**：`check_research_gate.py` 会扫描所有 Python 文件，检查是否存在从非 experiments/ 文件指向 experiments/ 的 import 语句。
+**How the tool checks**: `check_research_gate.py` scans all Python files, checking whether any import statement points from a non-experiments/ file to experiments/.
 
-**通过示例**：
+**Passing example**:
 ```
 src/tracks/research_strategy_momentum/
 ├── experiments/
-│   ├── EXP_001.py      # 独立运行，不被 import
-│   ├── EXP_002.py      # 独立运行
+│   ├── EXP_001.py      # runs standalone, not imported
+│   ├── EXP_002.py      # runs standalone
 │   └── EXP_001.md
 └── impl/
-    └── signal.py       # 被 EXP_003.py import 是可以的（反向 import）
+    └── signal.py       # being imported by EXP_003.py is fine (reverse import)
 ```
 
-**违反示例**：
+**Violating example**:
 ```python
 # src/tracks/research_strategy_momentum/impl/signal.py
-from ..experiments.EXP_002 import calc_momentum  # 禁止
+from ..experiments.EXP_002 import calc_momentum  # forbidden
 ```
 
-**修复**：
-- 把需要被复用的函数从 `experiments/EXP_002.py` 挪到 `impl/` 下
-- 如果被挪出的函数也要被另一个轨道用：进一步挪到 `src/shared/`，触发 PDAE M3（参见 PRAE_ROLES.md 执行者 SOP C）
+**Remediation**:
+- Move the function that needs to be reused from `experiments/EXP_002.py` into `impl/`
+- If the moved function also needs to be used by another track: move it further into `src/shared/`, which triggers PDAE M3 (see PRAE_ROLES.md Executor SOP C)
 
 ---
 
-## 3. Research Gate 不检查什么
+## 3. What the Research Gate does not check
 
-明确声明**不检查**以下项，不要在研究轨道浪费时间做它们：
+The following items are explicitly declared **not checked**; do not waste time on them in research tracks:
 
-| 不检查 | 原因 |
+| Not checked | Reason |
 |--------|------|
-| 测试覆盖率 | 研究代码可读可重跑即可，不要求工程覆盖 |
-| 设计评审 | 研究不做完整 M1/M2 类评审；实验前只做轻量 `Goal/Method/Preflight/Expected Signal` 冻结 |
-| 代码风格（lint / format） | 可选，不阻塞；建议启用但不作为门控 |
-| 文档字符串 | 参数记录走 `EXP_NNN.md`，不走 docstring |
-| 性能基准 | 研究期只要"能跑完"；性能优化留到毕业期 |
+| Test coverage | Research code only needs to be readable and re-runnable; engineering coverage is not required |
+| Design review | Research does not do full M1/M2-style reviews; before an experiment, only a lightweight `Goal/Method/Preflight/Expected Signal` freeze is done |
+| Code style (lint / format) | Optional, non-blocking; recommended but not used as a gate |
+| Docstrings | Parameter records go in `EXP_NNN.md`, not in docstrings |
+| Performance benchmarks | During the research period, only "runs to completion" matters; performance optimization is left to the graduation period |
 
 ---
 
-## 4. 工具调用
+## 4. Tool invocation
 
-### 4.1 本地调用
+### 4.1 Local invocation
 
 ```bash
-# 对单条研究轨道跑 Research Gate
+# Run the Research Gate on a single research track
 python3 tools/check_research_gate.py \
   --track-id research_strategy_momentum \
   --project-dir .
 ```
 
-返回码：
-- `0`：通过
-- `1`：违反规则 1-5 中任一项（错误详情打印到 stderr）
-- `2`：工具错误（track_id 不存在等）
+Return codes:
+- `0`: passed
+- `1`: violates any of rules 1-5 (error details printed to stderr)
+- `2`: tool error (track_id does not exist, etc.)
 
-### 4.2 工具到位前的人工检查清单
+### 4.2 Manual checklist before the tool is in place
 
-你（AI）可以按下面的清单自行检查：
+You (the AI) can check yourself against the checklist below:
 
 ```
-[ ] 规则 1: TRACK_LOG.md 有本次实验的完整条目（目标/方法/结果/结论/链接）
-[ ] 规则 2: experiments/ 下至少一个脚本可跑通，最近一次运行有记录
-[ ] 规则 3: 最新 EXP_NNN.md 的 Method 章节列齐种子/超参/数据范围
-[ ] 规则 4: python3 check_contracts.py 返回 0
-[ ] 规则 5: 从 impl/ 或其他轨道没有任何 import 指向 experiments/
+[ ] Rule 1: TRACK_LOG.md has a complete entry for this experiment (goal/method/result/conclusion/link)
+[ ] Rule 2: at least one script under experiments/ runs through, with a record of the most recent run
+[ ] Rule 3: the latest EXP_NNN.md Method section fully lists seed/hyperparameters/data range
+[ ] Rule 4: python3 check_contracts.py returns 0
+[ ] Rule 5: no import from impl/ or other tracks points to experiments/
 ```
 
-全部勾选才能视为通过 Research Gate。
+Only when all items are checked can it be considered as having passed the Research Gate.
 
-### 4.3 CI 调用
+### 4.3 CI invocation
 
-研究项目的 CI 应在每次 PR 上对涉及的轨道运行 `check_research_gate.py`。失败阻塞合并。
+The CI of a research project should run `check_research_gate.py` on the involved tracks for every PR. A failure blocks the merge.
 
 ---
 
-## 5. 违反后的处理流程
+## 5. Handling procedure after a violation
 
-发现违反时，按如下步骤处理：
+When a violation is found, handle it as follows:
 
-1. **不要合并或继续推进**当前轨道
-2. 识别违反的具体规则（1-5 哪一条）
-3. 按本文档对应规则的"修复"段落操作
-4. 重新运行 Research Gate
-5. 通过后继续
+1. **Do not merge or continue advancing** the current track
+2. Identify the specific rule violated (which of 1-5)
+3. Follow the "Remediation" paragraph of the corresponding rule in this document
+4. Re-run the Research Gate
+5. Continue once it passes
 
-**常见误区**：试图绕过 Research Gate（例如把规则视为建议）。这会让后续 Phase Gate 审查失败，因为 PHASE_GATE.md 需要列出"每条 ACTIVE 轨道通过 Research Gate"作为必要条件。
+**Common pitfall**: trying to bypass the Research Gate (for example, treating the rules as suggestions). This causes the subsequent Phase Gate review to fail, because PHASE_GATE.md needs to list "every ACTIVE track passes the Research Gate" as a necessary condition.
 
 ---
 
-## 6. 关键规则回顾
+## 6. Key rules recap
 
-1. Research Gate 是研究轨道的最低底线，不是工程质量检查
-2. 五条规则缺一不可
-3. `experiments/` 下的脚本永远不被其他代码 import
-4. 基础设施契约由 `check_contracts.py` 独立检查，是 Gate 的组成部分
-5. 无自动化工具环境下按 §4.2 人工清单自检
-6. **Research Gate 只适用于 ACTIVE 状态的轨道**：EXPLORING 轨道不能跳过 ACTIVE 直接被 KILLED；至少一次实验（触发 Research Gate 检查）是进入 KILLED 的前提
+1. The Research Gate is the minimum baseline for research tracks, not an engineering quality check
+2. None of the five rules can be omitted
+3. Scripts under `experiments/` are never imported by other code
+4. The infrastructure contract is checked independently by `check_contracts.py` and is a component of the Gate
+5. In an environment without automated tooling, self-check against the manual checklist in §4.2
+6. **The Research Gate applies only to tracks in the ACTIVE state**: an EXPLORING track cannot skip ACTIVE and go straight to KILLED; at least one experiment (which triggers the Research Gate check) is a precondition for entering KILLED

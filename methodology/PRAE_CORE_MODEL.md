@@ -1,225 +1,225 @@
 # PRAE Core Model
 
-> **用途**: PRAE 方法论的权威定义文档；轨道、状态、阶段、门控的精确规格
-> **读者**: LLM（你）
-> **状态**: Active（PRAE v1.0）
-> **最后更新**: 2026-04-19
+> **Purpose**: The authoritative definition document for the PRAE methodology; precise specifications for tracks, states, phases, and gates
+> **Audience**: LLM (you)
+> **Status**: Active (PRAE v1.0)
+> **Last updated**: 2026-04-19
 
-本文档是**定义层**，不是教程。遇到概念不一致时，以本文档为准。
+This document is the **definition layer**, not a tutorial. When concepts conflict, this document takes precedence.
 
 ---
 
-## 1. 两类轨道的完整定义
+## 1. Full definitions of the two track types
 
-PRAE 把一个研究项目拆成若干条**轨道（Track）**。任何轨道必须严格属于以下两类之一：
+PRAE breaks a research project into several **tracks**. Every track must strictly belong to one of the following two types:
 
-### 1.1 基础设施轨道（Infrastructure Track）
+### 1.1 Infrastructure Track
 
-**定义**：为研究提供可靠的数据 / 环境 / 工具底座的轨道。
+**Definition**: A track that provides research with a reliable data / environment / tooling foundation.
 
-**字段**（`track_registry.yaml` 中必填）：
-| 字段 | 类型 | 说明 |
+**Fields** (required in `track_registry.yaml`):
+| Field | Type | Description |
 |------|------|------|
-| `id` | string | 必须以 `infra_` 前缀开头，含版本号（`infra_data_v1`） |
-| `type` | `"infrastructure"` | 固定值 |
-| `state` | enum | `EXPLORING` 或 `LOCKED`，无其他合法值 |
-| `src` | path | 源码目录路径，格式 `src/infra_{name}_v{N}/` |
-| `module_spec` | path | 指向 PDAE MODULE_SPEC.md |
-| `contracts` | path | 指向 contracts.yaml |
-| `locked_at` | date | state=LOCKED 时必填；state=EXPLORING 时必须为空或不存在 |
+| `id` | string | Must start with the `infra_` prefix and include a version number (`infra_data_v1`) |
+| `type` | `"infrastructure"` | Fixed value |
+| `state` | enum | `EXPLORING` or `LOCKED`; no other legal values |
+| `src` | path | Source directory path, format `src/infra_{name}_v{N}/` |
+| `module_spec` | path | Points to the PDAE MODULE_SPEC.md |
+| `contracts` | path | Points to contracts.yaml |
+| `locked_at` | date | Required when state=LOCKED; must be empty or absent when state=EXPLORING |
 
-**生命周期**：
+**Lifecycle**:
 ```
-EXPLORING ──[选型确认 + PDAE M1-M3 通过]──▶ LOCKED
-LOCKED    ──[需求变更]────────────────────▶ 新建 infra_{name}_v2（v1 保持 LOCKED）
+EXPLORING ──[selection confirmed + PDAE M1-M3 passed]──▶ LOCKED
+LOCKED    ──[requirement change]──────────────────────▶ create infra_{name}_v2 (v1 stays LOCKED)
 ```
 
-**约束（硬性规则）**：
-- 一旦 `state = LOCKED`，该轨道源码目录 `src/infra_{name}_v{N}/` 变为只读
-- LOCKED 轨道的 `contracts.yaml` 变为合同，所有下游必须遵守
-- LOCKED 轨道需要变更时，**永远不解锁**，而是新建 v2 轨道
-- v1 和 v2 可以并存。迁移完成前，v1 继续为尚未迁移的研究轨道提供服务
+**Constraints (hard rules)**:
+- Once `state = LOCKED`, the track's source directory `src/infra_{name}_v{N}/` becomes read-only
+- A LOCKED track's `contracts.yaml` becomes a contract; all downstream consumers must obey it
+- When a LOCKED track needs changes, **never unlock it**; instead create a v2 track
+- v1 and v2 can coexist. Until migration is complete, v1 continues to serve research tracks that have not yet migrated
 
-### 1.2 研究轨道（Research Track）
+### 1.2 Research Track
 
-**定义**：承载一条研究假设的并行实验空间。
+**Definition**: A parallel experiment space that carries a single research hypothesis.
 
-**字段**：
-| 字段 | 类型 | 说明 |
+**Fields**:
+| Field | Type | Description |
 |------|------|------|
-| `id` | string | 必须以 `research_` 前缀开头（`research_strategy_momentum`） |
-| `type` | `"research"` | 固定值 |
+| `id` | string | Must start with the `research_` prefix (`research_strategy_momentum`) |
+| `type` | `"research"` | Fixed value |
 | `state` | enum | `EXPLORING` / `ACTIVE` / `KILLED` / `MERGED` / `GRADUATED` |
-| `src` | path | 源码目录路径，格式 `src/tracks/{track_id}/` |
-| `hypothesis` | string | 明确的可证伪假设 |
-| `depends_on` | list[string] | 依赖的基础设施轨道 ID 列表 |
-| `experiments` | int | 已执行实验次数 |
-| `evidence_summary` | string | 当前证据的一句话概括 |
-| `concluded_at` | date | state ∈ {KILLED, MERGED, GRADUATED} 时必填 |
+| `src` | path | Source directory path, format `src/tracks/{track_id}/` |
+| `hypothesis` | string | An explicit, falsifiable hypothesis |
+| `depends_on` | list[string] | List of infrastructure track IDs it depends on |
+| `experiments` | int | Number of experiments already run |
+| `evidence_summary` | string | A one-sentence summary of the current evidence |
+| `concluded_at` | date | Required when state ∈ {KILLED, MERGED, GRADUATED} |
 
-**生命周期**：
+**Lifecycle**:
 ```
-EXPLORING ──[有正向信号]──▶ ACTIVE
-ACTIVE ──[明显失败]────────▶ KILLED    （终态）
-ACTIVE ──[与其他轨道互补]──▶ MERGED    （终态）
-ACTIVE ──[结论确定，值得工程化]──▶ GRADUATED  （终态，触发 PDAE）
+EXPLORING ──[positive signal]──▶ ACTIVE
+ACTIVE ──[clear failure]──────────▶ KILLED    (terminal)
+ACTIVE ──[complements another track]──▶ MERGED    (terminal)
+ACTIVE ──[conclusion firm, worth engineering]──▶ GRADUATED  (terminal, triggers PDAE)
 ```
 
-**约束**：
-- `KILLED` / `MERGED` / `GRADUATED` 是终态，不可回退到 `ACTIVE` 或 `EXPLORING`
-- 一条研究轨道只能有一条假设。同时探索两条假设时，必须拆成两条研究轨道
-- 研究轨道的 `depends_on` 只能是 state=LOCKED 的基础设施轨道
+**Constraints**:
+- `KILLED` / `MERGED` / `GRADUATED` are terminal states; they cannot revert to `ACTIVE` or `EXPLORING`
+- A research track can have only one hypothesis. When exploring two hypotheses at once, you must split them into two research tracks
+- A research track's `depends_on` can only reference infrastructure tracks with state=LOCKED
 
 ---
 
-## 2. 状态机（合法与非法转移）
+## 2. State machine (legal and illegal transitions)
 
-### 2.1 基础设施轨道状态转移
+### 2.1 Infrastructure track state transitions
 
-| 当前状态 | 允许转到 | 禁止转到 | 备注 |
+| Current state | Allowed transitions | Forbidden transitions | Notes |
 |----------|----------|----------|------|
-| EXPLORING | LOCKED | 任何其他 | 必须经 PDAE M1-M3 全部通过 |
-| LOCKED | （无） | 任何状态 | LOCKED 是终态；变更请开 v2 |
+| EXPLORING | LOCKED | Any other | Must pass all of PDAE M1-M3 |
+| LOCKED | (none) | Any state | LOCKED is terminal; for changes, open a v2 |
 
-**非法转移**：
-- `LOCKED → EXPLORING`：禁止。任何"解锁修改"意图都要改为开 v2 新轨道
-- `EXPLORING → 任何其他名字`：不存在其他状态
+**Illegal transitions**:
+- `LOCKED → EXPLORING`: Forbidden. Any "unlock to modify" intent must be redirected to creating a v2 track
+- `EXPLORING → any other name`: No other states exist
 
-### 2.2 研究轨道状态转移
+### 2.2 Research track state transitions
 
-| 当前状态 | 允许转到 | 禁止转到 | 备注 |
+| Current state | Allowed transitions | Forbidden transitions | Notes |
 |----------|----------|----------|------|
-| EXPLORING | ACTIVE | KILLED, MERGED, GRADUATED | 必须先有正向信号才能 ACTIVE |
-| ACTIVE | KILLED, MERGED, GRADUATED | EXPLORING | 前进，不回退 |
-| KILLED | （无） | 任何状态 | 终态 |
-| MERGED | （无） | 任何状态 | 终态 |
-| GRADUATED | （无） | 任何状态 | 终态，会触发 PDAE 工程项目 |
+| EXPLORING | ACTIVE | KILLED, MERGED, GRADUATED | Requires a positive signal before going ACTIVE |
+| ACTIVE | KILLED, MERGED, GRADUATED | EXPLORING | Move forward, do not revert |
+| KILLED | (none) | Any state | Terminal |
+| MERGED | (none) | Any state | Terminal |
+| GRADUATED | (none) | Any state | Terminal; triggers a PDAE engineering project |
 
-**特殊情况**：
-- 若判定失误想"恢复"一个 KILLED 轨道：**不允许**修改 state 字段，应新建一个 `research_{新ID}`，在其 `TRACK_LOG.md` 说明继承自哪个 KILLED 轨道
-- `EXPLORING → KILLED` 跳过 ACTIVE：不允许。既然要杀，也得进 ACTIVE 留下至少一次实验记录，否则无证据可审
-
----
-
-## 3. 四个阶段的完整定义
-
-### 3.1 Phase 0 — 基础设施就绪期
-
-- **目标**：把所有在 `PRAE_INIT.md` 中声明的基础设施轨道推到 `LOCKED`
-- **进入前提**：项目完成 `PRAE_INIT.md` 和 `track_registry.yaml` 初始化
-- **退出门控**：所有 `type=infrastructure` 的轨道 `state=LOCKED`
-- **AI 角色**：分析者（选型研究）→ 执行者（PDAE M1-M3 实现）
-- **典型工件**：各 `infra_*` 轨道的选型实验记录、MODULE_SPEC.md、contracts.yaml
-- **允许同时存在多个基础设施轨道并行推进**
-
-### 3.2 Phase 1 — 算法探索期
-
-- **目标**：并行启动多条研究轨道，快速积累信号
-- **进入前提**：Phase 0 PHASE_GATE.md 经人工批准
-- **退出门控**：≥1 条研究轨道 `state=ACTIVE` 且 PHASE_GATE.md 经人工批准
-- **AI 角色**：分析者为主（文献检索、实验设计、结果解读）
-- **典型工件**：每条研究轨道的首批 EXP 记录、正向信号汇总
-
-### 3.3 Phase 2 — 算法验证期
-
-- **目标**：收敛到主方案，淘汰或合并轨道
-- **进入前提**：Phase 1 PHASE_GATE.md 经人工批准
-- **退出门控**：所有 `ACTIVE` 研究轨道都有明确结论（KILLED / MERGED / GRADUATED）且 PHASE_GATE.md 经人工批准
-- **AI 角色**：分析者（严格验证实验设计、结果解读）+ 执行者（对 GRADUATED 轨道启动 PDAE 准备）
-- **典型工件**：验证实验记录、轨道结论决策表
-
-### 3.4 Phase 3 — 结论期
-
-- **目标**：形成最终结论；归档或毕业到 PDAE
-- **进入前提**：Phase 2 PHASE_GATE.md 经人工批准
-- **退出门控**：人工决定（无 AI 自动判定）
-- **AI 角色**：文档整理；对 GRADUATED 轨道执行 PDAE 路由
-- **典型工件**：`CONCLUSION.md`、PDAE 工程项目的初始化材料
+**Special cases**:
+- If a misjudgment makes you want to "restore" a KILLED track: **not allowed** to modify the state field; instead create a new `research_{new ID}`, and explain in its `TRACK_LOG.md` which KILLED track it inherits from
+- `EXPLORING → KILLED` skipping ACTIVE: not allowed. Even to kill it, it must enter ACTIVE to leave at least one experiment record, otherwise there is no evidence to review
 
 ---
 
-## 4. 四层门控体系（权威表）
+## 3. Full definitions of the four phases
 
-| # | 门控名称 | 管什么 | 工具 | 谁触发 | 是否阻塞 |
+### 3.1 Phase 0 — Infrastructure Readiness
+
+- **Goal**: Push all infrastructure tracks declared in `PRAE_INIT.md` to `LOCKED`
+- **Entry prerequisite**: The project has completed initialization of `PRAE_INIT.md` and `track_registry.yaml`
+- **Exit gate**: All tracks with `type=infrastructure` have `state=LOCKED`
+- **AI roles**: Analyst (selection research) → Executor (PDAE M1-M3 implementation)
+- **Typical artifacts**: Selection experiment records for each `infra_*` track, MODULE_SPEC.md, contracts.yaml
+- **Multiple infrastructure tracks may advance in parallel**
+
+### 3.2 Phase 1 — Algorithm Exploration
+
+- **Goal**: Launch multiple research tracks in parallel and quickly accumulate signals
+- **Entry prerequisite**: Phase 0 PHASE_GATE.md has received human approval
+- **Exit gate**: ≥1 research track has `state=ACTIVE` and PHASE_GATE.md has received human approval
+- **AI roles**: Primarily the Analyst (literature search, experiment design, result interpretation)
+- **Typical artifacts**: The first batch of EXP records for each research track, summaries of positive signals
+
+### 3.3 Phase 2 — Algorithm Validation
+
+- **Goal**: Converge to the leading approach; eliminate or merge tracks
+- **Entry prerequisite**: Phase 1 PHASE_GATE.md has received human approval
+- **Exit gate**: All `ACTIVE` research tracks have a clear conclusion (KILLED / MERGED / GRADUATED) and PHASE_GATE.md has received human approval
+- **AI roles**: Analyst (rigorous validation of experiment design and result interpretation) + Executor (start PDAE preparation for GRADUATED tracks)
+- **Typical artifacts**: Validation experiment records, track conclusion decision table
+
+### 3.4 Phase 3 — Conclusion
+
+- **Goal**: Form the final conclusion; archive or graduate to PDAE
+- **Entry prerequisite**: Phase 2 PHASE_GATE.md has received human approval
+- **Exit gate**: Human decision (no automatic AI judgment)
+- **AI roles**: Documentation cleanup; execute PDAE routing for GRADUATED tracks
+- **Typical artifacts**: `CONCLUSION.md`, initialization materials for the PDAE engineering project
+
+---
+
+## 4. The four-layer gate system (authoritative table)
+
+| # | Gate name | What it governs | Tool | Who triggers | Blocking |
 |---|----------|--------|------|--------|----------|
-| 1 | PRAE Phase Gate | 阶段 N → 阶段 N+1 转换决策 | `tools/check_phase_gate.py` | AI 生成 + 人工批准 | 是（阻塞下一阶段） |
-| 2 | Research Gate | 研究轨道最低质量（实验日志、冒烟测试、参数记录） | `tools/check_research_gate.py` | 自动，研究轨道提交前 | 是（阻塞研究轨道提交） |
-| 3 | Contracts Gate | 基础设施轨道边界合规（研究代码不违反契约） | `tools/check_contracts.py`（复用 PDAE，可用） | 自动，所有涉及基础设施调用的提交前 | 是 |
-| 4 | PDAE M1-M3 Gate | 基础设施轨道和 shared 代码的工程质量 | PDAE 完整流程（可用） | 显式触发 | 是（阻塞 `EXPLORING → LOCKED`） |
+| 1 | PRAE Phase Gate | Phase N → Phase N+1 transition decision | `tools/check_phase_gate.py` | AI-generated + human approval | Yes (blocks the next phase) |
+| 2 | Research Gate | Minimum quality of a research track (experiment record, smoke test, parameter logging) | `tools/check_research_gate.py` | Automatic, before a research track commit | Yes (blocks the research track commit) |
+| 3 | Contracts Gate | Infrastructure track boundary compliance (research code does not violate contracts) | `tools/check_contracts.py` (reused from PDAE, available) | Automatic, before any commit involving infrastructure calls | Yes |
+| 4 | PDAE M1-M3 Gate | Engineering quality of infrastructure tracks and shared code | The full PDAE process (available) | Explicitly triggered | Yes (blocks `EXPLORING → LOCKED`) |
 
-**调用顺序建议**：
-- 研究轨道提交：Research Gate → Contracts Gate
-- 基础设施轨道 LOCKED：PDAE M3 Gate → Contracts Gate
-- 阶段转换：Phase Gate（各轨道自身的门控应已在此之前通过）
+**Recommended invocation order**:
+- Research track commit: Research Gate → Contracts Gate
+- Infrastructure track LOCKED: PDAE M3 Gate → Contracts Gate
+- Phase transition: Phase Gate (each track's own gates should already have passed before this)
 
-**Research Gate 的 5 条检查项**：
+**The 5 checks of the Research Gate**:
 ```
-✓ TRACK_LOG.md 有本次实验记录（目标、方法、结果、结论）
-✓ 至少一个冒烟测试（能跑通、输出格式正确）
-✓ 实验参数已记录（随机种子、超参数、数据时间范围）
-✓ check_contracts 通过（不违反基础设施契约）
-✓ 实验脚本在 experiments/ 下（不被其他代码 import）
-✗ 不要求覆盖率
-✗ 不要求设计评审
+✓ TRACK_LOG.md has a record of this experiment (goal, method, result, conclusion)
+✓ At least one smoke test (runs successfully, output format correct)
+✓ Experiment parameters logged (random seed, hyperparameters, data time range)
+✓ check_contracts passes (does not violate infrastructure contracts)
+✓ Experiment scripts live under experiments/ (not imported by other code)
+✗ Coverage not required
+✗ Design review not required
 ```
 
-详见 `PRAE_RESEARCH_GATE.md`。
+See `PRAE_RESEARCH_GATE.md` for details.
 
 ---
 
-## 5. 代码目录的治理分级
+## 5. Governance tiers of code directories
 
-| 目录 | 约束级别 | 谁管 | 允许的操作 |
+| Directory | Constraint level | Governed by | Allowed operations |
 |------|----------|------|-----------|
-| `src/infra_{name}_v{N}/`（LOCKED） | 最严格 | PDAE + Contracts Gate | 只读；变更需开 v2 |
-| `src/infra_{name}_v{N}/`（EXPLORING） | 严格 | 选型实验；LOCK 前必过 PDAE M1-M3 | 可修改，但目标是冻结 |
-| `src/shared/` | 严格 | PDAE M3 单元门控 | 新增或修改均走 PDAE M3 |
-| `src/tracks/{track_id}/impl/` | 中等 | Research Gate + Contracts Gate | 可修改，被二次 import 时必须迁移到 shared/ |
-| `src/tracks/{track_id}/experiments/` | LOOSE | 仅 Research Gate | 自由修改、删除；**不可被其他代码 import** |
+| `src/infra_{name}_v{N}/` (LOCKED) | Strictest | PDAE + Contracts Gate | Read-only; changes require a v2 |
+| `src/infra_{name}_v{N}/` (EXPLORING) | Strict | Selection experiments; must pass PDAE M1-M3 before LOCK | Modifiable, but the goal is to freeze it |
+| `src/shared/` | Strict | PDAE M3 unit gate | Both additions and modifications go through PDAE M3 |
+| `src/tracks/{track_id}/impl/` | Medium | Research Gate + Contracts Gate | Modifiable; must migrate to shared/ when imported a second time |
+| `src/tracks/{track_id}/experiments/` | LOOSE | Research Gate only | Freely modified or deleted; **must not be imported by other code** |
 
-**关键约束**：
-- `experiments/` 下的脚本**不能被 `impl/` 或其他轨道 import**。违反此规则会被 Contracts Gate / Research Gate 拦截
-- 同一函数或模块被**第二处 import** 的瞬间，必须迁入 `shared/`，触发 PDAE M3
-- 两条研究轨道**不允许直接相互 import**，只能通过 `shared/` 或基础设施轨道的公开接口交互
-
----
-
-## 6. 关键约束汇总（硬性规则）
-
-以下规则是 PRAE 方法论的硬约束，违反即视为破坏治理：
-
-1. **LOCKED 不可修改规则**：基础设施轨道一旦 LOCKED，其 `src/infra_{name}_v{N}/` 目录只读
-2. **v2 规则**：基础设施需求变更时，**新建 v2** 轨道而非解锁 v1
-3. **单一真相来源规则**：轨道状态以 `track_registry.yaml` 为准；任何其他文件冲突时修正它们
-4. **研究轨道不相互 import 规则**：共用代码必须进 `shared/`，禁止 `src/tracks/A/` import `src/tracks/B/`
-5. **experiments/ 不可被 import 规则**：该目录下的脚本是丢弃型的，被 import 会破坏复现性
-6. **终态不可回退规则**：KILLED / MERGED / GRADUATED / LOCKED 都是终态
-7. **人工批准规则**：所有 Phase Gate 必须人工批准；AI 只生成建议，不直接推进阶段
-8. **假设必须可证伪规则**：每条研究轨道的 `hypothesis` 必须是能被证据证伪的陈述，不能是"探索一下 X"这类开放句式
-9. **依赖必须 LOCKED 规则**：研究轨道进入 `ACTIVE` 时，`depends_on` 中声明的基础设施轨道必须全部处于 `LOCKED` 状态。初始化（Phase 0）期间允许声明对尚未 LOCKED 的轨道的依赖，但该研究轨道不得激活（不可从 EXPLORING 进入 ACTIVE），直到所有依赖项 LOCKED
+**Key constraints**:
+- Scripts under `experiments/` **cannot be imported by `impl/` or other tracks**. Violating this rule is blocked by the Contracts Gate / Research Gate
+- The moment a function or module is **imported a second time**, it must be migrated into `shared/`, triggering PDAE M3
+- Two research tracks **must not import each other directly**; they may only interact through `shared/` or through the public interfaces of infrastructure tracks
 
 ---
 
-## 7. 与 PDAE 的边界
+## 6. Summary of key constraints (hard rules)
 
-PRAE 管**决策**，PDAE 管**实现**。衔接点只有两个：
+The following rules are hard constraints of the PRAE methodology; violating them is considered a breach of governance:
 
-| 衔接事件 | PRAE 这边 | PDAE 这边 |
+1. **LOCKED immutability rule**: Once an infrastructure track is LOCKED, its `src/infra_{name}_v{N}/` directory is read-only
+2. **v2 rule**: When infrastructure requirements change, **create a v2** track rather than unlocking v1
+3. **Single source of truth rule**: Track state is authoritative in `track_registry.yaml`; when any other file conflicts, correct those files
+4. **No cross-import between research tracks rule**: Shared code must go into `shared/`; `src/tracks/A/` importing `src/tracks/B/` is forbidden
+5. **experiments/ non-importable rule**: Scripts under this directory are throwaway; importing them breaks reproducibility
+6. **Terminal state irreversibility rule**: KILLED / MERGED / GRADUATED / LOCKED are all terminal states
+7. **Human approval rule**: Every Phase Gate must receive human approval; the AI only generates recommendations and never advances a phase directly
+8. **Hypothesis must be falsifiable rule**: Each research track's `hypothesis` must be a statement that evidence can falsify; it cannot be an open-ended phrasing like "explore X a bit"
+9. **Dependencies must be LOCKED rule**: When a research track enters `ACTIVE`, all infrastructure tracks declared in `depends_on` must be in the `LOCKED` state. During initialization (Phase 0), declaring a dependency on a track that is not yet LOCKED is allowed, but that research track must not be activated (cannot move from EXPLORING to ACTIVE) until all its dependencies are LOCKED
+
+---
+
+## 7. The boundary with PDAE
+
+PRAE governs **decisions**, PDAE governs **implementation**. There are only two handoff points:
+
+| Handoff event | The PRAE side | The PDAE side |
 |---------|-----------|-----------|
-| 基础设施轨道 `EXPLORING → LOCKED` | 产出 MODULE_SPEC.md 骨架、contracts.yaml 草稿 | 跑完 M1-M3，产出合格的实现 |
-| 研究轨道 `ACTIVE → GRADUATED` | 冻结轨道代码，整理需求输入 | 从零或从研究代码启动新 M1-M3 流程 |
+| Infrastructure track `EXPLORING → LOCKED` | Produces the MODULE_SPEC.md skeleton and the contracts.yaml draft | Runs through M1-M3 and produces a qualified implementation |
+| Research track `ACTIVE → GRADUATED` | Freezes the track code, organizes the requirement input | Starts a new M1-M3 process from scratch or from the research code |
 
-PRAE 不干涉 PDAE 内部流程，PDAE 不干涉 PRAE 的阶段推进。
+PRAE does not interfere with PDAE's internal process, and PDAE does not interfere with PRAE's phase progression.
 
 ---
 
-## 8. 术语表（统一使用）
+## 8. Glossary (use consistently)
 
-| 术语 | 含义 | 不要写成 |
+| Term | Meaning | Do not write as |
 |------|------|----------|
-| 轨道（Track） | 一条独立研究或基础设施工作线 | 实验组、分支 |
-| 阶段（Phase） | Phase 0/1/2/3 中的一个 | 里程碑、季度 |
-| 实验（Experiment / EXP） | 一次带完整参数记录的可复现运行 | 跑一下、试试 |
-| 证据（Evidence） | 实验结果中支持或证伪假设的部分 | 直觉、感觉 |
-| 毕业（Graduate） | 研究轨道达到工程化条件，启动 PDAE | 上线、部署 |
-| 基础设施（Infrastructure） | 数据管道、仿真器、数据库等非算法底座 | 底层、平台 |
+| Track | An independent research or infrastructure work line | experiment group, branch |
+| Phase | One of Phase 0/1/2/3 | milestone, quarter |
+| Experiment / EXP | A reproducible run with a complete parameter record | a quick run, a try |
+| Evidence | The part of experiment results that supports or falsifies the hypothesis | intuition, gut feeling |
+| Graduate | A research track reaches engineering-ready conditions and starts PDAE | launch, deploy |
+| Infrastructure | Non-algorithmic foundations such as data pipelines, simulators, databases | the underlying layer, the platform |
