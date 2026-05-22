@@ -400,9 +400,9 @@ def evaluate_research_gate(project_dir: str, track_id: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="检查研究轨道 Research Gate 规则")
-    parser.add_argument("--track-id", required=True, help="轨道 ID（例如 research_strategy_momentum）")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Check Research Gate rules for a research track")
+    parser.add_argument("--track-id", required=True, help="Track ID (e.g. research_strategy_momentum)")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     args = parser.parse_args()
     run_action(
         lambda: evaluate_research_gate(args.project_dir, args.track_id),

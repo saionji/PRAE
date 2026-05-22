@@ -113,8 +113,8 @@ def render_phase_gate(project_dir: Path) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="生成当前阶段的 PHASE_GATE.md")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Generate PHASE_GATE.md for the current phase")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     args = parser.parse_args()
 
     payload = render_phase_gate(Path(args.project_dir))

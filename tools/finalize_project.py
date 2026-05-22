@@ -78,8 +78,8 @@ def finalize_project(project_dir: Path) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="根据 CONCLUSION.md 记录项目终态决定")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Record the project's final-state decision from CONCLUSION.md")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     args = parser.parse_args()
 
     run_action(lambda: finalize_project(Path(args.project_dir)), ConclusionError)

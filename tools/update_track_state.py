@@ -286,22 +286,22 @@ def evaluate_transition(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="更新研究轨道状态并写入 Decision Log")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--track-id", required=True, help="研究轨道 ID")
+    parser = argparse.ArgumentParser(description="Update a research track's state and append the Decision Log")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--track-id", required=True, help="Research track ID")
     parser.add_argument(
         "--to-state",
         required=True,
         choices=["ACTIVE", "KILLED", "MERGED", "GRADUATED"],
-        help="目标状态",
+        help="Target state",
     )
-    parser.add_argument("--approver", required=True, help="人工批准人")
-    parser.add_argument("--reason", required=True, help="状态变更原因")
-    parser.add_argument("--advisor", default="AI", help="建议者，默认 AI")
-    parser.add_argument("--approved-at", help="批准日期（YYYY-MM-DD），默认今天")
-    parser.add_argument("--exp-id", help="关联实验 ID，例如 EXP_001")
-    parser.add_argument("--merged-into", help="MERGED 时的目标轨道 ID")
-    parser.add_argument("--summary", help="可选：同步写回 evidence_summary 的一句话摘要")
+    parser.add_argument("--approver", required=True, help="Human approver")
+    parser.add_argument("--reason", required=True, help="Reason for the state change")
+    parser.add_argument("--advisor", default="AI", help="Advisor (default: AI)")
+    parser.add_argument("--approved-at", help="Approval date (YYYY-MM-DD; default: today)")
+    parser.add_argument("--exp-id", help="Associated experiment ID, e.g. EXP_001")
+    parser.add_argument("--merged-into", help="Target track ID when the state is MERGED")
+    parser.add_argument("--summary", help="Optional: one-line summary written back to evidence_summary")
     args = parser.parse_args()
 
     run_action(

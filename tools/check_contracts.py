@@ -604,7 +604,7 @@ def print_results(results: list[CheckResult]) -> int:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="PDAE v5.8.0 契约检查脚本",
+        description="PDAE v5.8.0 contract checker",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 退出码:
@@ -616,13 +616,13 @@ def main():
         """
     )
     parser.add_argument("--contracts", "-c", required=True,
-                        help="contracts.yaml 文件路径")
+                        help="Path to the contracts.yaml file")
     parser.add_argument("--src", "-s", required=True,
-                        help="源代码目录")
+                        help="Source code directory")
     parser.add_argument("--level", "-l", default=None,
-                        help="检查级别 (逗号分隔): immutable,critical,need_review")
+                        help="Check levels (comma-separated): immutable,critical,need_review")
     parser.add_argument("--id", default=None,
-                        help="只检查特定 ID")
+                        help="Check only a specific rule ID")
 
     args = parser.parse_args()
 

@@ -210,8 +210,8 @@ def write_conclusion(project_dir: Path) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="生成或刷新 Phase 3 的 CONCLUSION.md")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Generate or refresh the Phase 3 CONCLUSION.md")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     args = parser.parse_args()
 
     try:

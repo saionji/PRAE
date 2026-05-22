@@ -139,8 +139,8 @@ def reopen_project(project_dir: Path) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="根据 CONCLUSION.md 的 CONTINUE 决定重开 PRAE 项目")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Reopen a PRAE project from a CONTINUE decision in CONCLUSION.md")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     args = parser.parse_args()
 
     run_action(lambda: reopen_project(Path(args.project_dir)), ConclusionError)

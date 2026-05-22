@@ -170,9 +170,9 @@ def check_conclusion(project_dir: str, check_approved: bool) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="检查 Phase 3 的 CONCLUSION.md")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--check-approved", action="store_true", help="要求 CONCLUSION.md 已 APPROVED: yes")
+    parser = argparse.ArgumentParser(description="Check the Phase 3 CONCLUSION.md")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--check-approved", action="store_true", help="Require CONCLUSION.md to be APPROVED: yes")
     args = parser.parse_args()
     run_action(
         lambda: check_conclusion(args.project_dir, args.check_approved),

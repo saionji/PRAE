@@ -224,10 +224,10 @@ def record_result(project_dir: Path, track_id: str, exp_id: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="将实验结果同步到 TRACK_LOG.md 和 track_registry.yaml")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--track-id", required=True, help="轨道 ID")
-    parser.add_argument("--exp-id", required=True, help="实验 ID，例如 EXP_001")
+    parser = argparse.ArgumentParser(description="Sync experiment results into TRACK_LOG.md and track_registry.yaml")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--track-id", required=True, help="Track ID")
+    parser.add_argument("--exp-id", required=True, help="Experiment ID, e.g. EXP_001")
     args = parser.parse_args()
 
     run_action(lambda: record_result(Path(args.project_dir), args.track_id, args.exp_id), RecordResultError)

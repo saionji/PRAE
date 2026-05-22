@@ -104,8 +104,8 @@ def sync(dry_run: bool) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="同步 tools/ 到 project-pack/tools/")
-    parser.add_argument("--dry-run", action="store_true", help="只显示差异，不实际复制")
+    parser = argparse.ArgumentParser(description="Sync tools/ into project-pack/tools/")
+    parser.add_argument("--dry-run", action="store_true", help="Show differences only; do not actually copy")
     args = parser.parse_args()
     sync(args.dry_run)
 

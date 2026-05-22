@@ -479,12 +479,12 @@ def evaluate_phase_gate(project_dir: str, phase_num: int | None, check_approved:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="检查 PRAE 阶段门控条件")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Check PRAE phase-gate conditions")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     parser.add_argument("--phase", type=int, choices=[0, 1, 2], default=None,
-                        help="指定检查哪个阶段的推进门控（0=Phase0→1, 1=Phase1→2, 2=Phase2→3）")
+                        help="Which phase-advance gate to check (0=Phase0->1, 1=Phase1->2, 2=Phase2->3)")
     parser.add_argument("--check-approved", action="store_true",
-                        help="检查当前阶段的 PHASE_GATE.md 是否已 APPROVED: yes")
+                        help="Check whether the current phase's PHASE_GATE.md is APPROVED: yes")
     args = parser.parse_args()
     run_action(
         lambda: evaluate_phase_gate(args.project_dir, args.phase, args.check_approved),

@@ -128,8 +128,8 @@ def evaluate(project_dir: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="检查 PRAE track_registry.yaml 一致性")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
+    parser = argparse.ArgumentParser(description="Check PRAE track_registry.yaml consistency")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
     args = parser.parse_args()
     emit_payload(evaluate(args.project_dir))
 

@@ -147,11 +147,11 @@ def graduate_track(project_dir: Path, track_id: str, pdae_project_path: str, tra
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="登记一条 GRADUATED 轨道的 PDAE 毕业信息")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--track-id", required=True, help="研究轨道 ID")
-    parser.add_argument("--pdae-project-path", required=True, help="PDAE 项目路径")
-    parser.add_argument("--transfer-status", default="M1-M3 完成", help="移交状态说明")
+    parser = argparse.ArgumentParser(description="Record PDAE graduation info for a GRADUATED track")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--track-id", required=True, help="Research track ID")
+    parser.add_argument("--pdae-project-path", required=True, help="PDAE project path")
+    parser.add_argument("--transfer-status", default="M1-M3 complete", help="Handoff status note")
     args = parser.parse_args()
 
     run_action(

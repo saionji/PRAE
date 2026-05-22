@@ -125,14 +125,14 @@ def add_track(project_dir: Path, args: argparse.Namespace) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="向 track_registry.yaml 正式注册新轨道")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--track-id", required=True, help="轨道 ID")
-    parser.add_argument("--type", required=True, choices=["research", "infrastructure"], help="轨道类型")
-    parser.add_argument("--hypothesis", help="research 轨道的一句话假设")
-    parser.add_argument("--depends-on", nargs="*", default=[], help="research 轨道依赖的基础设施轨道 ID 列表")
-    parser.add_argument("--description", help="infrastructure 轨道的一句话描述")
-    parser.add_argument("--src", help="可选：覆盖默认 src 路径")
+    parser = argparse.ArgumentParser(description="Register a new track in track_registry.yaml")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--track-id", required=True, help="Track ID")
+    parser.add_argument("--type", required=True, choices=["research", "infrastructure"], help="Track type")
+    parser.add_argument("--hypothesis", help="One-line hypothesis for a research track")
+    parser.add_argument("--depends-on", nargs="*", default=[], help="Infrastructure track IDs that a research track depends on")
+    parser.add_argument("--description", help="One-line description for an infrastructure track")
+    parser.add_argument("--src", help="Optional: override the default src path")
     args = parser.parse_args()
 
     run_action(lambda: add_track(Path(args.project_dir), args), AddTrackError)

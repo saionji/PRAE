@@ -178,16 +178,16 @@ def lock_infra_track(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="正式将基础设施轨道推进到 LOCKED")
-    parser.add_argument("--project-dir", required=True, help="研究项目根目录")
-    parser.add_argument("--track-id", required=True, help="基础设施轨道 ID")
-    parser.add_argument("--approver", required=True, help="人工批准人")
-    parser.add_argument("--reason", required=True, help="锁定原因，例如 PDAE M3 通过")
-    parser.add_argument("--contracts", help="contracts.yaml 相对路径，默认优先取 registry，否则按 src/{track_id}/contracts.yaml 推断")
-    parser.add_argument("--module-spec", help="MODULE_SPEC.md 相对路径，默认优先取 registry，否则按 src/{track_id}/MODULE_SPEC.md 推断")
-    parser.add_argument("--advisor", default="AI", help="建议者，默认 AI")
+    parser = argparse.ArgumentParser(description="Formally advance an infrastructure track to LOCKED")
+    parser.add_argument("--project-dir", required=True, help="Research project root directory")
+    parser.add_argument("--track-id", required=True, help="Infrastructure track ID")
+    parser.add_argument("--approver", required=True, help="Human approver")
+    parser.add_argument("--reason", required=True, help="Lock reason, e.g. 'PDAE M3 passed'")
+    parser.add_argument("--contracts", help="Relative path to contracts.yaml (default: from registry, else src/{track_id}/contracts.yaml)")
+    parser.add_argument("--module-spec", help="Relative path to MODULE_SPEC.md (default: from registry, else src/{track_id}/MODULE_SPEC.md)")
+    parser.add_argument("--advisor", default="AI", help="Advisor (default: AI)")
     parser.add_argument("--locked-at", "--approved-at", dest="locked_at",
-                        help="锁定日期（YYYY-MM-DD），默认今天")
+                        help="Lock date (YYYY-MM-DD; default: today)")
     args = parser.parse_args()
 
     run_action(
